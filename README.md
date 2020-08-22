@@ -1,2 +1,2 @@
 # vscode-moca-client
-Visual Studio Code MOCA Client
+Visual Studio Code MOCA Client Extension
