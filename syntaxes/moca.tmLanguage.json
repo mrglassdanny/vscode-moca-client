@@ -1,0 +1,329 @@
+{
+    "scopeName": "source.moca",
+    "patterns": [
+        {
+            "include": "#groovy-context"
+        },
+        {
+            "include": "#sql-context"
+        },
+        {
+            "include": "#moca-context-sql-context-shared"
+        },
+        {
+            "include": "#moca-context"
+        },
+        {
+            "include": "#comments"
+        },
+        {
+            "include": "#regexps"
+        },
+        {
+            "include": "#string_escape"
+        },
+        {
+            "include": "#string_interpolation"
+        },
+        {
+            "include": "#strings"
+        }
+    ],
+    "repository": {
+        "groovy-context": {
+            "name": "embedded.block.groovy",
+            "patterns": [
+                {
+                    "begin": "\\[\\[",
+                    "end": "\\]\\]",
+                    "name": "source.groovy",
+                    "patterns": [
+                        {
+                            "include": "source.groovy"
+                        }
+                    ]
+                }
+            ]
+        },
+        "sql-context": {
+            "name": "embedded.block.sql",
+            "patterns": [
+                {
+                    "begin": "\\[",
+                    "end": "\\]",
+                    "name": "source.sql",
+                    "patterns": [
+                        {
+                            "include": "#moca-context-sql-context-shared"
+                        },
+                        {
+                            "include": "#moca-sql"
+                        },
+                        {
+                            "include": "source.sql"
+                        }
+                    ]
+                }
+            ]
+        },
+        "moca-context-sql-context-shared": {
+            "patterns": [
+                {
+                    "comment": "moca-environment-variables",
+                    "name": "constant.language",
+                    "match": "@@([^\\s\\];,())]+)"
+                },
+                {
+                    "comment": "moca-variables",
+                    "name": "variable.language",
+                    "match": "@([^\\s\\];,())]+)"
+                },
+                {
+                    "comment": "moca-functions",
+                    "name": "support.function",
+                    "match": "\\b(?i)(upper|lower|trim|rtrim|length|decode|nvl|substr|instr|to_date|to_char|to_number|lpad|rpad|sysdate)\\b"
+                },
+                {
+                    "comment": "moca-properties",
+                    "name": "keyword",
+                    "match": "\\b(?i)(rownum)\\b"
+                }
+            ]
+        },
+        "moca-sql": {
+            "patterns": [
+                {
+                    "comment": "moca-sql-properties",
+                    "name": "keyword",
+                    "match": "\\b(?i)(rownum)\\b"
+                },
+                {
+                    "comment": "moca-sql-joins -- having to add here as well due to how we format sql",
+                    "name": "keyword.other.DML.sql",
+                    "match": "\\b(?i)(left|right|inner|cross)\\b"
+                }
+            ]
+        },
+        "moca-context": {
+            "patterns": [
+                {
+                    "comment": "moca-reserved-words",
+                    "name": "keyword.reserved",
+                    "match": "\\b(?i)(if|else|where|and|or|not|is|null|like|try|catch|finally)\\b"
+                },
+                {
+                    "comment": "moca-functions",
+                    "name": "support.function",
+                    "match": "\\b(?i)(remote|parallel|inparallel|int|float|date|len|sprintf|iif|nvl|min|max|rowcount|b64encode|b64decode|dbtype|dbdate|nextval)\\b"
+                },
+                {
+                    "comment": "moca-reference-expressions",
+                    "name": "keyword",
+                    "match": "\\b(?i)(#onstack|#keep)\\b"
+                }
+            ]
+        },
+        "comments": {
+            "patterns": [
+                {
+                    "begin": "/\\*",
+                    "captures": {
+                        "0": {
+                            "name": "punctuation.definition.comment.moca"
+                        }
+                    },
+                    "end": "\\*/",
+                    "name": "comment.block.moca"
+                }
+            ]
+        },
+        "regexps": {
+            "patterns": [
+                {
+                    "begin": "/(?=\\S.*/)",
+                    "beginCaptures": {
+                        "0": {
+                            "name": "punctuation.definition.string.begin.moca"
+                        }
+                    },
+                    "end": "/",
+                    "endCaptures": {
+                        "0": {
+                            "name": "punctuation.definition.string.end.moca"
+                        }
+                    },
+                    "name": "string.regexp.moca",
+                    "patterns": [
+                        {
+                            "include": "#string_interpolation"
+                        },
+                        {
+                            "match": "\\\\/",
+                            "name": "constant.character.escape.slash.moca"
+                        }
+                    ]
+                },
+                {
+                    "begin": "%r\\{",
+                    "beginCaptures": {
+                        "0": {
+                            "name": "punctuation.definition.string.begin.moca"
+                        }
+                    },
+                    "comment": "We should probably handle nested bracket pairs!?! -- Allan",
+                    "end": "\\}",
+                    "endCaptures": {
+                        "0": {
+                            "name": "punctuation.definition.string.end.moca"
+                        }
+                    },
+                    "name": "string.regexp.modr.moca",
+                    "patterns": [
+                        {
+                            "include": "#string_interpolation"
+                        }
+                    ]
+                }
+            ]
+        },
+        "string_escape": {
+            "match": "\\\\.",
+            "name": "constant.character.escape.moca"
+        },
+        "string_interpolation": {
+            "captures": {
+                "1": {
+                    "name": "punctuation.definition.string.begin.moca"
+                },
+                "3": {
+                    "name": "punctuation.definition.string.end.moca"
+                }
+            },
+            "match": "(#\\{)([^\\}]*)(\\})",
+            "name": "string.interpolated.moca"
+        },
+        "strings": {
+            "patterns": [
+                {
+                    "captures": {
+                        "1": {
+                            "name": "punctuation.definition.string.begin.moca"
+                        },
+                        "2": {
+                            "name": "punctuation.definition.string.end.moca"
+                        }
+                    },
+                    "comment": "this is faster than the next begin/end rule since sub-pattern will match till end-of-line and moca files tend to have very long lines.",
+                    "match": "(N)?(')[^']*(')",
+                    "name": "string.quoted.single.moca"
+                },
+                {
+                    "begin": "'",
+                    "beginCaptures": {
+                        "0": {
+                            "name": "punctuation.definition.string.begin.moca"
+                        }
+                    },
+                    "end": "'",
+                    "endCaptures": {
+                        "0": {
+                            "name": "punctuation.definition.string.end.moca"
+                        }
+                    },
+                    "name": "string.quoted.single.moca",
+                    "patterns": [
+                        {
+                            "include": "#string_escape"
+                        }
+                    ]
+                },
+                {
+                    "captures": {
+                        "1": {
+                            "name": "punctuation.definition.string.begin.moca"
+                        },
+                        "2": {
+                            "name": "punctuation.definition.string.end.moca"
+                        }
+                    },
+                    "comment": "this is faster than the next begin/end rule since sub-pattern will match till end-of-line and moca files tend to have very long lines.",
+                    "match": "(`)[^`\\\\]*(`)",
+                    "name": "string.quoted.other.backtick.moca"
+                },
+                {
+                    "begin": "`",
+                    "beginCaptures": {
+                        "0": {
+                            "name": "punctuation.definition.string.begin.moca"
+                        }
+                    },
+                    "end": "`",
+                    "endCaptures": {
+                        "0": {
+                            "name": "punctuation.definition.string.end.moca"
+                        }
+                    },
+                    "name": "string.quoted.other.backtick.moca",
+                    "patterns": [
+                        {
+                            "include": "#string_escape"
+                        }
+                    ]
+                },
+                {
+                    "captures": {
+                        "1": {
+                            "name": "punctuation.definition.string.begin.moca"
+                        },
+                        "2": {
+                            "name": "punctuation.definition.string.end.moca"
+                        }
+                    },
+                    "comment": "this is faster than the next begin/end rule since sub-pattern will match till end-of-line and moca files tend to have very long lines.",
+                    "match": "(\")[^\"#]*(\")",
+                    "name": "string.quoted.double.moca"
+                },
+                {
+                    "begin": "\"",
+                    "beginCaptures": {
+                        "0": {
+                            "name": "punctuation.definition.string.begin.moca"
+                        }
+                    },
+                    "end": "\"",
+                    "endCaptures": {
+                        "0": {
+                            "name": "punctuation.definition.string.end.moca"
+                        }
+                    },
+                    "name": "string.quoted.double.moca",
+                    "patterns": [
+                        {
+                            "include": "#string_interpolation"
+                        }
+                    ]
+                },
+                {
+                    "begin": "%\\{",
+                    "beginCaptures": {
+                        "0": {
+                            "name": "punctuation.definition.string.begin.moca"
+                        }
+                    },
+                    "end": "\\}",
+                    "endCaptures": {
+                        "0": {
+                            "name": "punctuation.definition.string.end.moca"
+                        }
+                    },
+                    "name": "string.other.quoted.brackets.moca",
+                    "patterns": [
+                        {
+                            "include": "#string_interpolation"
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}

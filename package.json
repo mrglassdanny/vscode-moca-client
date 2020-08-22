@@ -1,0 +1,286 @@
+{
+	"name": "vscode-moca-client",
+	"icon": "resources/logo.png",
+	"displayName": "vscode MOCA Client",
+	"description": "vscode MOCA Client",
+	"version": "1.0.3",
+	"publisher": "mrglassdanny",
+	"homepage": "https://github.com/dglass-longbow/vscode-moca-client",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/dglass-longbow/vscode-moca-client.git"
+	},
+	"engines": {
+		"vscode": "^1.40.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+		"onCommand:mocalanguageserver.client.connect"
+	],
+	"main": "./out/extension.js",
+	"contributes": {
+		"commands": [
+			{
+				"command": "mocalanguageserver.client.connect",
+				"title": "Connect to MOCA Server",
+				"category": "MOCA"
+			},
+			{
+				"command": "mocalanguageserver.client.loadRepository",
+				"title": "Load MOCA Repository",
+				"category": "MOCA"
+			},
+			{
+				"command": "mocalanguageserver.client.execute",
+				"title": "Execute MOCA Script",
+				"category": "MOCA"
+			},
+			{
+				"command": "mocalanguageserver.client.executeSelection",
+				"title": "Execute MOCA Selection",
+				"category": "MOCA"
+			},
+			{
+				"command": "mocalanguageserver.client.trace",
+				"title": "MOCA Trace",
+				"category": "MOCA"
+			},
+			{
+				"command": "mocalanguageserver.client.commandLookup",
+				"title": "Lookup MOCA Command",
+				"category": "MOCA"
+			},
+			{
+				"command": "mocalanguageserver.client.executionHistory",
+				"title": "Execution History",
+				"category": "MOCA"
+			},
+			{
+				"command": "mocalanguageserver.client.autoExecute",
+				"title": "Auto Execute MOCA Script",
+				"category": "MOCA"
+			}
+		],
+		"keybindings": [
+			{
+				"command": "mocalanguageserver.client.execute",
+				"key": "ctrl+enter",
+				"when": "editorTextFocus && editorLangId == moca"
+			},
+			{
+				"command": "mocalanguageserver.client.executeSelection",
+				"key": "ctrl+shift+enter",
+				"when": "editorTextFocus && editorLangId == moca && editorHasSelection"
+			},
+			{
+				"command": "mocalanguageserver.client.commandLookup",
+				"key": "ctrl+d"
+			}
+		],
+		"languages": [
+			{
+				"id": "moca",
+				"aliases": [
+					"MOCA"
+				],
+				"extensions": [
+					".msql",
+					".ctl",
+					".mcmd",
+					".mtrg",
+					".msql.readonly"
+				],
+				"configuration": "./language-configuration.json"
+			}
+		],
+		"grammars": [
+			{
+				"language": "moca",
+				"scopeName": "source.moca",
+				"path": "./syntaxes/moca.tmLanguage.json",
+				"embeddedLanguages": {
+					"embedded.block.groovy": "source.groovy",
+					"embedded.block.sql": "source.sql"
+				}
+			}
+		],
+		"configuration": {
+			"type": "object",
+			"description": "vscode MOCA Client Configuration",
+			"properties": {
+				"mocalanguageserver-client.connections": {
+					"type": "array",
+					"default": [
+						{
+							"name": "",
+							"url": "",
+							"user": "",
+							"password": "",
+							"groovyclasspath": [
+								""
+							]
+						}
+					],
+					"description": "MOCA connections",
+					"items": {
+						"type": "object",
+						"properties": {
+							"name": {
+								"type": "string",
+								"default": "",
+								"description": "Connection Name"
+							},
+							"url": {
+								"type": "string",
+								"default": "",
+								"description": "URL (host:port)"
+							},
+							"user": {
+								"type": "string",
+								"default": "",
+								"description": "User ID"
+							},
+							"password": {
+								"type": "string",
+								"default": "",
+								"description": "Password"
+							},
+							"groovyclasspath": {
+								"type": "array",
+								"default": null,
+								"description": "Specifies additional entries to add to the classpath. May contain both folders and individual .jar files.",
+								"items": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"mocalanguageserver-client.trace": {
+					"type": "object",
+					"default": {
+						"fileName": "",
+						"mode": "w"
+					},
+					"description": "MOCA Trace Configuration",
+					"properties": {
+						"fileName": {
+							"type": "string",
+							"default": "",
+							"description": "Trace File Name(user name if blank)"
+						},
+						"mode": {
+							"type": "string",
+							"default": "w",
+							"description": "w - Write(overwrite) | a - Append"
+						}
+					}
+				},
+				"mocalanguageserver-client.autoExecution": {
+					"type": "object",
+					"default": {
+						"initialDuration": 5,
+						"sleepDuration": 5,
+						"stopIfExecutionCountExceeds": 75,
+						"stopIfTimeElapses": 600,
+						"stopIfExecutionError": true
+					},
+					"description": "Auto MOCA Script Execution",
+					"properties": {
+						"initialDuration": {
+							"type": "number",
+							"default": 5,
+							"description": "Initial Duration in Seconds Before First Execution"
+						},
+						"sleepDuration": {
+							"type": "number",
+							"default": 5,
+							"description": "Sleed Duration in Seconds Between Executions"
+						},
+						"stopIfExecutionCountExceeds": {
+							"type": "number",
+							"default": 75,
+							"description": "Stop Execution IF Execution Count Exceeds"
+						},
+						"stopIfTimeElapses": {
+							"type": "number",
+							"default": 600,
+							"description": "Stop Execution IF X Seconds Elapse"
+						},
+						"stopIfExecutionError": {
+							"type": "boolean",
+							"default": true,
+							"description": "Stop Execution If Execution Error Occurs"
+						}
+					}
+				},
+				"mocalanguageserver-client.sqlRangeColor": {
+					"type": "object",
+					"default": {
+						"light": "rgba(0,150,225,0.15)",
+						"dark": "rgba(0,80,180,0.15)"
+					},
+					"description": "SQL Range Color",
+					"properties": {
+						"light": {
+							"type": "string",
+							"default": "rgba(0,150,225,0.15)",
+							"description": "RGBA String"
+						},
+						"dark": {
+							"type": "string",
+							"default": "rgba(0,80,180,0.15)",
+							"description": "RGBA String"
+						}
+					}
+				},
+				"mocalanguageserver-client.groovyRangeColor": {
+					"type": "object",
+					"default": {
+						"light": "rgba(225,100,0,0.15)",
+						"dark": "rgba(175,45,0,0.15)"
+					},
+					"description": "Groovy Range Color",
+					"properties": {
+						"light": {
+							"type": "string",
+							"default": "rgba(225,100,0,0.15)",
+							"description": "RGBA String"
+						},
+						"dark": {
+							"type": "string",
+							"default": "rgba(175,45,0,0.15)",
+							"description": "RGBA String"
+						}
+					}
+				}
+			}
+		}
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./",
+		"pretest": "npm run compile",
+		"test": "node ./out/test/runTest.js"
+	},
+	"devDependencies": {
+		"@types/glob": "^7.1.1",
+		"@types/mocha": "^5.2.6",
+		"@types/node": "^10.12.21",
+		"@types/vscode": "^1.40.0",
+		"glob": "^7.1.4",
+		"mocha": "^6.1.4",
+		"typescript": "^3.3.1",
+		"vscode-test": "^1.2.3"
+	},
+	"dependencies": {
+		"dateformat": "^3.0.3",
+		"jsonc-parser": "^2.2.0",
+		"vscode-languageclient": "^6.0.0-next.8",
+		"vscode-languageserver": "^6.0.0-next.7",
+		"vscode-languageserver-types": "^3.15.0-next.9"
+	}
+}
