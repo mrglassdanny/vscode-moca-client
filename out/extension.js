@@ -28,7 +28,7 @@ let globalExtensionContext;
 let mocaLanguageClient;
 let javaPath;
 // Client constants.
-exports.CONFIGURATION_NAME = "mocalanguageserver-client";
+exports.CONFIGURATION_NAME = "mocaclient";
 exports.CONFIGURATION_CONNECTIONS_NAME = "connections";
 exports.CONFIGURATION_TRACE_NAME = "trace";
 exports.CONFIGURATION_AUTO_EXECUTION_NAME = "autoExecution";
@@ -37,26 +37,26 @@ exports.CONFIGURATION_GROOVY_RANGE_COLOR_NAME = "groovyRangeColor";
 // Client commands.
 var LanguageClientCommands;
 (function (LanguageClientCommands) {
-    LanguageClientCommands.CONNECT = "mocalanguageserver.client.connect";
-    LanguageClientCommands.LOAD_REPOSITORY = "mocalanguageserver.client.loadRepository";
-    LanguageClientCommands.EXECUTE = "mocalanguageserver.client.execute";
-    LanguageClientCommands.EXECUTE_SELECTION = "mocalanguageserver.client.executeSelection";
-    LanguageClientCommands.TRACE = "mocalanguageserver.client.trace";
-    LanguageClientCommands.COMMAND_LOOKUP = "mocalanguageserver.client.commandLookup";
-    LanguageClientCommands.EXECUTION_HISTORY = "mocalanguageserver.client.executionHistory";
-    LanguageClientCommands.AUTO_EXECUTE = "mocalanguageserver.client.autoExecute";
+    LanguageClientCommands.CONNECT = "mocaclient.connect";
+    LanguageClientCommands.LOAD_REPOSITORY = "mocaclient.loadRepository";
+    LanguageClientCommands.EXECUTE = "mocaclient.execute";
+    LanguageClientCommands.EXECUTE_SELECTION = "mocaclient.executeSelection";
+    LanguageClientCommands.TRACE = "mocaclient.trace";
+    LanguageClientCommands.COMMAND_LOOKUP = "mocaclient.commandLookup";
+    LanguageClientCommands.EXECUTION_HISTORY = "mocaclient.executionHistory";
+    LanguageClientCommands.AUTO_EXECUTE = "mocaclient.autoExecute";
 })(LanguageClientCommands = exports.LanguageClientCommands || (exports.LanguageClientCommands = {}));
 // Language server commands.
 var LanguageServerCommands;
 (function (LanguageServerCommands) {
-    LanguageServerCommands.ACTIVATE = "mocalanguageserver.server.activate";
-    LanguageServerCommands.CONNECT = "mocalanguageserver.server.connect";
-    LanguageServerCommands.LOAD_REPOSITORY = "mocalanguageserver.server.loadRepository";
-    LanguageServerCommands.EXECUTE = "mocalanguageserver.server.execute";
-    LanguageServerCommands.TRACE = "mocalanguageserver.server.trace";
-    LanguageServerCommands.COMMAND_LOOKUP = "mocalanguageserver.server.commandLookup";
-    LanguageServerCommands.EXECUTION_HISTORY = "mocalanguageserver.server.executionHistory";
-    LanguageServerCommands.CANCEL_EXECUTION = "mocalanguageserver.server.cancelExecution";
+    LanguageServerCommands.ACTIVATE = "mocalanguageserver.activate";
+    LanguageServerCommands.CONNECT = "mocalanguageserver.connect";
+    LanguageServerCommands.LOAD_REPOSITORY = "mocalanguageserver.loadRepository";
+    LanguageServerCommands.EXECUTE = "mocalanguageserver.execute";
+    LanguageServerCommands.TRACE = "mocalanguageserver.trace";
+    LanguageServerCommands.COMMAND_LOOKUP = "mocalanguageserver.commandLookup";
+    LanguageServerCommands.EXECUTION_HISTORY = "mocalanguageserver.executionHistory";
+    LanguageServerCommands.CANCEL_EXECUTION = "mocalanguageserver.cancelExecution";
 })(LanguageServerCommands = exports.LanguageServerCommands || (exports.LanguageServerCommands = {}));
 // Status bar items.
 // Arbitrary number to offset status bar priorities in order to try to keep items together better.

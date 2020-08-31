@@ -20,7 +20,7 @@ let mocaLanguageClient: LanguageClient;
 let javaPath: string;
 
 // Client constants.
-export const CONFIGURATION_NAME = "mocalanguageserver-client";
+export const CONFIGURATION_NAME = "mocaclient";
 export const CONFIGURATION_CONNECTIONS_NAME = "connections";
 export const CONFIGURATION_TRACE_NAME = "trace";
 export const CONFIGURATION_AUTO_EXECUTION_NAME = "autoExecution";
@@ -29,26 +29,26 @@ export const CONFIGURATION_GROOVY_RANGE_COLOR_NAME = "groovyRangeColor";
 
 // Client commands.
 export namespace LanguageClientCommands {
-	export const CONNECT = "mocalanguageserver.client.connect";
-	export const LOAD_REPOSITORY = "mocalanguageserver.client.loadRepository";
-	export const EXECUTE = "mocalanguageserver.client.execute";
-	export const EXECUTE_SELECTION = "mocalanguageserver.client.executeSelection";
-	export const TRACE = "mocalanguageserver.client.trace";
-	export const COMMAND_LOOKUP = "mocalanguageserver.client.commandLookup";
-	export const EXECUTION_HISTORY = "mocalanguageserver.client.executionHistory";
-	export const AUTO_EXECUTE = "mocalanguageserver.client.autoExecute";
+	export const CONNECT = "mocaclient.connect";
+	export const LOAD_REPOSITORY = "mocaclient.loadRepository";
+	export const EXECUTE = "mocaclient.execute";
+	export const EXECUTE_SELECTION = "mocaclient.executeSelection";
+	export const TRACE = "mocaclient.trace";
+	export const COMMAND_LOOKUP = "mocaclient.commandLookup";
+	export const EXECUTION_HISTORY = "mocaclient.executionHistory";
+	export const AUTO_EXECUTE = "mocaclient.autoExecute";
 }
 
 // Language server commands.
 export namespace LanguageServerCommands {
-	export const ACTIVATE = "mocalanguageserver.server.activate";
-	export const CONNECT = "mocalanguageserver.server.connect";
-	export const LOAD_REPOSITORY = "mocalanguageserver.server.loadRepository";
-	export const EXECUTE = "mocalanguageserver.server.execute";
-	export const TRACE = "mocalanguageserver.server.trace";
-	export const COMMAND_LOOKUP = "mocalanguageserver.server.commandLookup";
-	export const EXECUTION_HISTORY = "mocalanguageserver.server.executionHistory";
-	export const CANCEL_EXECUTION = "mocalanguageserver.server.cancelExecution";
+	export const ACTIVATE = "mocalanguageserver.activate";
+	export const CONNECT = "mocalanguageserver.connect";
+	export const LOAD_REPOSITORY = "mocalanguageserver.loadRepository";
+	export const EXECUTE = "mocalanguageserver.execute";
+	export const TRACE = "mocalanguageserver.trace";
+	export const COMMAND_LOOKUP = "mocalanguageserver.commandLookup";
+	export const EXECUTION_HISTORY = "mocalanguageserver.executionHistory";
+	export const CANCEL_EXECUTION = "mocalanguageserver.cancelExecution";
 }
 
 // Status bar items.

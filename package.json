@@ -18,66 +18,62 @@
 	],
 	"activationEvents": [
 		"onLanguage:moca",
-		"onCommand:mocalanguageserver.client.connect"
+		"onCommand:mocaclient.connect"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "mocalanguageserver.client.connect",
+				"command": "mocaclient.connect",
 				"title": "Connect to MOCA Server",
 				"category": "MOCA"
 			},
 			{
-				"command": "mocalanguageserver.client.loadRepository",
+				"command": "mocaclient.loadRepository",
 				"title": "Load MOCA Repository",
 				"category": "MOCA"
 			},
 			{
-				"command": "mocalanguageserver.client.execute",
+				"command": "mocaclient.execute",
 				"title": "Execute MOCA Script",
 				"category": "MOCA"
 			},
 			{
-				"command": "mocalanguageserver.client.executeSelection",
+				"command": "mocaclient.executeSelection",
 				"title": "Execute MOCA Selection",
 				"category": "MOCA"
 			},
 			{
-				"command": "mocalanguageserver.client.trace",
+				"command": "mocaclient.trace",
 				"title": "MOCA Trace",
 				"category": "MOCA"
 			},
 			{
-				"command": "mocalanguageserver.client.commandLookup",
+				"command": "mocaclient.commandLookup",
 				"title": "Lookup MOCA Command",
 				"category": "MOCA"
 			},
 			{
-				"command": "mocalanguageserver.client.executionHistory",
+				"command": "mocaclient.executionHistory",
 				"title": "Execution History",
 				"category": "MOCA"
 			},
 			{
-				"command": "mocalanguageserver.client.autoExecute",
+				"command": "mocaclient.autoExecute",
 				"title": "Auto Execute MOCA Script",
 				"category": "MOCA"
 			}
 		],
 		"keybindings": [
 			{
-				"command": "mocalanguageserver.client.execute",
+				"command": "mocaclient.execute",
 				"key": "ctrl+enter",
 				"when": "editorTextFocus && editorLangId == moca"
 			},
 			{
-				"command": "mocalanguageserver.client.executeSelection",
+				"command": "mocaclient.executeSelection",
 				"key": "ctrl+shift+enter",
 				"when": "editorTextFocus && editorLangId == moca && editorHasSelection"
-			},
-			{
-				"command": "mocalanguageserver.client.commandLookup",
-				"key": "ctrl+d"
 			}
 		],
 		"languages": [
@@ -111,7 +107,7 @@
 			"type": "object",
 			"description": "vscode MOCA Client Configuration",
 			"properties": {
-				"mocalanguageserver-client.connections": {
+				"mocaclient.connections": {
 					"type": "array",
 					"default": [
 						{
@@ -159,7 +155,7 @@
 						}
 					}
 				},
-				"mocalanguageserver-client.trace": {
+				"mocaclient.trace": {
 					"type": "object",
 					"default": {
 						"fileName": "",
@@ -179,7 +175,7 @@
 						}
 					}
 				},
-				"mocalanguageserver-client.autoExecution": {
+				"mocaclient.autoExecution": {
 					"type": "object",
 					"default": {
 						"initialDuration": 5,
@@ -217,7 +213,7 @@
 						}
 					}
 				},
-				"mocalanguageserver-client.sqlRangeColor": {
+				"mocaclient.sqlRangeColor": {
 					"type": "object",
 					"default": {
 						"light": "rgba(0,150,225,0.15)",
@@ -237,7 +233,7 @@
 						}
 					}
 				},
-				"mocalanguageserver-client.groovyRangeColor": {
+				"mocaclient.groovyRangeColor": {
 					"type": "object",
 					"default": {
 						"light": "rgba(225,100,0,0.15)",
