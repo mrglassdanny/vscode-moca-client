@@ -57,12 +57,10 @@ export namespace LanguageServerCommands {
 // Arbitrary number to offset status bar priorities in order to try to keep items together better.
 const STATUS_BAR_PRIORITY_OFFSET = 562;
 var connectionStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE + STATUS_BAR_PRIORITY_OFFSET);
-var loadRepositoryStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 1 + STATUS_BAR_PRIORITY_OFFSET);
-var executeStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 2 + STATUS_BAR_PRIORITY_OFFSET);
-var executeSelectionStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 3 + STATUS_BAR_PRIORITY_OFFSET);
-var commandLookupStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 4 + STATUS_BAR_PRIORITY_OFFSET);
-var traceStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 5 + STATUS_BAR_PRIORITY_OFFSET);
-var executionHistoryStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 6 + STATUS_BAR_PRIORITY_OFFSET);
+var executeStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 1 + STATUS_BAR_PRIORITY_OFFSET);
+var executeSelectionStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 2 + STATUS_BAR_PRIORITY_OFFSET);
+var commandLookupStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 3 + STATUS_BAR_PRIORITY_OFFSET);
+var traceStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 4 + STATUS_BAR_PRIORITY_OFFSET);
 
 // Status bar constants.
 const NOT_CONNECTED_STR = "MOCA: $(database) Not Connected";
@@ -759,10 +757,6 @@ export function activate(context: vscode.ExtensionContext) {
 	connectionStatusBarItem.command = LanguageClientCommands.CONNECT;
 	connectionStatusBarItem.tooltip = "Connect To MOCA Server";
 	connectionStatusBarItem.show();
-	loadRepositoryStatusBarItem.text = "$(repo-sync)";
-	loadRepositoryStatusBarItem.command = LanguageClientCommands.LOAD_REPOSITORY;
-	loadRepositoryStatusBarItem.tooltip = "Load MOCA Command Repository";
-	loadRepositoryStatusBarItem.show();
 	executeStatusBarItem.text = "$(play)";
 	executeStatusBarItem.command = LanguageClientCommands.EXECUTE;
 	executeStatusBarItem.tooltip = "Execute (Ctrl+Enter)";
@@ -778,18 +772,12 @@ export function activate(context: vscode.ExtensionContext) {
 	traceStatusBarItem.text = START_TRACE_STR;
 	traceStatusBarItem.command = LanguageClientCommands.TRACE;
 	traceStatusBarItem.show();
-	executionHistoryStatusBarItem.text = "$(history)";
-	executionHistoryStatusBarItem.command = LanguageClientCommands.EXECUTION_HISTORY;
-	executionHistoryStatusBarItem.tooltip = "Execution History";
-	executionHistoryStatusBarItem.show();
 
 	context.subscriptions.push(connectionStatusBarItem);
-	context.subscriptions.push(loadRepositoryStatusBarItem);
 	context.subscriptions.push(executeStatusBarItem);
 	context.subscriptions.push(executeSelectionStatusBarItem);
 	context.subscriptions.push(commandLookupStatusBarItem);
 	context.subscriptions.push(traceStatusBarItem);
-	context.subscriptions.push(executionHistoryStatusBarItem);
 
 }
 

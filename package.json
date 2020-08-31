@@ -17,6 +17,7 @@
 		"Other"
 	],
 	"activationEvents": [
+		"onLanguage:moca",
 		"onCommand:mocalanguageserver.client.connect"
 	],
 	"main": "./out/extension.js",
