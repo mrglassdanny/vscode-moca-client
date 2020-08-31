@@ -42,6 +42,7 @@ export namespace LanguageClientCommands {
 
 // Language server commands.
 export namespace LanguageServerCommands {
+	export const ACTIVATE = "mocalanguageserver.server.activate";
 	export const CONNECT = "mocalanguageserver.server.connect";
 	export const LOAD_REPOSITORY = "mocalanguageserver.server.loadRepository";
 	export const EXECUTE = "mocalanguageserver.server.execute";
@@ -86,7 +87,14 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\command_lookup"));
 
 	// Start language server on extension activate.
-	startMocaLanguageServer();
+	startMocaLanguageServer().then(() => {
+		vscode.commands.executeCommand(LanguageServerCommands.ACTIVATE, context.globalStoragePath).then((activateResponse) => {
+			var activateResponseJsonObj = JSON.parse(JSON.stringify(activateResponse));
+			var exceptionJsonObj = JSON.parse(JSON.stringify(activateResponseJsonObj["exception"]));
+			vscode.window.showErrorMessage("Error occuring during MOCA Language Server activation: " + exceptionJsonObj["message"]);
+		})
+	});
+
 
 
 	// Command registration.
@@ -156,7 +164,7 @@ export function activate(context: vscode.ExtensionContext) {
 				});
 
 				// Language server will be started at this point.
-				vscode.commands.executeCommand(LanguageServerCommands.CONNECT, selectedConnection, useExistingMocaRepo, context.globalStoragePath).then((connResponse) => {
+				vscode.commands.executeCommand(LanguageServerCommands.CONNECT, selectedConnection, useExistingMocaRepo).then((connResponse) => {
 
 					// If cancellation requested, skip this part.
 					if (!cancellationRequested) {

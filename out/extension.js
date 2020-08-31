@@ -50,6 +50,7 @@ var LanguageClientCommands;
 // Language server commands.
 var LanguageServerCommands;
 (function (LanguageServerCommands) {
+    LanguageServerCommands.ACTIVATE = "mocalanguageserver.server.activate";
     LanguageServerCommands.CONNECT = "mocalanguageserver.server.connect";
     LanguageServerCommands.LOAD_REPOSITORY = "mocalanguageserver.server.loadRepository";
     LanguageServerCommands.EXECUTE = "mocalanguageserver.server.execute";
@@ -85,7 +86,13 @@ function activate(context) {
     // Make sure other paths exist.
     vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\command_lookup"));
     // Start language server on extension activate.
-    startMocaLanguageServer();
+    startMocaLanguageServer().then(() => {
+        vscode.commands.executeCommand(LanguageServerCommands.ACTIVATE, context.globalStoragePath).then((activateResponse) => {
+            var activateResponseJsonObj = JSON.parse(JSON.stringify(activateResponse));
+            var exceptionJsonObj = JSON.parse(JSON.stringify(activateResponseJsonObj["exception"]));
+            vscode.window.showErrorMessage("Error occuring during MOCA Language Server activation: " + exceptionJsonObj["message"]);
+        });
+    });
     // Command registration.
     context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.CONNECT, () => __awaiter(this, void 0, void 0, function* () {
         var connections = new Map();
@@ -139,7 +146,7 @@ function activate(context) {
                     return p;
                 });
                 // Language server will be started at this point.
-                vscode.commands.executeCommand(LanguageServerCommands.CONNECT, selectedConnection, useExistingMocaRepo, context.globalStoragePath).then((connResponse) => {
+                vscode.commands.executeCommand(LanguageServerCommands.CONNECT, selectedConnection, useExistingMocaRepo).then((connResponse) => {
                     // If cancellation requested, skip this part.
                     if (!cancellationRequested) {
                         var connResponseJsonObj = JSON.parse(JSON.stringify(connResponse));
