@@ -18,7 +18,6 @@ const MOCA_LANGUAGE_SERVER_ERR_STARTUP = "The MOCA extension failed to start.";
 let globalExtensionContext: vscode.ExtensionContext;
 let mocaLanguageClient: LanguageClient;
 let javaPath: string;
-let isConnectedToMocaLanguageServer: boolean = false;
 
 // Client constants.
 export const CONFIGURATION_NAME = "mocalanguageserver-client";
@@ -86,6 +85,10 @@ export function activate(context: vscode.ExtensionContext) {
 	// Make sure other paths exist.
 	vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\command_lookup"));
 
+	// Start language server on extension activate.
+	startMocaLanguageServer();
+
+
 	// Command registration.
 	context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.CONNECT, async () => {
 
@@ -152,56 +155,29 @@ export function activate(context: vscode.ExtensionContext) {
 					return p;
 				});
 
-				if (isConnectedToMocaLanguageServer) {
-					vscode.commands.executeCommand(LanguageServerCommands.CONNECT, selectedConnection, useExistingMocaRepo, context.globalStoragePath).then((connResponse) => {
+				// Language server will be started at this point.
+				vscode.commands.executeCommand(LanguageServerCommands.CONNECT, selectedConnection, useExistingMocaRepo, context.globalStoragePath).then((connResponse) => {
 
-						// If cancellation requested, skip this part.
-						if (!cancellationRequested) {
-							var connResponseJsonObj = JSON.parse(JSON.stringify(connResponse));
-							var eOk = connResponseJsonObj["eOk"];
+					// If cancellation requested, skip this part.
+					if (!cancellationRequested) {
+						var connResponseJsonObj = JSON.parse(JSON.stringify(connResponse));
+						var eOk = connResponseJsonObj["eOk"];
 
-							if (eOk === true) {
-								connectionSuccess = true;
-								connectionStatusBarItem.text = CONNECTED_PREFIX_STR + selectedConnectionJsonObj[0];
-							} else {
-								var exceptionJsonObj = JSON.parse(JSON.stringify(connResponseJsonObj["exception"]));
-								vscode.window.showErrorMessage(selectedConnectionJsonObj[0] + ": " + exceptionJsonObj["message"]);
-								connectionStatusBarItem.text = NOT_CONNECTED_STR;
-							}
+						if (eOk === true) {
+							connectionSuccess = true;
+							connectionStatusBarItem.text = CONNECTED_PREFIX_STR + selectedConnectionJsonObj[0];
+						} else {
+							var exceptionJsonObj = JSON.parse(JSON.stringify(connResponseJsonObj["exception"]));
+							vscode.window.showErrorMessage(selectedConnectionJsonObj[0] + ": " + exceptionJsonObj["message"]);
+							connectionStatusBarItem.text = NOT_CONNECTED_STR;
 						}
+					}
 
-					}).then(() => {
-						// Resolve progress indicator.
-						progress.report({ increment: Infinity });
-						progressResolve();
-					});
-				}
-				else {
-					Promise.resolve(startMocaLanguageServer()).then(() => {
-						vscode.commands.executeCommand(LanguageServerCommands.CONNECT, selectedConnection, useExistingMocaRepo, context.globalStoragePath).then((connResponse) => {
-
-							// If cancellation requested, skip this part.
-							if (!cancellationRequested) {
-								var connResponseJsonObj = JSON.parse(JSON.stringify(connResponse));
-								var eOk = connResponseJsonObj["eOk"];
-
-								if (eOk === true) {
-									connectionSuccess = true;
-									connectionStatusBarItem.text = CONNECTED_PREFIX_STR + selectedConnectionJsonObj[0];
-								} else {
-									var exceptionJsonObj = JSON.parse(JSON.stringify(connResponseJsonObj["exception"]));
-									vscode.window.showErrorMessage(selectedConnectionJsonObj[0] + ": " + exceptionJsonObj["message"]);
-									connectionStatusBarItem.text = NOT_CONNECTED_STR;
-								}
-							}
-
-						}).then(() => {
-							// Resolve progress indicator.
-							progress.report({ increment: Infinity });
-							progressResolve();
-						});
-					});
-				}
+				}).then(() => {
+					// Resolve progress indicator.
+					progress.report({ increment: Infinity });
+					progressResolve();
+				});
 			});
 			return p;
 		}).then(() => {
@@ -828,7 +804,6 @@ function startMocaLanguageServer() {
 
 					resolve();
 					vscode.window.showErrorMessage(MOCA_LANGUAGE_SERVER_ERR_STARTUP);
-					isConnectedToMocaLanguageServer = false;
 
 				});
 
@@ -841,8 +816,6 @@ function startMocaLanguageServer() {
 
 				let disposable = mocaLanguageClient.start();
 				globalExtensionContext.subscriptions.push(disposable);
-				isConnectedToMocaLanguageServer = true;
-
 			});
 		}
 	);

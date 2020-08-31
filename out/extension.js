@@ -27,7 +27,6 @@ const MOCA_LANGUAGE_SERVER_ERR_STARTUP = "The MOCA extension failed to start.";
 let globalExtensionContext;
 let mocaLanguageClient;
 let javaPath;
-let isConnectedToMocaLanguageServer = false;
 // Client constants.
 exports.CONFIGURATION_NAME = "mocalanguageserver-client";
 exports.CONFIGURATION_CONNECTIONS_NAME = "connections";
@@ -85,6 +84,8 @@ function activate(context) {
     vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath));
     // Make sure other paths exist.
     vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\command_lookup"));
+    // Start language server on extension activate.
+    startMocaLanguageServer();
     // Command registration.
     context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.CONNECT, () => __awaiter(this, void 0, void 0, function* () {
         var connections = new Map();
@@ -137,52 +138,27 @@ function activate(context) {
                     progressResolve();
                     return p;
                 });
-                if (isConnectedToMocaLanguageServer) {
-                    vscode.commands.executeCommand(LanguageServerCommands.CONNECT, selectedConnection, useExistingMocaRepo, context.globalStoragePath).then((connResponse) => {
-                        // If cancellation requested, skip this part.
-                        if (!cancellationRequested) {
-                            var connResponseJsonObj = JSON.parse(JSON.stringify(connResponse));
-                            var eOk = connResponseJsonObj["eOk"];
-                            if (eOk === true) {
-                                connectionSuccess = true;
-                                connectionStatusBarItem.text = CONNECTED_PREFIX_STR + selectedConnectionJsonObj[0];
-                            }
-                            else {
-                                var exceptionJsonObj = JSON.parse(JSON.stringify(connResponseJsonObj["exception"]));
-                                vscode.window.showErrorMessage(selectedConnectionJsonObj[0] + ": " + exceptionJsonObj["message"]);
-                                connectionStatusBarItem.text = NOT_CONNECTED_STR;
-                            }
+                // Language server will be started at this point.
+                vscode.commands.executeCommand(LanguageServerCommands.CONNECT, selectedConnection, useExistingMocaRepo, context.globalStoragePath).then((connResponse) => {
+                    // If cancellation requested, skip this part.
+                    if (!cancellationRequested) {
+                        var connResponseJsonObj = JSON.parse(JSON.stringify(connResponse));
+                        var eOk = connResponseJsonObj["eOk"];
+                        if (eOk === true) {
+                            connectionSuccess = true;
+                            connectionStatusBarItem.text = CONNECTED_PREFIX_STR + selectedConnectionJsonObj[0];
                         }
-                    }).then(() => {
-                        // Resolve progress indicator.
-                        progress.report({ increment: Infinity });
-                        progressResolve();
-                    });
-                }
-                else {
-                    Promise.resolve(startMocaLanguageServer()).then(() => {
-                        vscode.commands.executeCommand(LanguageServerCommands.CONNECT, selectedConnection, useExistingMocaRepo, context.globalStoragePath).then((connResponse) => {
-                            // If cancellation requested, skip this part.
-                            if (!cancellationRequested) {
-                                var connResponseJsonObj = JSON.parse(JSON.stringify(connResponse));
-                                var eOk = connResponseJsonObj["eOk"];
-                                if (eOk === true) {
-                                    connectionSuccess = true;
-                                    connectionStatusBarItem.text = CONNECTED_PREFIX_STR + selectedConnectionJsonObj[0];
-                                }
-                                else {
-                                    var exceptionJsonObj = JSON.parse(JSON.stringify(connResponseJsonObj["exception"]));
-                                    vscode.window.showErrorMessage(selectedConnectionJsonObj[0] + ": " + exceptionJsonObj["message"]);
-                                    connectionStatusBarItem.text = NOT_CONNECTED_STR;
-                                }
-                            }
-                        }).then(() => {
-                            // Resolve progress indicator.
-                            progress.report({ increment: Infinity });
-                            progressResolve();
-                        });
-                    });
-                }
+                        else {
+                            var exceptionJsonObj = JSON.parse(JSON.stringify(connResponseJsonObj["exception"]));
+                            vscode.window.showErrorMessage(selectedConnectionJsonObj[0] + ": " + exceptionJsonObj["message"]);
+                            connectionStatusBarItem.text = NOT_CONNECTED_STR;
+                        }
+                    }
+                }).then(() => {
+                    // Resolve progress indicator.
+                    progress.report({ increment: Infinity });
+                    progressResolve();
+                });
             });
             return p;
         }).then(() => {
@@ -697,14 +673,12 @@ function startMocaLanguageServer() {
             mocaLanguageClient.onReady().then(resolve, reason => {
                 resolve();
                 vscode.window.showErrorMessage(MOCA_LANGUAGE_SERVER_ERR_STARTUP);
-                isConnectedToMocaLanguageServer = false;
             });
             const semanticHighlightingFeature = new semanticHighlighting_1.SemanticHighlightingFeature(mocaLanguageClient, globalExtensionContext);
             globalExtensionContext.subscriptions.push(vscode.Disposable.from(semanticHighlightingFeature));
             mocaLanguageClient.registerFeature(semanticHighlightingFeature);
             let disposable = mocaLanguageClient.start();
             globalExtensionContext.subscriptions.push(disposable);
-            isConnectedToMocaLanguageServer = true;
         });
     });
 }
