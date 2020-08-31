@@ -197,6 +197,8 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.LOAD_REPOSITORY, async () => {
+
+
 		vscode.commands.executeCommand(LanguageServerCommands.LOAD_REPOSITORY).then(() => {
 
 			vscode.window.withProgress({
