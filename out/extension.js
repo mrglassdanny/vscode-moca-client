@@ -44,7 +44,6 @@ var LanguageClientCommands;
     LanguageClientCommands.TRACE = "mocalanguageserver.client.trace";
     LanguageClientCommands.COMMAND_LOOKUP = "mocalanguageserver.client.commandLookup";
     LanguageClientCommands.EXECUTION_HISTORY = "mocalanguageserver.client.executionHistory";
-    LanguageClientCommands.MLOAD = "mocalanguageserver.client.mload";
     LanguageClientCommands.AUTO_EXECUTE = "mocalanguageserver.client.autoExecute";
 })(LanguageClientCommands = exports.LanguageClientCommands || (exports.LanguageClientCommands = {}));
 // Language server commands.
@@ -58,7 +57,6 @@ var LanguageServerCommands;
     LanguageServerCommands.COMMAND_LOOKUP = "mocalanguageserver.server.commandLookup";
     LanguageServerCommands.EXECUTION_HISTORY = "mocalanguageserver.server.executionHistory";
     LanguageServerCommands.CANCEL_EXECUTION = "mocalanguageserver.server.cancelExecution";
-    LanguageServerCommands.MLOAD = "mocalanguageserver.server.mload";
 })(LanguageServerCommands = exports.LanguageServerCommands || (exports.LanguageServerCommands = {}));
 // Status bar items.
 // Arbitrary number to offset status bar priorities in order to try to keep items together better.
@@ -416,55 +414,6 @@ function activate(context) {
             });
             return p;
         });
-    })));
-    context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.MLOAD, () => __awaiter(this, void 0, void 0, function* () {
-        vscode.window.showInformationMessage("MLOAD: Select CSV File");
-        let selectedCsvFileRes = yield vscode.window.showOpenDialog({
-            canSelectFiles: true,
-            canSelectFolders: false,
-            canSelectMany: false,
-            openLabel: "Use CSV"
-        });
-        var selectedCsvFilePath = selectedCsvFileRes[0].path;
-        var lastIndexOfDot = selectedCsvFilePath.lastIndexOf('.');
-        if (selectedCsvFilePath && selectedCsvFilePath.substring(lastIndexOfDot, lastIndexOfDot + 4).localeCompare(".csv") === 0) {
-            vscode.window.showInformationMessage("MLOAD: Select CTL(.msql or .ctl) File");
-            let selectedCtlFileRes = yield vscode.window.showOpenDialog({
-                canSelectFiles: true,
-                canSelectFolders: false,
-                canSelectMany: false,
-                openLabel: "Use CTL"
-            });
-            var selectedCtlFilePath = selectedCtlFileRes[0].path;
-            if (selectedCtlFilePath) {
-                vscode.window.withProgress({
-                    location: vscode.ProgressLocation.Notification,
-                    title: "MOCA",
-                    cancellable: false
-                }, (progress, token) => {
-                    progress.report({
-                        increment: Infinity,
-                        message: "MLOAD With Local File..."
-                    });
-                    var p = new Promise(progressResolve => {
-                        token.onCancellationRequested(() => {
-                            // Nothing...
-                        });
-                        vscode.commands.executeCommand(LanguageServerCommands.MLOAD, selectedCsvFilePath, selectedCtlFilePath).then((res) => {
-                            var jsonObj = JSON.parse(JSON.stringify(res));
-                        }).then(() => {
-                            // Resolve progress indicator.
-                            progress.report({ increment: Infinity });
-                            progressResolve();
-                        });
-                    });
-                    return p;
-                });
-            }
-        }
-        else {
-            vscode.window.showErrorMessage("MLOAD: File must be .csv");
-        }
     })));
     context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.AUTO_EXECUTE, () => __awaiter(this, void 0, void 0, function* () {
         // Read in configuration and execute.

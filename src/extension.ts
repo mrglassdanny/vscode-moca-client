@@ -36,7 +36,6 @@ export namespace LanguageClientCommands {
 	export const TRACE = "mocalanguageserver.client.trace";
 	export const COMMAND_LOOKUP = "mocalanguageserver.client.commandLookup";
 	export const EXECUTION_HISTORY = "mocalanguageserver.client.executionHistory";
-	export const MLOAD = "mocalanguageserver.client.mload";
 	export const AUTO_EXECUTE = "mocalanguageserver.client.autoExecute";
 }
 
@@ -50,7 +49,6 @@ export namespace LanguageServerCommands {
 	export const COMMAND_LOOKUP = "mocalanguageserver.server.commandLookup";
 	export const EXECUTION_HISTORY = "mocalanguageserver.server.executionHistory";
 	export const CANCEL_EXECUTION = "mocalanguageserver.server.cancelExecution";
-	export const MLOAD = "mocalanguageserver.server.mload";
 }
 
 // Status bar items.
@@ -480,75 +478,6 @@ export function activate(context: vscode.ExtensionContext) {
 			});
 			return p;
 		});
-	}));
-
-	context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.MLOAD, async () => {
-
-		vscode.window.showInformationMessage("MLOAD: Select CSV File");
-		let selectedCsvFileRes = await vscode.window.showOpenDialog(
-			{
-				canSelectFiles: true,
-				canSelectFolders: false,
-				canSelectMany: false,
-				openLabel: "Use CSV"
-			}
-		)
-
-		var selectedCsvFilePath = selectedCsvFileRes[0].path;
-
-		var lastIndexOfDot = selectedCsvFilePath.lastIndexOf('.');
-		if (selectedCsvFilePath && selectedCsvFilePath.substring(lastIndexOfDot, lastIndexOfDot + 4).localeCompare(".csv") === 0) {
-
-			vscode.window.showInformationMessage("MLOAD: Select CTL(.msql or .ctl) File");
-			let selectedCtlFileRes = await vscode.window.showOpenDialog(
-				{
-					canSelectFiles: true,
-					canSelectFolders: false,
-					canSelectMany: false,
-					openLabel: "Use CTL"
-				}
-			)
-
-			var selectedCtlFilePath = selectedCtlFileRes[0].path;
-
-			if (selectedCtlFilePath) {
-
-				vscode.window.withProgress({
-					location: vscode.ProgressLocation.Notification,
-					title: "MOCA",
-					cancellable: false
-				}, (progress, token) => {
-					progress.report({
-						increment: Infinity,
-						message: "MLOAD With Local File..."
-					});
-
-					var p = new Promise(progressResolve => {
-
-
-						token.onCancellationRequested(() => {
-							// Nothing...
-						});
-
-						vscode.commands.executeCommand(LanguageServerCommands.MLOAD, selectedCsvFilePath, selectedCtlFilePath).then((res) => {
-
-							var jsonObj = JSON.parse(JSON.stringify(res));
-
-						}).then(() => {
-							// Resolve progress indicator.
-							progress.report({ increment: Infinity });
-							progressResolve();
-						});
-					});
-					return p;
-				});
-
-			}
-
-
-		} else {
-			vscode.window.showErrorMessage("MLOAD: File must be .csv");
-		}
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.AUTO_EXECUTE, async () => {
