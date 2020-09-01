@@ -261,19 +261,19 @@
 				"mocaclient.formatterTrainingData": {
 					"type": "object",
 					"default": {
-						"moca-dir-name": "default-a",
-						"mocasql-dir-name": "default-a"
+						"moca-dir-name": "default",
+						"mocasql-dir-name": "default"
 					},
 					"description": "Formatter Training Data",
 					"properties": {
 						"moca-dir-name": {
 							"type": "string",
-							"default": "default-a",
+							"default": "default",
 							"description": "MOCA Script Examples Directory Name. Files must have .msql extension.\nFull Path: {globalExtensionStoragePath}/formatting/training/moca/{moca-dir-name}"
 						},
 						"mocasql-dir-name": {
 							"type": "string",
-							"default": "default-a",
+							"default": "default",
 							"description": "MOCA SQL Script Examples Directory Name. Files must have .sql extension.\nFull Path: {globalExtensionStoragePath}/formatting/training/mocasql/{mocasql-dir-name}"
 						}
 					}
