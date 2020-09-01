@@ -26,6 +26,7 @@ export const CONFIGURATION_TRACE_NAME = "trace";
 export const CONFIGURATION_AUTO_EXECUTION_NAME = "autoExecution";
 export const CONFIGURATION_SQL_RANGE_COLOR_NAME = "sqlRangeColor";
 export const CONFIGURATION_GROOVY_RANGE_COLOR_NAME = "groovyRangeColor";
+export const CONFIGURATION_FORMATTING_TRAINING_DATA = "formatterTrainingData";
 
 // Client commands.
 export namespace LanguageClientCommands {
@@ -85,10 +86,17 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath));
 	// Make sure other paths exist.
 	vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\command_lookup"));
+	vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\formatting\\training\\moca"));
+	vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\formatting\\training\\mocasql"));
 
 	// Start language server on extension activate.
 	startMocaLanguageServer().then(() => {
-		vscode.commands.executeCommand(LanguageServerCommands.ACTIVATE, context.globalStoragePath).then((activateResponse) => {
+		const config = vscode.workspace.getConfiguration(CONFIGURATION_NAME);
+		var formatterTrainingDataConfigObj = JSON.parse(JSON.stringify(config.get(CONFIGURATION_FORMATTING_TRAINING_DATA)));
+
+		var formatterTrainingDataMocaDirName = formatterTrainingDataConfigObj['moca-dir-name'];
+		var formatterTrainingDataMocaSqlDirName = formatterTrainingDataConfigObj['mocasql-dir-name'];
+		vscode.commands.executeCommand(LanguageServerCommands.ACTIVATE, context.globalStoragePath, formatterTrainingDataMocaDirName, formatterTrainingDataMocaSqlDirName).then((activateResponse) => {
 			var activateResponseJsonObj = JSON.parse(JSON.stringify(activateResponse));
 			if (activateResponseJsonObj["exception"]) {
 				vscode.window.showErrorMessage("Error occuring during MOCA Language Server activation: " + activateResponseJsonObj["exception"]["message"]);
@@ -485,9 +493,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.TRAIN_FORMATTERS, async () => {
 
-
-
-
 		vscode.window.withProgress({
 			location: vscode.ProgressLocation.Notification,
 			title: "MOCA",
@@ -499,7 +504,12 @@ export function activate(context: vscode.ExtensionContext) {
 			});
 
 			var p = new Promise(progressResolve => {
-				vscode.commands.executeCommand(LanguageServerCommands.TRAIN_FORMATTERS).then((trainFormattersRes) => {
+				const config = vscode.workspace.getConfiguration(CONFIGURATION_NAME);
+				var formatterTrainingDataConfigObj = JSON.parse(JSON.stringify(config.get(CONFIGURATION_FORMATTING_TRAINING_DATA)));
+
+				var mocaDirName = formatterTrainingDataConfigObj['moca-dir-name'];
+				var mocaSqlDirName = formatterTrainingDataConfigObj['mocasql-dir-name'];
+				vscode.commands.executeCommand(LanguageServerCommands.TRAIN_FORMATTERS, mocaDirName, mocaSqlDirName).then((trainFormattersRes) => {
 					var trainFormattersResJsonObj = JSON.parse(JSON.stringify(trainFormattersRes));
 					if (trainFormattersResJsonObj["exception"]) {
 						vscode.window.showErrorMessage("Error occured during formatting model training: " + trainFormattersResJsonObj["exception"]["message"]);

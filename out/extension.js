@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deactivate = exports.activate = exports.LanguageServerCommands = exports.LanguageClientCommands = exports.CONFIGURATION_GROOVY_RANGE_COLOR_NAME = exports.CONFIGURATION_SQL_RANGE_COLOR_NAME = exports.CONFIGURATION_AUTO_EXECUTION_NAME = exports.CONFIGURATION_TRACE_NAME = exports.CONFIGURATION_CONNECTIONS_NAME = exports.CONFIGURATION_NAME = void 0;
+exports.deactivate = exports.activate = exports.LanguageServerCommands = exports.LanguageClientCommands = exports.CONFIGURATION_FORMATTING_TRAINING_DATA = exports.CONFIGURATION_GROOVY_RANGE_COLOR_NAME = exports.CONFIGURATION_SQL_RANGE_COLOR_NAME = exports.CONFIGURATION_AUTO_EXECUTION_NAME = exports.CONFIGURATION_TRACE_NAME = exports.CONFIGURATION_CONNECTIONS_NAME = exports.CONFIGURATION_NAME = void 0;
 const vscode = require("vscode");
 const vscode_languageclient_1 = require("vscode-languageclient");
 const path = require("path");
@@ -34,6 +34,7 @@ exports.CONFIGURATION_TRACE_NAME = "trace";
 exports.CONFIGURATION_AUTO_EXECUTION_NAME = "autoExecution";
 exports.CONFIGURATION_SQL_RANGE_COLOR_NAME = "sqlRangeColor";
 exports.CONFIGURATION_GROOVY_RANGE_COLOR_NAME = "groovyRangeColor";
+exports.CONFIGURATION_FORMATTING_TRAINING_DATA = "formatterTrainingData";
 // Client commands.
 var LanguageClientCommands;
 (function (LanguageClientCommands) {
@@ -85,9 +86,15 @@ function activate(context) {
     vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath));
     // Make sure other paths exist.
     vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\command_lookup"));
+    vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\formatting\\training\\moca"));
+    vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\formatting\\training\\mocasql"));
     // Start language server on extension activate.
     startMocaLanguageServer().then(() => {
-        vscode.commands.executeCommand(LanguageServerCommands.ACTIVATE, context.globalStoragePath).then((activateResponse) => {
+        const config = vscode.workspace.getConfiguration(exports.CONFIGURATION_NAME);
+        var formatterTrainingDataConfigObj = JSON.parse(JSON.stringify(config.get(exports.CONFIGURATION_FORMATTING_TRAINING_DATA)));
+        var formatterTrainingDataMocaDirName = formatterTrainingDataConfigObj['moca-dir-name'];
+        var formatterTrainingDataMocaSqlDirName = formatterTrainingDataConfigObj['mocasql-dir-name'];
+        vscode.commands.executeCommand(LanguageServerCommands.ACTIVATE, context.globalStoragePath, formatterTrainingDataMocaDirName, formatterTrainingDataMocaSqlDirName).then((activateResponse) => {
             var activateResponseJsonObj = JSON.parse(JSON.stringify(activateResponse));
             if (activateResponseJsonObj["exception"]) {
                 vscode.window.showErrorMessage("Error occuring during MOCA Language Server activation: " + activateResponseJsonObj["exception"]["message"]);
@@ -429,7 +436,11 @@ function activate(context) {
                 message: "Training formatting models..."
             });
             var p = new Promise(progressResolve => {
-                vscode.commands.executeCommand(LanguageServerCommands.TRAIN_FORMATTERS).then((trainFormattersRes) => {
+                const config = vscode.workspace.getConfiguration(exports.CONFIGURATION_NAME);
+                var formatterTrainingDataConfigObj = JSON.parse(JSON.stringify(config.get(exports.CONFIGURATION_FORMATTING_TRAINING_DATA)));
+                var mocaDirName = formatterTrainingDataConfigObj['moca-dir-name'];
+                var mocaSqlDirName = formatterTrainingDataConfigObj['mocasql-dir-name'];
+                vscode.commands.executeCommand(LanguageServerCommands.TRAIN_FORMATTERS, mocaDirName, mocaSqlDirName).then((trainFormattersRes) => {
                     var trainFormattersResJsonObj = JSON.parse(JSON.stringify(trainFormattersRes));
                     if (trainFormattersResJsonObj["exception"]) {
                         vscode.window.showErrorMessage("Error occured during formatting model training: " + trainFormattersResJsonObj["exception"]["message"]);
