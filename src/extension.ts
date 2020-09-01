@@ -36,6 +36,7 @@ export namespace LanguageClientCommands {
 	export const TRACE = "mocaclient.trace";
 	export const COMMAND_LOOKUP = "mocaclient.commandLookup";
 	export const EXECUTION_HISTORY = "mocaclient.executionHistory";
+	export const TRAIN_FORMATTERS = "mocaclient.trainFormatters";
 	export const AUTO_EXECUTE = "mocaclient.autoExecute";
 }
 
@@ -49,6 +50,7 @@ export namespace LanguageServerCommands {
 	export const COMMAND_LOOKUP = "mocalanguageserver.commandLookup";
 	export const EXECUTION_HISTORY = "mocalanguageserver.executionHistory";
 	export const CANCEL_EXECUTION = "mocalanguageserver.cancelExecution";
+	export const TRAIN_FORMATTERS = "mocalanguageserver.trainFormatters";
 }
 
 // Status bar items.
@@ -88,8 +90,9 @@ export function activate(context: vscode.ExtensionContext) {
 	startMocaLanguageServer().then(() => {
 		vscode.commands.executeCommand(LanguageServerCommands.ACTIVATE, context.globalStoragePath).then((activateResponse) => {
 			var activateResponseJsonObj = JSON.parse(JSON.stringify(activateResponse));
-			var exceptionJsonObj = JSON.parse(JSON.stringify(activateResponseJsonObj["exception"]));
-			vscode.window.showErrorMessage("Error occuring during MOCA Language Server activation: " + exceptionJsonObj["message"]);
+			if (activateResponseJsonObj["exception"]) {
+				vscode.window.showErrorMessage("Error occuring during MOCA Language Server activation: " + activateResponseJsonObj["exception"]["message"]);
+			}
 		})
 	});
 
@@ -480,6 +483,39 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 	}));
 
+	context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.TRAIN_FORMATTERS, async () => {
+
+
+
+
+		vscode.window.withProgress({
+			location: vscode.ProgressLocation.Notification,
+			title: "MOCA",
+			cancellable: false
+		}, (progress, token) => {
+			progress.report({
+				increment: Infinity,
+				message: "Training formatting models..."
+			});
+
+			var p = new Promise(progressResolve => {
+				vscode.commands.executeCommand(LanguageServerCommands.TRAIN_FORMATTERS).then((trainFormattersRes) => {
+					var trainFormattersResJsonObj = JSON.parse(JSON.stringify(trainFormattersRes));
+					if (trainFormattersResJsonObj["exception"]) {
+						vscode.window.showErrorMessage("Error occured during formatting model training: " + trainFormattersResJsonObj["exception"]["message"]);
+					}
+				}).then(() => {
+					// Resolve progress indicator.
+					progress.report({ increment: Infinity });
+					progressResolve();
+				});
+			});
+			return p;
+		});
+
+
+	}));
+
 	context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.AUTO_EXECUTE, async () => {
 
 		// Read in configuration and execute.
@@ -730,7 +766,7 @@ function startMocaLanguageServer() {
 
 				// TODO: change back to regular path!
 				//let args = ["-jar", path.resolve(globalExtensionContext.extensionPath, "bin", MOCA_LANGUAGE_SERVER)];
-				let args = ["-jar", path.resolve("C:\\dev\\moca-language-server\\build", "libs", MOCA_LANGUAGE_SERVER)];
+				let args = ["-jar", path.resolve("C:\\dev\\moca-language-server\\build\\", "libs", MOCA_LANGUAGE_SERVER)];
 
 				let executable: Executable = {
 					command: javaPath,

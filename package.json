@@ -59,6 +59,11 @@
 				"category": "MOCA"
 			},
 			{
+				"command": "mocaclient.trainFormatters",
+				"title": "Train Formatting Models",
+				"category": "MOCA"
+			},
+			{
 				"command": "mocaclient.autoExecute",
 				"title": "Auto Execute MOCA Script",
 				"category": "MOCA"

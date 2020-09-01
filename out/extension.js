@@ -44,6 +44,7 @@ var LanguageClientCommands;
     LanguageClientCommands.TRACE = "mocaclient.trace";
     LanguageClientCommands.COMMAND_LOOKUP = "mocaclient.commandLookup";
     LanguageClientCommands.EXECUTION_HISTORY = "mocaclient.executionHistory";
+    LanguageClientCommands.TRAIN_FORMATTERS = "mocaclient.trainFormatters";
     LanguageClientCommands.AUTO_EXECUTE = "mocaclient.autoExecute";
 })(LanguageClientCommands = exports.LanguageClientCommands || (exports.LanguageClientCommands = {}));
 // Language server commands.
@@ -57,6 +58,7 @@ var LanguageServerCommands;
     LanguageServerCommands.COMMAND_LOOKUP = "mocalanguageserver.commandLookup";
     LanguageServerCommands.EXECUTION_HISTORY = "mocalanguageserver.executionHistory";
     LanguageServerCommands.CANCEL_EXECUTION = "mocalanguageserver.cancelExecution";
+    LanguageServerCommands.TRAIN_FORMATTERS = "mocalanguageserver.trainFormatters";
 })(LanguageServerCommands = exports.LanguageServerCommands || (exports.LanguageServerCommands = {}));
 // Status bar items.
 // Arbitrary number to offset status bar priorities in order to try to keep items together better.
@@ -87,8 +89,9 @@ function activate(context) {
     startMocaLanguageServer().then(() => {
         vscode.commands.executeCommand(LanguageServerCommands.ACTIVATE, context.globalStoragePath).then((activateResponse) => {
             var activateResponseJsonObj = JSON.parse(JSON.stringify(activateResponse));
-            var exceptionJsonObj = JSON.parse(JSON.stringify(activateResponseJsonObj["exception"]));
-            vscode.window.showErrorMessage("Error occuring during MOCA Language Server activation: " + exceptionJsonObj["message"]);
+            if (activateResponseJsonObj["exception"]) {
+                vscode.window.showErrorMessage("Error occuring during MOCA Language Server activation: " + activateResponseJsonObj["exception"]["message"]);
+            }
         });
     });
     // Command registration.
@@ -415,6 +418,31 @@ function activate(context) {
             return p;
         });
     })));
+    context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.TRAIN_FORMATTERS, () => __awaiter(this, void 0, void 0, function* () {
+        vscode.window.withProgress({
+            location: vscode.ProgressLocation.Notification,
+            title: "MOCA",
+            cancellable: false
+        }, (progress, token) => {
+            progress.report({
+                increment: Infinity,
+                message: "Training formatting models..."
+            });
+            var p = new Promise(progressResolve => {
+                vscode.commands.executeCommand(LanguageServerCommands.TRAIN_FORMATTERS).then((trainFormattersRes) => {
+                    var trainFormattersResJsonObj = JSON.parse(JSON.stringify(trainFormattersRes));
+                    if (trainFormattersResJsonObj["exception"]) {
+                        vscode.window.showErrorMessage("Error occured during formatting model training: " + trainFormattersResJsonObj["exception"]["message"]);
+                    }
+                }).then(() => {
+                    // Resolve progress indicator.
+                    progress.report({ increment: Infinity });
+                    progressResolve();
+                });
+            });
+            return p;
+        });
+    })));
     context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.AUTO_EXECUTE, () => __awaiter(this, void 0, void 0, function* () {
         // Read in configuration and execute.
         const config = vscode.workspace.getConfiguration(exports.CONFIGURATION_NAME);
@@ -620,7 +648,7 @@ function startMocaLanguageServer() {
             };
             // TODO: change back to regular path!
             //let args = ["-jar", path.resolve(globalExtensionContext.extensionPath, "bin", MOCA_LANGUAGE_SERVER)];
-            let args = ["-jar", path.resolve("C:\\dev\\moca-language-server\\build", "libs", MOCA_LANGUAGE_SERVER)];
+            let args = ["-jar", path.resolve("C:\\dev\\moca-language-server\\build\\", "libs", MOCA_LANGUAGE_SERVER)];
             let executable = {
                 command: javaPath,
                 args: args
