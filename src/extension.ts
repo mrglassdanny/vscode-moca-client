@@ -724,7 +724,7 @@ export function activate(context: vscode.ExtensionContext) {
 	executeStatusBarItem.show();
 	executeSelectionStatusBarItem.text = "$(selection)";
 	executeSelectionStatusBarItem.command = LanguageClientCommands.EXECUTE_SELECTION;
-	executeSelectionStatusBarItem.tooltip = "Execute Seletion (Ctrl+Shift+Enter)";
+	executeSelectionStatusBarItem.tooltip = "Execute Selection (Ctrl+Shift+Enter)";
 	executeSelectionStatusBarItem.show();
 	commandLookupStatusBarItem.text = "$(file-code)";
 	commandLookupStatusBarItem.command = LanguageClientCommands.COMMAND_LOOKUP;
