@@ -54,11 +54,6 @@
 				"category": "MOCA"
 			},
 			{
-				"command": "mocaclient.executionHistory",
-				"title": "Execution History",
-				"category": "MOCA"
-			},
-			{
 				"command": "mocaclient.trainFormatters",
 				"title": "Train Formatting Models",
 				"category": "MOCA"
