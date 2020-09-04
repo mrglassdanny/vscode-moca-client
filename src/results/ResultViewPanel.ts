@@ -1,6 +1,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { MocaResults } from '../mocaResults';
+import { CONFIGURATION_NAME, CONFIGURATION_DATA_TABLE_PAGINATION } from '../extension';
 
 export class ResultViewPanel {
     public static resultViewPanels: Map<string, ResultViewPanel> = new Map<string, ResultViewPanel>();
@@ -135,6 +136,12 @@ export class ResultViewPanel {
         const jsuitesCssUri = webview.asWebviewUri(jsuitesCssPathOnDisk);
 
 
+        const config = vscode.workspace.getConfiguration(CONFIGURATION_NAME);
+        var dataTablePaginationRows = JSON.parse(JSON.stringify(config.get(CONFIGURATION_DATA_TABLE_PAGINATION)));
+        if (dataTablePaginationRows < 1)
+            dataTablePaginationRows = 100;
+
+
         var htmlStr = `<html lang="en">
         <script src="${jexcelScriptUri}"></script>
         <script src="${jsuitesScriptUri}"></script>
@@ -165,7 +172,7 @@ export class ResultViewPanel {
                     columnDrag:true,
                     parseFormulas:false,
                     search:true,
-                    pagination:100,
+                    pagination:${dataTablePaginationRows},
                 });
             </script>
         </html>`;

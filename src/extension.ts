@@ -27,6 +27,8 @@ export const CONFIGURATION_AUTO_EXECUTION_NAME = "autoExecution";
 export const CONFIGURATION_SQL_RANGE_COLOR_NAME = "sqlRangeColor";
 export const CONFIGURATION_GROOVY_RANGE_COLOR_NAME = "groovyRangeColor";
 export const CONFIGURATION_FORMATTING_TRAINING_DATA = "formatterTrainingData";
+export const CONFIGURATION_DATA_TABLE_PAGINATION = "dataTablePagination";
+
 
 // Client commands.
 export namespace LanguageClientCommands {

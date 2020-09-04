@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ResultViewPanel = void 0;
 const path = require("path");
 const vscode = require("vscode");
+const extension_1 = require("../extension");
 class ResultViewPanel {
     constructor(panel, extensionPath, fileName, res) {
         this._disposables = [];
@@ -84,6 +85,10 @@ class ResultViewPanel {
         const jexcelCssUri = webview.asWebviewUri(jexcelCssPathOnDisk);
         const jsuitesCssPathOnDisk = vscode.Uri.file(path.join(this._extensionPath, 'media', 'jsuites.css'));
         const jsuitesCssUri = webview.asWebviewUri(jsuitesCssPathOnDisk);
+        const config = vscode.workspace.getConfiguration(extension_1.CONFIGURATION_NAME);
+        var dataTablePaginationRows = JSON.parse(JSON.stringify(config.get(extension_1.CONFIGURATION_DATA_TABLE_PAGINATION)));
+        if (dataTablePaginationRows < 1)
+            dataTablePaginationRows = 100;
         var htmlStr = `<html lang="en">
         <script src="${jexcelScriptUri}"></script>
         <script src="${jsuitesScriptUri}"></script>
@@ -114,7 +119,7 @@ class ResultViewPanel {
                     columnDrag:true,
                     parseFormulas:false,
                     search:true,
-                    pagination:100,
+                    pagination:${dataTablePaginationRows},
                 });
             </script>
         </html>`;

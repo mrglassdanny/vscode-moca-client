@@ -272,6 +272,11 @@
 							"description": "MOCA SQL Script Examples Directory Name. Files must have .sql extension.\nFull Path: {globalExtensionStoragePath}/formatting/training/mocasql/{mocasql-dir-name}"
 						}
 					}
+				},
+				"mocaclient.dataTablePagination": {
+					"type": "integer",
+					"default": 100,
+					"description": "Data Table Pagination"
 				}
 			}
 		}
