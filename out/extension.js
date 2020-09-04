@@ -39,7 +39,7 @@ exports.CONFIGURATION_FORMATTING_TRAINING_DATA = "formatterTrainingData";
 var LanguageClientCommands;
 (function (LanguageClientCommands) {
     LanguageClientCommands.CONNECT = "mocaclient.connect";
-    LanguageClientCommands.LOAD_REPOSITORY = "mocaclient.loadRepository";
+    LanguageClientCommands.LOAD_CACHE = "mocaclient.loadCache";
     LanguageClientCommands.EXECUTE = "mocaclient.execute";
     LanguageClientCommands.EXECUTE_SELECTION = "mocaclient.executeSelection";
     LanguageClientCommands.TRACE = "mocaclient.trace";
@@ -52,7 +52,7 @@ var LanguageServerCommands;
 (function (LanguageServerCommands) {
     LanguageServerCommands.ACTIVATE = "mocalanguageserver.activate";
     LanguageServerCommands.CONNECT = "mocalanguageserver.connect";
-    LanguageServerCommands.LOAD_REPOSITORY = "mocalanguageserver.loadRepository";
+    LanguageServerCommands.LOAD_CACHE = "mocalanguageserver.loadCache";
     LanguageServerCommands.EXECUTE = "mocalanguageserver.execute";
     LanguageServerCommands.TRACE = "mocalanguageserver.trace";
     LanguageServerCommands.COMMAND_LOOKUP = "mocalanguageserver.commandLookup";
@@ -176,11 +176,11 @@ function activate(context) {
         }).then(() => {
             // If successful connection and we are not just re-connecting to current connection, load repo.
             if (connectionSuccess && !useExistingMocaRepo) {
-                vscode.commands.executeCommand(LanguageClientCommands.LOAD_REPOSITORY);
+                vscode.commands.executeCommand(LanguageClientCommands.LOAD_CACHE);
             }
         });
     })));
-    context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.LOAD_REPOSITORY, () => __awaiter(this, void 0, void 0, function* () {
+    context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.LOAD_CACHE, () => __awaiter(this, void 0, void 0, function* () {
         vscode.window.withProgress({
             location: vscode.ProgressLocation.Window,
             title: "Loading MOCA Command Repository...",
@@ -188,7 +188,7 @@ function activate(context) {
         }, (progress) => {
             progress.report({ increment: Infinity });
             var p = new Promise(progressResolve => {
-                vscode.commands.executeCommand(LanguageServerCommands.LOAD_REPOSITORY).then(() => {
+                vscode.commands.executeCommand(LanguageServerCommands.LOAD_CACHE).then(() => {
                     // Resolve progress indicator.
                     progress.report({ increment: Infinity });
                     progressResolve();

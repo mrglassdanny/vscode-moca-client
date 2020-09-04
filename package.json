@@ -29,8 +29,8 @@
 				"category": "MOCA"
 			},
 			{
-				"command": "mocaclient.loadRepository",
-				"title": "Load MOCA Repository",
+				"command": "mocaclient.loadCache",
+				"title": "Load MOCA Cache",
 				"category": "MOCA"
 			},
 			{

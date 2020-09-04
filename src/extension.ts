@@ -31,7 +31,7 @@ export const CONFIGURATION_FORMATTING_TRAINING_DATA = "formatterTrainingData";
 // Client commands.
 export namespace LanguageClientCommands {
 	export const CONNECT = "mocaclient.connect";
-	export const LOAD_REPOSITORY = "mocaclient.loadRepository";
+	export const LOAD_CACHE = "mocaclient.loadCache";
 	export const EXECUTE = "mocaclient.execute";
 	export const EXECUTE_SELECTION = "mocaclient.executeSelection";
 	export const TRACE = "mocaclient.trace";
@@ -44,7 +44,7 @@ export namespace LanguageClientCommands {
 export namespace LanguageServerCommands {
 	export const ACTIVATE = "mocalanguageserver.activate";
 	export const CONNECT = "mocalanguageserver.connect";
-	export const LOAD_REPOSITORY = "mocalanguageserver.loadRepository";
+	export const LOAD_CACHE = "mocalanguageserver.loadCache";
 	export const EXECUTE = "mocalanguageserver.execute";
 	export const TRACE = "mocalanguageserver.trace";
 	export const COMMAND_LOOKUP = "mocalanguageserver.commandLookup";
@@ -197,12 +197,12 @@ export function activate(context: vscode.ExtensionContext) {
 		}).then(() => {
 			// If successful connection and we are not just re-connecting to current connection, load repo.
 			if (connectionSuccess && !useExistingMocaRepo) {
-				vscode.commands.executeCommand(LanguageClientCommands.LOAD_REPOSITORY);
+				vscode.commands.executeCommand(LanguageClientCommands.LOAD_CACHE);
 			}
 		});
 	}));
 
-	context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.LOAD_REPOSITORY, async () => {
+	context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.LOAD_CACHE, async () => {
 
 		vscode.window.withProgress({
 			location: vscode.ProgressLocation.Window,
@@ -214,7 +214,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 			var p = new Promise(progressResolve => {
 
-				vscode.commands.executeCommand(LanguageServerCommands.LOAD_REPOSITORY).then(() => {
+				vscode.commands.executeCommand(LanguageServerCommands.LOAD_CACHE).then(() => {
 					// Resolve progress indicator.
 					progress.report({ increment: Infinity });
 					progressResolve();
