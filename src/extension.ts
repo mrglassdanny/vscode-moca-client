@@ -204,28 +204,30 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.LOAD_REPOSITORY, async () => {
 
+		vscode.window.withProgress({
+			location: vscode.ProgressLocation.Window,
+			title: "Loading MOCA Command Repository...",
+			cancellable: false
+		}, (progress) => {
 
-		vscode.commands.executeCommand(LanguageServerCommands.LOAD_REPOSITORY).then(() => {
+			progress.report({ increment: Infinity });
 
-			vscode.window.withProgress({
-				location: vscode.ProgressLocation.Window,
-				title: "Loading MOCA Command Repository...",
-				cancellable: false
-			}, (progress) => {
+			var p = new Promise(progressResolve => {
 
-				progress.report({ increment: Infinity });
-
-				// Just have it go for an arbitrary amount of time to let the user know something is happening.
-				// Should not take longer than 50 seconds(list active commands ~ 45 secs).
-				var p = new Promise(resolve => {
-					setTimeout(() => {
-						resolve();
-					}, 50000);
+				vscode.commands.executeCommand(LanguageServerCommands.LOAD_REPOSITORY).then(() => {
+					// Resolve progress indicator.
+					progress.report({ increment: Infinity });
+					progressResolve();
 				});
-
-				return p;
 			});
+			return p;
 		});
+
+
+		
+
+
+		
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.EXECUTE, async () => {
