@@ -183,7 +183,7 @@ function activate(context) {
     context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.LOAD_CACHE, () => __awaiter(this, void 0, void 0, function* () {
         vscode.window.withProgress({
             location: vscode.ProgressLocation.Window,
-            title: "Loading MOCA Command Repository...",
+            title: "Loading MOCA Cache...",
             cancellable: false
         }, (progress) => {
             progress.report({ increment: Infinity });

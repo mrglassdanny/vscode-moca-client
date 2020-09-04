@@ -206,7 +206,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 		vscode.window.withProgress({
 			location: vscode.ProgressLocation.Window,
-			title: "Loading MOCA Command Repository...",
+			title: "Loading MOCA Cache...",
 			cancellable: false
 		}, (progress) => {
 
