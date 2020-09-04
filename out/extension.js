@@ -21,7 +21,7 @@ const perf_hooks_1 = require("perf_hooks");
 // Language server constants.
 const MOCA_LANGUAGE_SERVER_VERSION = "0.0.1";
 const MOCA_LANGUAGE_SERVER = "moca-language-server-" + MOCA_LANGUAGE_SERVER_VERSION + "-all.jar";
-const MOCA_LANGUAGE_SERVER_INITIALIZING_MESSAGE = "Initializing MOCA language server...";
+const MOCA_LANGUAGE_SERVER_INITIALIZING_MESSAGE = "MOCA: Initializing language server";
 const MOCA_LANGUAGE_SERVER_ERR_STARTUP = "The MOCA extension failed to start.";
 // Client vars.
 let globalExtensionContext;
@@ -137,7 +137,7 @@ function activate(context) {
         }, (progress, token) => {
             progress.report({
                 increment: Infinity,
-                message: ("Connecting To " + selectedConnectionJsonObj[0] + "...")
+                message: ("Connecting To " + selectedConnectionJsonObj[0])
             });
             var p = new Promise(progressResolve => {
                 // Purpose of this is to indicate that cancellation was requested down below.
@@ -183,7 +183,7 @@ function activate(context) {
     context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.LOAD_CACHE, () => __awaiter(this, void 0, void 0, function* () {
         vscode.window.withProgress({
             location: vscode.ProgressLocation.Window,
-            title: "Loading MOCA Cache...",
+            title: "MOCA: Loading Cache",
             cancellable: false
         }, (progress) => {
             progress.report({ increment: Infinity });
@@ -210,7 +210,7 @@ function activate(context) {
             }, (progress, token) => {
                 progress.report({
                     increment: Infinity,
-                    message: "Executing " + curFileNameShortened + "..."
+                    message: "Executing " + curFileNameShortened
                 });
                 var p = new Promise(progressResolve => {
                     // Purpose of this is to indicate that cancellation was requested down below.
@@ -255,7 +255,7 @@ function activate(context) {
                 }, (progress, token) => {
                     progress.report({
                         increment: Infinity,
-                        message: "Executing Selection " + curFileNameShortened + "..."
+                        message: "Executing Selection " + curFileNameShortened
                     });
                     var p = new Promise(progressResolve => {
                         // Purpose of this is to indicate that cancellation was requested down below.
@@ -394,7 +394,7 @@ function activate(context) {
         }, (progress, token) => {
             progress.report({
                 increment: Infinity,
-                message: "Training formatting models..."
+                message: "Training formatting models"
             });
             var p = new Promise(progressResolve => {
                 const config = vscode.workspace.getConfiguration(exports.CONFIGURATION_NAME);
@@ -468,7 +468,7 @@ function activate(context) {
                 }, (autoExecProgress, autoExecToken) => __awaiter(this, void 0, void 0, function* () {
                     autoExecProgress.report({
                         increment: Infinity,
-                        message: "Auto Executing " + curFileNameShortened + "..."
+                        message: "Auto Executing " + curFileNameShortened
                     });
                     // Start with initial duration.
                     yield sleepFunc(initialDuration);
@@ -496,7 +496,7 @@ function activate(context) {
                                 }, (execProgress, execToken) => {
                                     execProgress.report({
                                         increment: Infinity,
-                                        message: "Auto Executing " + curFileNameShortened + "... (" + (executionCount + 1) + ")"
+                                        message: "Auto Executing " + curFileNameShortened + " (" + (executionCount + 1) + ")"
                                     });
                                     var execP = new Promise(execProgressResolve => {
                                         // Purpose of this is to indicate that cancellation was requested down below.

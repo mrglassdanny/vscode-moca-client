@@ -361,7 +361,7 @@
     -webkit-box-shadow: 0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12), 0 5px 5px -3px rgba(0,0,0,0.2);
     box-shadow: 0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12), 0 5px 5px -3px rgba(0,0,0,0.2);
     padding:10px;
-    background-color:#fff;
+    /*background-color:#fff;*/
     width:300px;
     min-height:225px;
     margin-top:2px;
@@ -552,7 +552,7 @@
     width:36px;
     height:36px;
     line-height:34px;
-    border:1px solid #ccc;
+    /*border:1px solid #ccc;*/
     box-sizing: border-box;
     margin-left:2px;
     cursor:pointer;
@@ -561,13 +561,13 @@
 .jexcel_page_selected
 {
     font-weight:bold;
-    background-color:#f3f3f3;
+    /*background-color:#f3f3f3;*/
 }
 
 .jexcel_toolbar
 {
     display:flex;
-    background-color:#f3f3f3;
+    /*background-color:#f3f3f3;*/
     border:1px solid #ccc;
     padding:4px;
     margin:0px 2px 4px 1px;
@@ -592,7 +592,7 @@
 
 .jexcel_toolbar i.jexcel_toolbar_item:hover 
 {
-    background-color:#ddd;
+    /*background-color:#ddd;*/
 }
 
 .jexcel_toolbar select.jexcel_toolbar_item 
@@ -632,7 +632,7 @@
     padding-right:20px;
     margin-right:5px;
     margin-bottom:5px;
-    background-color:#f3f3f3;
+    /*background-color:#f3f3f3;*/
     cursor:pointer;
 }
 
@@ -644,4 +644,16 @@
 .jexcel_hidden_index tr > td:first-child, .jexcel_hidden_index colgroup > col:first-child
 {
     display:none;
+}
+
+.jexcel_search {
+    background-color:rgba(0,0,0,0.25);
+    border-top:1px solid rgba(0,0,0,0.85);
+    border-left:1px solid rgba(0,0,0,0.85);
+    border-right:1px solid rgba(0,0,0,0.85);
+    border-bottom:1px solid rgba(0,0,0,0.85);
+    color: var(--vscode-editor-foreground);
+    font-family: var(--vscode-font-family);
+    font-weight: var(--vscode-font-weight);
+    font-size: var(--vscode-font-size);
 }

@@ -112,7 +112,9 @@ class ResultViewPanel {
                     allowRenameColumn:false,
                     about:false,
                     columnDrag:true,
-                    parseFormulas:false
+                    parseFormulas:false,
+                    search:true,
+                    pagination:100,
                 });
             </script>
         </html>`;
