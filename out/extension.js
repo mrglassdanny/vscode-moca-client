@@ -44,7 +44,6 @@ var LanguageClientCommands;
     LanguageClientCommands.EXECUTE_SELECTION = "mocaclient.executeSelection";
     LanguageClientCommands.TRACE = "mocaclient.trace";
     LanguageClientCommands.COMMAND_LOOKUP = "mocaclient.commandLookup";
-    LanguageClientCommands.EXECUTION_HISTORY = "mocaclient.executionHistory";
     LanguageClientCommands.TRAIN_FORMATTERS = "mocaclient.trainFormatters";
     LanguageClientCommands.AUTO_EXECUTE = "mocaclient.autoExecute";
 })(LanguageClientCommands = exports.LanguageClientCommands || (exports.LanguageClientCommands = {}));
@@ -57,8 +56,6 @@ var LanguageServerCommands;
     LanguageServerCommands.EXECUTE = "mocalanguageserver.execute";
     LanguageServerCommands.TRACE = "mocalanguageserver.trace";
     LanguageServerCommands.COMMAND_LOOKUP = "mocalanguageserver.commandLookup";
-    LanguageServerCommands.EXECUTION_HISTORY = "mocalanguageserver.executionHistory";
-    LanguageServerCommands.CANCEL_EXECUTION = "mocalanguageserver.cancelExecution";
     LanguageServerCommands.TRAIN_FORMATTERS = "mocalanguageserver.trainFormatters";
 })(LanguageServerCommands = exports.LanguageServerCommands || (exports.LanguageServerCommands = {}));
 // Status bar items.
@@ -223,9 +220,6 @@ function activate(context) {
                     token.onCancellationRequested(() => {
                         // Go ahead and resolve progress, send cancellation, then quit.
                         cancellationRequested = true;
-                        vscode.commands.executeCommand(LanguageServerCommands.CANCEL_EXECUTION, script).then((res) => {
-                            // Not doing anything special upon completion.
-                        });
                         progressResolve();
                         return p;
                     });
@@ -271,9 +265,6 @@ function activate(context) {
                         token.onCancellationRequested(() => {
                             // Go ahead and resolve progress, send cancellation, then quit.
                             cancellationRequested = true;
-                            vscode.commands.executeCommand(LanguageServerCommands.CANCEL_EXECUTION, selectedScript).then((res) => {
-                                // Not doing anything special upon completion.
-                            });
                             progressResolve();
                             return p;
                         });
@@ -397,34 +388,6 @@ function activate(context) {
             }
         }));
     })));
-    context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.EXECUTION_HISTORY, () => __awaiter(this, void 0, void 0, function* () {
-        vscode.window.withProgress({
-            location: vscode.ProgressLocation.Notification,
-            title: "MOCA",
-            cancellable: false
-        }, (progress, token) => {
-            progress.report({
-                increment: Infinity,
-                message: "Getting Execution History..."
-            });
-            var p = new Promise(progressResolve => {
-                token.onCancellationRequested(() => {
-                    // No cancel action right now.
-                });
-                vscode.commands.executeCommand(LanguageServerCommands.EXECUTION_HISTORY).then((res) => {
-                    // Need to translate to mocaResultsResponse.
-                    var jsonObj = JSON.parse(JSON.stringify(res));
-                    var mocaResults = new mocaResults_1.MocaResults(jsonObj.mocaResultsResponse);
-                    ResultViewPanel_1.ResultViewPanel.createOrShow(context.extensionPath, "Execution History", mocaResults);
-                }).then(() => {
-                    // Resolve progress indicator.
-                    progress.report({ increment: Infinity });
-                    progressResolve();
-                });
-            });
-            return p;
-        });
-    })));
     context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.TRAIN_FORMATTERS, () => __awaiter(this, void 0, void 0, function* () {
         vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
@@ -517,10 +480,6 @@ function activate(context) {
                         autoExecToken.onCancellationRequested(() => {
                             // Go ahead and resolve progress, send cancellation, then quit.
                             autoExecCancellationRequested = true;
-                            // Cancel current script execution.
-                            vscode.commands.executeCommand(LanguageServerCommands.CANCEL_EXECUTION, script).then((res) => {
-                                // Not doing anything special upon completion.
-                            });
                             autoExecProgressResolve();
                             return autoExecP;
                         });
@@ -547,9 +506,6 @@ function activate(context) {
                                         execToken.onCancellationRequested(() => {
                                             // Go ahead and resolve progress, send cancellation, then quit.
                                             execCancellationRequested = true;
-                                            vscode.commands.executeCommand(LanguageServerCommands.CANCEL_EXECUTION, script).then((res) => {
-                                                // Not doing anything special upon completion.
-                                            });
                                             execProgressResolve();
                                             return execP;
                                         });
