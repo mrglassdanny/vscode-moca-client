@@ -614,8 +614,8 @@ function startMocaLanguageServer() {
             };
             // TODO: change back to regular path!
             //let args = ["-jar", path.resolve(globalExtensionContext.extensionPath, "bin", MOCA_LANGUAGE_SERVER)];
-            //let args = ["-jar", path.resolve("C:\\dev\\moca-language-server\\build\\", "libs", MOCA_LANGUAGE_SERVER)];
-            let args = [" '-agentlib:jdwp=transport=dt_socket,server=n,suspend=y,address=localhost:60956' '-Dfile.encoding=UTF-8'", path.resolve("C:\\dev\\moca-language-server\\build\\", "libs", MOCA_LANGUAGE_SERVER)];
+            let args = ["-jar", path.resolve("C:\\dev\\moca-language-server\\build\\", "libs", MOCA_LANGUAGE_SERVER)];
+            //let args = [" '-agentlib:jdwp=transport=dt_socket,server=n,suspend=y,address=localhost:60956' '-Dfile.encoding=UTF-8'", path.resolve("C:\\dev\\moca-language-server\\build\\", "libs", MOCA_LANGUAGE_SERVER)];
             let executable = {
                 command: javaPath,
                 args: args
