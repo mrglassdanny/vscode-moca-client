@@ -88,8 +88,7 @@
 					".ctl",
 					".mcmd",
 					".mtrg",
-					".moca.readonly",
-					".msql.readonly"
+					".moca.readonly"
 				],
 				"configuration": "./language-configuration.json"
 			}
