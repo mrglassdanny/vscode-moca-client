@@ -1,6 +1,6 @@
 {
 	"name": "vscode-moca-client",
-	"icon": "resources/logo.png",
+	"icon": "resources/local-syntax-logo.png",
 	"displayName": "MOCA client",
 	"description": "MOCA client",
 	"version": "0.0.1",
