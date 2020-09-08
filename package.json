@@ -5,6 +5,7 @@
 	"description": "vscode MOCA client",
 	"version": "0.0.1",
 	"publisher": "mrglassdanny",
+	"license": "MIT",
 	"homepage": "https://github.com/mrglassdanny/vscode-moca-client",
 	"repository": {
 		"type": "git",
