@@ -2,10 +2,10 @@ import * as vscode from 'vscode';
 import { LanguageClient, LanguageClientOptions, Executable } from "vscode-languageclient";
 import * as path from "path";
 import * as fs from "fs";
-import { SemanticHighlightingFeature, GlobalSemanticHighlightingVars } from './semanticHighlighting';
-import { MocaResults } from './mocaResults';
+import { SemanticHighlightingFeature, GlobalSemanticHighlightingVars } from './semanticHighlighting/semanticHighlighting';
+import { MocaResults } from './results/mocaResults';
 import { ResultViewPanel } from './results/ResultViewPanel';
-import { MocaCommand, MocaTrigger } from './mocaCommandLookup';
+import { MocaCommand, MocaTrigger } from './mocaCommandLookup/mocaCommandLookup';
 import { performance } from 'perf_hooks';
 
 // Language server constants.
@@ -730,10 +730,11 @@ function startMocaLanguageServer() {
 					}
 				};
 
-				// TODO: change back to regular path!
-				//let args = ["-jar", path.resolve(globalExtensionContext.extensionPath, "bin", MOCA_LANGUAGE_SERVER)];
-				let args = ["-jar", path.resolve("C:\\dev\\moca-language-server\\build\\", "libs", MOCA_LANGUAGE_SERVER)];
-				//let args = [" '-agentlib:jdwp=transport=dt_socket,server=n,suspend=y,address=localhost:60956' '-Dfile.encoding=UTF-8'", path.resolve("C:\\dev\\moca-language-server\\build\\", "libs", MOCA_LANGUAGE_SERVER)];
+
+				let args = ["-jar", path.resolve(globalExtensionContext.extensionPath, "bin", MOCA_LANGUAGE_SERVER)];
+				// Below 'args' is used for testing.
+				// let args = ["-jar", path.resolve("C:\\dev\\moca-language-server\\build\\", "libs", MOCA_LANGUAGE_SERVER)];
+
 
 				let executable: Executable = {
 					command: javaPath,

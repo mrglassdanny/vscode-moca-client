@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { MocaResults } from '../mocaResults';
+import { MocaResults } from './mocaResults';
 import { CONFIGURATION_NAME, CONFIGURATION_DATA_TABLE_PAGINATION } from '../extension';
 
 export class ResultViewPanel {

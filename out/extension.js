@@ -14,8 +14,8 @@ const vscode = require("vscode");
 const vscode_languageclient_1 = require("vscode-languageclient");
 const path = require("path");
 const fs = require("fs");
-const semanticHighlighting_1 = require("./semanticHighlighting");
-const mocaResults_1 = require("./mocaResults");
+const semanticHighlighting_1 = require("./semanticHighlighting/semanticHighlighting");
+const mocaResults_1 = require("./results/mocaResults");
 const ResultViewPanel_1 = require("./results/ResultViewPanel");
 const perf_hooks_1 = require("perf_hooks");
 // Language server constants.
@@ -612,10 +612,9 @@ function startMocaLanguageServer() {
                     protocol2Code: value => vscode.Uri.parse(value)
                 }
             };
-            // TODO: change back to regular path!
-            //let args = ["-jar", path.resolve(globalExtensionContext.extensionPath, "bin", MOCA_LANGUAGE_SERVER)];
-            let args = ["-jar", path.resolve("C:\\dev\\moca-language-server\\build\\", "libs", MOCA_LANGUAGE_SERVER)];
-            //let args = [" '-agentlib:jdwp=transport=dt_socket,server=n,suspend=y,address=localhost:60956' '-Dfile.encoding=UTF-8'", path.resolve("C:\\dev\\moca-language-server\\build\\", "libs", MOCA_LANGUAGE_SERVER)];
+            let args = ["-jar", path.resolve(globalExtensionContext.extensionPath, "bin", MOCA_LANGUAGE_SERVER)];
+            // Below 'args' is used for testing.
+            // let args = ["-jar", path.resolve("C:\\dev\\moca-language-server\\build\\", "libs", MOCA_LANGUAGE_SERVER)];
             let executable = {
                 command: javaPath,
                 args: args
