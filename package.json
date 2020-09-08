@@ -1,9 +1,9 @@
 {
-	"name": "vscode-moca-client",
+	"name": "mrglassdanny-vmc-alpha",
 	"icon": "resources/logo.png",
-	"displayName": "vscode MOCA Client",
-	"description": "vscode MOCA Client",
-	"version": "1.0.3",
+	"displayName": "mrglassdanny-vmc-alpha",
+	"description": "mrglassdanny-vmc-alpha",
+	"version": "0.0.1",
 	"publisher": "mrglassdanny",
 	"homepage": "https://github.com/dglass-longbow/vscode-moca-client",
 	"repository": {
