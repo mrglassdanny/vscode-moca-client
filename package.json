@@ -1,9 +1,9 @@
 {
 	"name": "vscode-moca-client",
 	"icon": "resources/local-syntax-logo.png",
-	"displayName": "MOCA client",
-	"description": "MOCA client",
-	"version": "0.0.1",
+	"displayName": "MOCA Client",
+	"description": "MOCA Client",
+	"version": "0.0.2",
 	"publisher": "mrglassdanny",
 	"preview": true,
 	"license": "MIT",
