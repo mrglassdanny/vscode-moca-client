@@ -5,10 +5,10 @@
 	"description": "vscode MOCA client",
 	"version": "0.0.1",
 	"publisher": "mrglassdanny",
-	"homepage": "https://github.com/dglass-longbow/vscode-moca-client",
+	"homepage": "https://github.com/mrglassdanny/vscode-moca-client",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/dglass-longbow/vscode-moca-client.git"
+		"url": "https://github.com/mrglassdanny/vscode-moca-client.git"
 	},
 	"engines": {
 		"vscode": "^1.40.0"
