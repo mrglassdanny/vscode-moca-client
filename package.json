@@ -83,10 +83,12 @@
 					"MOCA"
 				],
 				"extensions": [
+					".moca",
 					".msql",
 					".ctl",
 					".mcmd",
 					".mtrg",
+					".moca.readonly",
 					".msql.readonly"
 				],
 				"configuration": "./language-configuration.json"
