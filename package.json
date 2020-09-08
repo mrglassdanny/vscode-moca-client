@@ -1,8 +1,8 @@
 {
 	"name": "vscode-moca-client",
 	"icon": "resources/logo.png",
-	"displayName": "vscode MOCA client",
-	"description": "vscode MOCA client",
+	"displayName": "MOCA client",
+	"description": "MOCA client",
 	"version": "0.0.1",
 	"publisher": "mrglassdanny",
 	"license": "MIT",
