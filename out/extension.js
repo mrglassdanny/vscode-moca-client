@@ -83,7 +83,7 @@ function activate(context) {
     // Make sure global storage path exists.
     vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath));
     // Make sure other paths exist.
-    vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\command_lookup"));
+    vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\command-lookup"));
     vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\formatting\\training\\moca"));
     vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\formatting\\training\\mocasql"));
     // Start language server on extension activate.
@@ -348,7 +348,7 @@ function activate(context) {
                                     var commandsAtLevels = commandDataJsonObj.commandsAtLevels;
                                     for (var i = 0; i < commandsAtLevels.length; i++) {
                                         if (commandDataSelected.localeCompare(commandsAtLevels[i].cmplvl + ": " + commandsAtLevels[i].command + " (" + commandsAtLevels[i].type + ")") === 0) {
-                                            var uri = vscode.Uri.file(context.globalStoragePath + "\\command_lookup\\" + (commandsAtLevels[i].cmplvl + "-" + commandsAtLevels[i].command).replace(/ /g, "_") + ".msql.readonly");
+                                            var uri = vscode.Uri.file(context.globalStoragePath + "\\command-lookup\\" + (commandsAtLevels[i].cmplvl + "-" + commandsAtLevels[i].command).replace(/ /g, "_") + ".moca.readonly");
                                             // Before we attempt to write, we need to make sure code is local syntax.
                                             if (commandsAtLevels[i].type.localeCompare("Local Syntax") !== 0) {
                                                 vscode.window.showErrorMessage("Command Lookup: Cannot view non Local Syntax commands!");
@@ -369,7 +369,7 @@ function activate(context) {
                                     for (var i = 0; i < triggers.length; i++) {
                                         commandData.push("Trigger: " + triggers[i].name);
                                         if (commandDataSelected.localeCompare("Trigger: " + triggers[i].trgseq + " - " + triggers[i].name) === 0) {
-                                            var uri = vscode.Uri.file(context.globalStoragePath + "\\command_lookup\\" + (distinctCommandSelected + "-" + triggers[i].name).replace(/ /g, "_") + ".msql.readonly");
+                                            var uri = vscode.Uri.file(context.globalStoragePath + "\\command-lookup\\" + (distinctCommandSelected + "-" + triggers[i].name).replace(/ /g, "_") + ".moca.readonly");
                                             // Triggers are always local syntax.
                                             vscode.workspace.fs.writeFile(uri, Buffer.from(triggers[i].syntax)).then(() => {
                                                 vscode.workspace.openTextDocument(uri).then(doc => {
