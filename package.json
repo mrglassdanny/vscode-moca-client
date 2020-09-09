@@ -3,7 +3,7 @@
 	"icon": "resources/local-syntax-logo.png",
 	"displayName": "MOCA Client",
 	"description": "MOCA Client",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"publisher": "mrglassdanny",
 	"preview": true,
 	"license": "MIT",
