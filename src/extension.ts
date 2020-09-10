@@ -26,7 +26,6 @@ export const CONFIGURATION_TRACE_NAME = "trace";
 export const CONFIGURATION_AUTO_EXECUTION_NAME = "autoExecution";
 export const CONFIGURATION_SQL_RANGE_COLOR_NAME = "sqlRangeColor";
 export const CONFIGURATION_GROOVY_RANGE_COLOR_NAME = "groovyRangeColor";
-export const CONFIGURATION_FORMATTING_TRAINING_DATA = "formatterTrainingData";
 export const CONFIGURATION_DATA_TABLE_PAGINATION = "dataTablePagination";
 
 
@@ -38,7 +37,6 @@ export namespace LanguageClientCommands {
 	export const EXECUTE_SELECTION = "mocaclient.executeSelection";
 	export const TRACE = "mocaclient.trace";
 	export const COMMAND_LOOKUP = "mocaclient.commandLookup";
-	export const TRAIN_FORMATTERS = "mocaclient.trainFormatters";
 	export const AUTO_EXECUTE = "mocaclient.autoExecute";
 }
 
@@ -50,7 +48,6 @@ export namespace LanguageServerCommands {
 	export const EXECUTE = "mocalanguageserver.execute";
 	export const TRACE = "mocalanguageserver.trace";
 	export const COMMAND_LOOKUP = "mocalanguageserver.commandLookup";
-	export const TRAIN_FORMATTERS = "mocalanguageserver.trainFormatters";
 }
 
 // Status bar items.
@@ -85,17 +82,11 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath));
 	// Make sure other paths exist.
 	vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\command-lookup"));
-	vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\formatting\\training\\moca"));
-	vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\formatting\\training\\mocasql"));
 
 	// Start language server on extension activate.
 	startMocaLanguageServer().then(() => {
-		const config = vscode.workspace.getConfiguration(CONFIGURATION_NAME);
-		var formatterTrainingDataConfigObj = JSON.parse(JSON.stringify(config.get(CONFIGURATION_FORMATTING_TRAINING_DATA)));
 
-		var formatterTrainingDataMocaDirName = formatterTrainingDataConfigObj['moca-dir-name'];
-		var formatterTrainingDataMocaSqlDirName = formatterTrainingDataConfigObj['mocasql-dir-name'];
-		vscode.commands.executeCommand(LanguageServerCommands.ACTIVATE, context.globalStoragePath, formatterTrainingDataMocaDirName, formatterTrainingDataMocaSqlDirName).then((activateResponse) => {
+		vscode.commands.executeCommand(LanguageServerCommands.ACTIVATE, context.globalStoragePath).then((activateResponse) => {
 			var activateResponseJsonObj = JSON.parse(JSON.stringify(activateResponse));
 			if (activateResponseJsonObj["exception"]) {
 				vscode.window.showErrorMessage("Error occuring during MOCA Language Server activation: " + activateResponseJsonObj["exception"]["message"]);
@@ -454,41 +445,6 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 	}));
 
-	context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.TRAIN_FORMATTERS, async () => {
-
-		vscode.window.withProgress({
-			location: vscode.ProgressLocation.Notification,
-			title: "MOCA",
-			cancellable: false
-		}, (progress, token) => {
-			progress.report({
-				increment: Infinity,
-				message: "Training formatting models"
-			});
-
-			var p = new Promise(progressResolve => {
-				const config = vscode.workspace.getConfiguration(CONFIGURATION_NAME);
-				var formatterTrainingDataConfigObj = JSON.parse(JSON.stringify(config.get(CONFIGURATION_FORMATTING_TRAINING_DATA)));
-
-				var mocaDirName = formatterTrainingDataConfigObj['moca-dir-name'];
-				var mocaSqlDirName = formatterTrainingDataConfigObj['mocasql-dir-name'];
-				vscode.commands.executeCommand(LanguageServerCommands.TRAIN_FORMATTERS, mocaDirName, mocaSqlDirName).then((trainFormattersRes) => {
-					var trainFormattersResJsonObj = JSON.parse(JSON.stringify(trainFormattersRes));
-					if (trainFormattersResJsonObj["exception"]) {
-						vscode.window.showErrorMessage("Error occured during formatting model training: " + trainFormattersResJsonObj["exception"]["message"]);
-					}
-				}).then(() => {
-					// Resolve progress indicator.
-					progress.report({ increment: Infinity });
-					progressResolve();
-				});
-			});
-			return p;
-		});
-
-
-	}));
-
 	context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.AUTO_EXECUTE, async () => {
 
 		// Read in configuration and execute.
@@ -731,9 +687,9 @@ function startMocaLanguageServer() {
 				};
 
 
-				let args = ["-jar", path.resolve(globalExtensionContext.extensionPath, "bin", MOCA_LANGUAGE_SERVER)];
+				// let args = ["-jar", path.resolve(globalExtensionContext.extensionPath, "bin", MOCA_LANGUAGE_SERVER)];
 				// Below 'args' is used for testing.
-				// let args = ["-jar", path.resolve("C:\\dev\\moca-language-server\\build\\", "libs", MOCA_LANGUAGE_SERVER)];
+				let args = ["-jar", path.resolve("C:\\dev\\moca-language-server\\build\\", "libs", MOCA_LANGUAGE_SERVER)];
 
 
 				let executable: Executable = {
