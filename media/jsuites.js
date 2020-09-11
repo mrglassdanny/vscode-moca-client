@@ -1,3 +1,6 @@
+/*
+    This file is derived from JExcel which has the following license:
+*/
 
 /**
  * (c) jSuites v2.3.1 - Javascript Web Components
@@ -9,6 +12,11 @@
  * MIT License
  *
  */
+
+/*
+    Subsequent modifications have been done under the MIT License.
+*/
+
 ; (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
         typeof define === 'function' && define.amd ? define(factory) :

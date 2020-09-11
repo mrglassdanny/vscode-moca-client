@@ -1,3 +1,6 @@
+/*
+    This file is derived from JExcel which has the following license:
+*/
 
 /**
  * jExcel v3.7.1
@@ -6,10 +9,12 @@
  * Website: https://bossanova.uk/jexcel/
  * Description: Create amazing web based spreadsheets.
  * 
- * Modified By: Danny Glass
- *
  * This software is distribute under MIT License
  */
+
+/*
+    Subsequent modifications have been done under the MIT License.
+*/
 
 if (!jSuites && typeof (require) === 'function') {
     var jSuites = require('jsuites');
