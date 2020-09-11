@@ -4,6 +4,11 @@
 	"displayName": "MOCA Client",
 	"description": "MOCA Client and Local Syntax programming support",
 	"version": "0.0.4",
+	"author": {
+		"name": "Danny Glass",
+		"email": "mrglassdanny@gmail.com",
+		"url": "https://github.com/mrglassdanny"
+	},
 	"publisher": "mrglassdanny",
 	"preview": true,
 	"license": "MIT",
