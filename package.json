@@ -3,7 +3,7 @@
 	"icon": "resources/local-syntax-logo.png",
 	"displayName": "MOCA Client",
 	"description": "MOCA Client and Local Syntax programming support",
-	"version": "0.0.4",
+	"version": "0.0.5",
 	"author": {
 		"name": "Danny Glass",
 		"email": "mrglassdanny@gmail.com",
