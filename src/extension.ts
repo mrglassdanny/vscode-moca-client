@@ -20,7 +20,7 @@ let mocaLanguageClient: LanguageClient;
 let javaPath: string;
 
 // Client constants.
-export const CONFIGURATION_NAME = "mocaclient";
+export const CONFIGURATION_NAME = "moca";
 export const CONFIGURATION_CONNECTIONS_NAME = "connections";
 export const CONFIGURATION_TRACE_NAME = "trace";
 export const CONFIGURATION_AUTO_EXECUTION_NAME = "autoExecution";
@@ -30,13 +30,13 @@ export const CONFIGURATION_LANGUAGE_SERVER_OPTIONS = "languageServerOptions";
 
 // Client commands.
 export namespace LanguageClientCommands {
-	export const CONNECT = "mocaclient.connect";
-	export const LOAD_CACHE = "mocaclient.loadCache";
-	export const EXECUTE = "mocaclient.execute";
-	export const EXECUTE_SELECTION = "mocaclient.executeSelection";
-	export const TRACE = "mocaclient.trace";
-	export const COMMAND_LOOKUP = "mocaclient.commandLookup";
-	export const AUTO_EXECUTE = "mocaclient.autoExecute";
+	export const CONNECT = "moca.connect";
+	export const LOAD_CACHE = "moca.loadCache";
+	export const EXECUTE = "moca.execute";
+	export const EXECUTE_SELECTION = "moca.executeSelection";
+	export const TRACE = "moca.trace";
+	export const COMMAND_LOOKUP = "moca.commandLookup";
+	export const AUTO_EXECUTE = "moca.autoExecute";
 }
 
 // Language server commands.
@@ -47,6 +47,7 @@ export namespace LanguageServerCommands {
 	export const EXECUTE = "mocalanguageserver.execute";
 	export const TRACE = "mocalanguageserver.trace";
 	export const COMMAND_LOOKUP = "mocalanguageserver.commandLookup";
+	export const SET_LANGUAGE_SERVER_OPTIONS = "mocalanguageserver.setLanguageServerOptions";
 }
 
 // Status bar items.
@@ -85,7 +86,7 @@ export function activate(context: vscode.ExtensionContext) {
 	// Start language server on extension activate.
 	startMocaLanguageServer().then(() => {
 
-		vscode.commands.executeCommand(LanguageServerCommands.ACTIVATE, context.globalStoragePath).then((activateResponse) => {
+		vscode.commands.executeCommand(LanguageServerCommands.ACTIVATE, context.globalStoragePath, vscode.workspace.getConfiguration(CONFIGURATION_NAME).get(CONFIGURATION_LANGUAGE_SERVER_OPTIONS)).then((activateResponse) => {
 			var activateResponseJsonObj = JSON.parse(JSON.stringify(activateResponse));
 			if (activateResponseJsonObj["exception"]) {
 				vscode.window.showErrorMessage("Error occuring during MOCA Language Server activation: " + activateResponseJsonObj["exception"]["message"]);
@@ -613,12 +614,19 @@ export function activate(context: vscode.ExtensionContext) {
 
 
 	// Events registration.
+
+	// Configuration listener.
 	context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {
 
 		// Checking if user changed client options config (object has mocasql & groovy range color config).
 		// If so, we potentially need to re-color things!
 		if (e.affectsConfiguration((CONFIGURATION_NAME + "." + CONFIGURATION_CLIENT_OPTIONS))) {
 			GlobalSemanticHighlightingVars.semanticHighlightingFeature.loadCurrentTheme();
+		}
+
+		// Checking if user changed lang server options. If so, we need to let the lang server know!
+		if (e.affectsConfiguration((CONFIGURATION_NAME + "." + CONFIGURATION_LANGUAGE_SERVER_OPTIONS))) {
+			vscode.commands.executeCommand(LanguageServerCommands.SET_LANGUAGE_SERVER_OPTIONS, vscode.workspace.getConfiguration(CONFIGURATION_NAME).get(CONFIGURATION_LANGUAGE_SERVER_OPTIONS));
 		}
 
 	}));
@@ -686,9 +694,9 @@ function startMocaLanguageServer() {
 				};
 
 
-				let args = ["-jar", path.resolve(globalExtensionContext.extensionPath, "bin", MOCA_LANGUAGE_SERVER)];
+				// let args = ["-jar", path.resolve(globalExtensionContext.extensionPath, "bin", MOCA_LANGUAGE_SERVER)];
 				// Below 'args' is used for testing.
-				// let args = ["-jar", path.resolve("C:\\dev\\moca-language-server\\build\\", "libs", MOCA_LANGUAGE_SERVER)];
+				let args = ["-jar", path.resolve("C:\\dev\\moca-language-server\\build\\", "libs", MOCA_LANGUAGE_SERVER)];
 
 
 				let executable: Executable = {

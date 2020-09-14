@@ -25,55 +25,55 @@
 	],
 	"activationEvents": [
 		"onLanguage:moca",
-		"onCommand:mocaclient.connect"
+		"onCommand:moca.connect"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "mocaclient.connect",
+				"command": "moca.connect",
 				"title": "Connect to MOCA Server",
 				"category": "MOCA"
 			},
 			{
-				"command": "mocaclient.loadCache",
+				"command": "moca.loadCache",
 				"title": "Load MOCA Cache",
 				"category": "MOCA"
 			},
 			{
-				"command": "mocaclient.execute",
+				"command": "moca.execute",
 				"title": "Execute MOCA Script",
 				"category": "MOCA"
 			},
 			{
-				"command": "mocaclient.executeSelection",
+				"command": "moca.executeSelection",
 				"title": "Execute MOCA Selection",
 				"category": "MOCA"
 			},
 			{
-				"command": "mocaclient.trace",
+				"command": "moca.trace",
 				"title": "MOCA Trace",
 				"category": "MOCA"
 			},
 			{
-				"command": "mocaclient.commandLookup",
+				"command": "moca.commandLookup",
 				"title": "Lookup MOCA Command",
 				"category": "MOCA"
 			},
 			{
-				"command": "mocaclient.autoExecute",
+				"command": "moca.autoExecute",
 				"title": "Auto Execute MOCA Script",
 				"category": "MOCA"
 			}
 		],
 		"keybindings": [
 			{
-				"command": "mocaclient.execute",
+				"command": "moca.execute",
 				"key": "ctrl+enter",
 				"when": "editorTextFocus && editorLangId == moca"
 			},
 			{
-				"command": "mocaclient.executeSelection",
+				"command": "moca.executeSelection",
 				"key": "ctrl+shift+enter",
 				"when": "editorTextFocus && editorLangId == moca && editorHasSelection"
 			}
@@ -105,9 +105,9 @@
 		],
 		"configuration": {
 			"type": "object",
-			"description": "MOCA Client Configuration",
+			"description": "MOCA Configuration",
 			"properties": {
-				"mocaclient.connections": {
+				"moca.connections": {
 					"type": "array",
 					"default": [
 						{
@@ -155,7 +155,7 @@
 						}
 					}
 				},
-				"mocaclient.trace": {
+				"moca.trace": {
 					"type": "object",
 					"default": {
 						"fileName": "",
@@ -175,7 +175,7 @@
 						}
 					}
 				},
-				"mocaclient.autoExecution": {
+				"moca.autoExecution": {
 					"type": "object",
 					"default": {
 						"initialDuration": 5,
@@ -213,7 +213,7 @@
 						}
 					}
 				},
-				"mocaclient.clientOptions": {
+				"moca.clientOptions": {
 					"type": "object",
 					"default": {
 						"mocasql-range-color-light": "rgba(0,150,225,0.15)",
@@ -251,101 +251,65 @@
 						}
 					}
 				},
-				"mocaclient.languageServerOptions": {
+				"moca.languageServerOptions": {
 					"type": "object",
 					"default": {
 						"moca-error-diagnostics-enabled": true,
 						"moca-warning-diagnostics-enabled": true,
-						"moca-info-diagnostics-enabled": true,
-						"moca-hint-diagnostics-enabled": true,
 						"mocasql-error-diagnostics-enabled": true,
 						"mocasql-warning-diagnostics-enabled": true,
-						"mocasql-info-diagnostics-enabled": true,
-						"mocasql-hint-diagnostics-enabled": true,
 						"groovy-error-diagnostics-enabled": true,
 						"groovy-warning-diagnostics-enabled": true,
-						"groovy-info-diagnostics-enabled": true,
-						"groovy-hint-diagnostics-enabled": true,
-						"moca-formatting-enabled": true,
 						"mocasql-formatting-enabled": true,
-						"groovy-formatting-enabled": true
+						"groovy-formatting-enabled": true,
+						"groovy-static-type-checking-enabled": true
 					},
 					"description": "MOCA Language Server Options",
 					"properties": {
 						"moca-error-diagnostics-enabled": {
 							"type": "boolean",
 							"default": true,
-							"description": "true OR false"
+							"description": "true | false"
 						},
 						"moca-warning-diagnostics-enabled": {
 							"type": "boolean",
 							"default": true,
-							"description": "true OR false"
-						},
-						"moca-info-diagnostics-enabled": {
-							"type": "boolean",
-							"default": true,
-							"description": "true OR false"
-						},
-						"moca-hint-diagnostics-enabled": {
-							"type": "boolean",
-							"default": true,
-							"description": "true OR false"
+							"description": "true | false"
 						},
 						"mocasql-error-diagnostics-enabled": {
 							"type": "boolean",
 							"default": true,
-							"description": "true OR false"
+							"description": "true | false"
 						},
 						"mocasql-warning-diagnostics-enabled": {
 							"type": "boolean",
 							"default": true,
-							"description": "true OR false"
-						},
-						"mocasql-info-diagnostics-enabled": {
-							"type": "boolean",
-							"default": true,
-							"description": "true OR false"
-						},
-						"mocasql-hint-diagnostics-enabled": {
-							"type": "boolean",
-							"default": true,
-							"description": "true OR false"
+							"description": "true | false"
 						},
 						"groovy-error-diagnostics-enabled": {
 							"type": "boolean",
 							"default": true,
-							"description": "true OR false"
+							"description": "true | false"
 						},
 						"groovy-warning-diagnostics-enabled": {
 							"type": "boolean",
 							"default": true,
-							"description": "true OR false"
-						},
-						"groovy-info-diagnostics-enabled": {
-							"type": "boolean",
-							"default": true,
-							"description": "true OR false"
-						},
-						"groovy-hint-diagnostics-enabled": {
-							"type": "boolean",
-							"default": true,
-							"description": "true OR false"
-						},
-						"moca-formatting-enabled": {
-							"type": "boolean",
-							"default": true,
-							"description": "true OR false"
+							"description": "true | false"
 						},
 						"mocasql-formatting-enabled": {
 							"type": "boolean",
 							"default": true,
-							"description": "true OR false"
+							"description": "true | false"
 						},
 						"groovy-formatting-enabled": {
 							"type": "boolean",
 							"default": true,
-							"description": "true OR false"
+							"description": "true | false -- not currently supported!"
+						},
+						"groovy-static-type-checking-enabled": {
+							"type": "boolean",
+							"default": true,
+							"description": "true | false"
 						}
 					}
 				}
