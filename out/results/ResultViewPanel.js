@@ -85,10 +85,13 @@ class ResultViewPanel {
         const jexcelCssUri = webview.asWebviewUri(jexcelCssPathOnDisk);
         const jsuitesCssPathOnDisk = vscode.Uri.file(path.join(this._extensionPath, 'media', 'jsuites.css'));
         const jsuitesCssUri = webview.asWebviewUri(jsuitesCssPathOnDisk);
+        // Get data table page size from client options configuration.
         const config = vscode.workspace.getConfiguration(extension_1.CONFIGURATION_NAME);
-        var dataTablePaginationRows = JSON.parse(JSON.stringify(config.get(extension_1.CONFIGURATION_DATA_TABLE_PAGINATION)));
-        if (dataTablePaginationRows < 1)
-            dataTablePaginationRows = 100;
+        var clientOptsConfigObj = JSON.parse(JSON.stringify(config.get(extension_1.CONFIGURATION_CLIENT_OPTIONS)));
+        var dataTablePageSize = clientOptsConfigObj['dataTablePageSize'];
+        // If less than 1, set to default.
+        if (dataTablePageSize < 1)
+            dataTablePageSize = 100;
         var htmlStr = `<html lang="en">
         <script src="${jexcelScriptUri}"></script>
         <script src="${jsuitesScriptUri}"></script>
@@ -119,7 +122,7 @@ class ResultViewPanel {
                     columnDrag:true,
                     parseFormulas:false,
                     search:true,
-                    pagination:${dataTablePaginationRows},
+                    pagination:${dataTablePageSize},
                 });
             </script>
         </html>`;

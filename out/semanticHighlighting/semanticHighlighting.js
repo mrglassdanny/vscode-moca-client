@@ -137,64 +137,61 @@ class Highlighter {
     // theme is loaded.
     initialize(themeRuleMatcher) {
         this.decorationTypes.forEach((t) => t.dispose());
-        // Create moca decoration types.
+        // Create decoration types.
         const config = vscode.workspace.getConfiguration(extension_1.CONFIGURATION_NAME);
-        var sqlRangeColorObj = config.get(extension_1.CONFIGURATION_SQL_RANGE_COLOR_NAME);
-        if (sqlRangeColorObj) {
-            var sqlRangeColorJsonObj = JSON.parse(JSON.stringify(sqlRangeColorObj));
-            this.sqlRangeDecoration = vscode.window.createTextEditorDecorationType({
-                overviewRulerLane: vscode.OverviewRulerLane.Right,
-                isWholeLine: true,
-                light: {
-                    overviewRulerColor: sqlRangeColorJsonObj.light,
-                    backgroundColor: sqlRangeColorJsonObj.light
-                },
-                dark: {
-                    overviewRulerColor: sqlRangeColorJsonObj.dark,
-                    backgroundColor: sqlRangeColorJsonObj.dark
-                }
-            });
-            this.sqlRangeLastLineDecoration = vscode.window.createTextEditorDecorationType({
-                overviewRulerLane: vscode.OverviewRulerLane.Right,
-                isWholeLine: false,
-                light: {
-                    overviewRulerColor: sqlRangeColorJsonObj.light,
-                    backgroundColor: sqlRangeColorJsonObj.light
-                },
-                dark: {
-                    overviewRulerColor: sqlRangeColorJsonObj.dark,
-                    backgroundColor: sqlRangeColorJsonObj.dark
-                }
-            });
-        }
-        var groovyRangeColorObj = config.get(extension_1.CONFIGURATION_GROOVY_RANGE_COLOR_NAME);
-        if (groovyRangeColorObj) {
-            var groovyRangeColorJsonObj = JSON.parse(JSON.stringify(groovyRangeColorObj));
-            this.groovyRangeDecoration = vscode.window.createTextEditorDecorationType({
-                overviewRulerLane: vscode.OverviewRulerLane.Right,
-                isWholeLine: true,
-                light: {
-                    overviewRulerColor: groovyRangeColorJsonObj.light,
-                    backgroundColor: groovyRangeColorJsonObj.light
-                },
-                dark: {
-                    overviewRulerColor: groovyRangeColorJsonObj.dark,
-                    backgroundColor: groovyRangeColorJsonObj.dark
-                }
-            });
-            this.groovyRangeLastLineDecoration = vscode.window.createTextEditorDecorationType({
-                overviewRulerLane: vscode.OverviewRulerLane.Right,
-                isWholeLine: false,
-                light: {
-                    overviewRulerColor: groovyRangeColorJsonObj.light,
-                    backgroundColor: groovyRangeColorJsonObj.light
-                },
-                dark: {
-                    overviewRulerColor: groovyRangeColorJsonObj.dark,
-                    backgroundColor: groovyRangeColorJsonObj.dark
-                }
-            });
-        }
+        const clientOptsConfigObj = JSON.parse(JSON.stringify(config.get(extension_1.CONFIGURATION_CLIENT_OPTIONS)));
+        var mocasqlRangeColorLightObj = clientOptsConfigObj['mocasql-range-color-light'];
+        var mocasqlRangeColorDarkObj = clientOptsConfigObj['mocasql-range-color-dark'];
+        this.mocasqlRangeDecoration = vscode.window.createTextEditorDecorationType({
+            overviewRulerLane: vscode.OverviewRulerLane.Right,
+            isWholeLine: true,
+            light: {
+                overviewRulerColor: mocasqlRangeColorLightObj,
+                backgroundColor: mocasqlRangeColorLightObj
+            },
+            dark: {
+                overviewRulerColor: mocasqlRangeColorDarkObj,
+                backgroundColor: mocasqlRangeColorDarkObj
+            }
+        });
+        this.mocasqlRangeLastLineDecoration = vscode.window.createTextEditorDecorationType({
+            overviewRulerLane: vscode.OverviewRulerLane.Right,
+            isWholeLine: false,
+            light: {
+                overviewRulerColor: mocasqlRangeColorLightObj,
+                backgroundColor: mocasqlRangeColorLightObj
+            },
+            dark: {
+                overviewRulerColor: mocasqlRangeColorDarkObj,
+                backgroundColor: mocasqlRangeColorDarkObj
+            }
+        });
+        var groovyRangeColorLightObj = clientOptsConfigObj['groovy-range-color-light'];
+        var groovyRangeColorDarkObj = clientOptsConfigObj['groovy-range-color-dark'];
+        this.groovyRangeDecoration = vscode.window.createTextEditorDecorationType({
+            overviewRulerLane: vscode.OverviewRulerLane.Right,
+            isWholeLine: true,
+            light: {
+                overviewRulerColor: groovyRangeColorLightObj,
+                backgroundColor: groovyRangeColorLightObj
+            },
+            dark: {
+                overviewRulerColor: groovyRangeColorDarkObj,
+                backgroundColor: groovyRangeColorDarkObj
+            }
+        });
+        this.groovyRangeLastLineDecoration = vscode.window.createTextEditorDecorationType({
+            overviewRulerLane: vscode.OverviewRulerLane.Right,
+            isWholeLine: false,
+            light: {
+                overviewRulerColor: groovyRangeColorLightObj,
+                backgroundColor: groovyRangeColorLightObj
+            },
+            dark: {
+                overviewRulerColor: groovyRangeColorDarkObj,
+                backgroundColor: groovyRangeColorDarkObj
+            }
+        });
         this.mocaCommandStreamEndDecoration = vscode.window.createTextEditorDecorationType({
             isWholeLine: true,
             light: {
@@ -213,9 +210,9 @@ class Highlighter {
                 case "moca.commandstream.end":
                     return this.mocaCommandStreamEndDecoration;
                 case "moca.sql":
-                    return this.sqlRangeDecoration;
+                    return this.mocasqlRangeDecoration;
                 case "moca.sql.lastline":
-                    return this.sqlRangeLastLineDecoration;
+                    return this.mocasqlRangeLastLineDecoration;
                 case "moca.groovy":
                     return this.groovyRangeDecoration;
                 case "moca.groovy.lastline":

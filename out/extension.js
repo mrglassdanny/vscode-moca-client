@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deactivate = exports.activate = exports.LanguageServerCommands = exports.LanguageClientCommands = exports.CONFIGURATION_DATA_TABLE_PAGINATION = exports.CONFIGURATION_GROOVY_RANGE_COLOR_NAME = exports.CONFIGURATION_SQL_RANGE_COLOR_NAME = exports.CONFIGURATION_AUTO_EXECUTION_NAME = exports.CONFIGURATION_TRACE_NAME = exports.CONFIGURATION_CONNECTIONS_NAME = exports.CONFIGURATION_NAME = void 0;
+exports.deactivate = exports.activate = exports.LanguageServerCommands = exports.LanguageClientCommands = exports.CONFIGURATION_LANGUAGE_SERVER_OPTIONS = exports.CONFIGURATION_CLIENT_OPTIONS = exports.CONFIGURATION_AUTO_EXECUTION_NAME = exports.CONFIGURATION_TRACE_NAME = exports.CONFIGURATION_CONNECTIONS_NAME = exports.CONFIGURATION_NAME = void 0;
 const vscode = require("vscode");
 const vscode_languageclient_1 = require("vscode-languageclient");
 const path = require("path");
@@ -32,9 +32,8 @@ exports.CONFIGURATION_NAME = "mocaclient";
 exports.CONFIGURATION_CONNECTIONS_NAME = "connections";
 exports.CONFIGURATION_TRACE_NAME = "trace";
 exports.CONFIGURATION_AUTO_EXECUTION_NAME = "autoExecution";
-exports.CONFIGURATION_SQL_RANGE_COLOR_NAME = "sqlRangeColor";
-exports.CONFIGURATION_GROOVY_RANGE_COLOR_NAME = "groovyRangeColor";
-exports.CONFIGURATION_DATA_TABLE_PAGINATION = "dataTablePagination";
+exports.CONFIGURATION_CLIENT_OPTIONS = "clientOptions";
+exports.CONFIGURATION_LANGUAGE_SERVER_OPTIONS = "languageServerOptions";
 // Client commands.
 var LanguageClientCommands;
 (function (LanguageClientCommands) {
@@ -516,9 +515,9 @@ function activate(context) {
     })));
     // Events registration.
     context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {
-        // Checking if user changed sql or groovy range color config.
-        // If so, we need to re-color things!
-        if (e.affectsConfiguration((exports.CONFIGURATION_NAME + "." + exports.CONFIGURATION_SQL_RANGE_COLOR_NAME)) || e.affectsConfiguration((exports.CONFIGURATION_NAME + "." + exports.CONFIGURATION_GROOVY_RANGE_COLOR_NAME))) {
+        // Checking if user changed client options config (object has mocasql & groovy range color config).
+        // If so, we potentially need to re-color things!
+        if (e.affectsConfiguration((exports.CONFIGURATION_NAME + "." + exports.CONFIGURATION_CLIENT_OPTIONS))) {
             semanticHighlighting_1.GlobalSemanticHighlightingVars.semanticHighlightingFeature.loadCurrentTheme();
         }
     }));

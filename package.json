@@ -105,7 +105,7 @@
 		],
 		"configuration": {
 			"type": "object",
-			"description": "vscode MOCA Client Configuration",
+			"description": "MOCA Client Configuration",
 			"properties": {
 				"mocaclient.connections": {
 					"type": "array",
@@ -132,7 +132,7 @@
 							"url": {
 								"type": "string",
 								"default": "",
-								"description": "URL (host:port)"
+								"description": "URL (host:port) - only http/https supported"
 							},
 							"user": {
 								"type": "string",
@@ -213,50 +213,141 @@
 						}
 					}
 				},
-				"mocaclient.sqlRangeColor": {
+				"mocaclient.clientOptions": {
 					"type": "object",
 					"default": {
-						"light": "rgba(0,150,225,0.15)",
-						"dark": "rgba(0,80,180,0.15)"
+						"mocasql-range-color-light": "rgba(0,150,225,0.15)",
+						"mocasql-range-color-dark": "rgba(0,80,180,0.25)",
+						"groovy-range-color-light": "rgba(225,100,0,0.15)",
+						"groovy-range-color-dark": "rgba(175,45,0,0.25)",
+						"dataTablePageSize": 100
 					},
-					"description": "SQL Range Color",
+					"description": "",
 					"properties": {
-						"light": {
+						"mocasql-range-color-light": {
 							"type": "string",
 							"default": "rgba(0,150,225,0.15)",
 							"description": "RGBA String"
 						},
-						"dark": {
+						"mocasql-range-color-dark": {
 							"type": "string",
-							"default": "rgba(0,80,180,0.15)",
-							"description": "RGBA String"
-						}
-					}
-				},
-				"mocaclient.groovyRangeColor": {
-					"type": "object",
-					"default": {
-						"light": "rgba(225,100,0,0.15)",
-						"dark": "rgba(175,45,0,0.15)"
-					},
-					"description": "Groovy Range Color",
-					"properties": {
-						"light": {
-							"type": "string",
-							"default": "rgba(225,100,0,0.15)",
+							"default": "rgba(0,80,180,0.25)",
 							"description": "RGBA String"
 						},
-						"dark": {
+						"groovy-range-color-light": {
 							"type": "string",
-							"default": "rgba(175,45,0,0.15)",
+							"default": "rgba(0,150,225,0.15)",
 							"description": "RGBA String"
+						},
+						"groovy-range-color-dark": {
+							"type": "string",
+							"default": "rgba(0,80,180,0.25)",
+							"description": "RGBA String"
+						},
+						"dataTablePageSize": {
+							"type": "integer",
+							"default": 100,
+							"description": "Data Table Page Size"
 						}
 					}
 				},
-				"mocaclient.dataTablePagination": {
-					"type": "integer",
-					"default": 100,
-					"description": "Data Table Pagination"
+				"mocaclient.languageServerOptions": {
+					"type": "object",
+					"default": {
+						"moca-error-diagnostics-enabled": true,
+						"moca-warning-diagnostics-enabled": true,
+						"moca-info-diagnostics-enabled": true,
+						"moca-hint-diagnostics-enabled": true,
+						"mocasql-error-diagnostics-enabled": true,
+						"mocasql-warning-diagnostics-enabled": true,
+						"mocasql-info-diagnostics-enabled": true,
+						"mocasql-hint-diagnostics-enabled": true,
+						"groovy-error-diagnostics-enabled": true,
+						"groovy-warning-diagnostics-enabled": true,
+						"groovy-info-diagnostics-enabled": true,
+						"groovy-hint-diagnostics-enabled": true,
+						"moca-formatting-enabled": true,
+						"mocasql-formatting-enabled": true,
+						"groovy-formatting-enabled": true
+					},
+					"description": "MOCA Language Server Options",
+					"properties": {
+						"moca-error-diagnostics-enabled": {
+							"type": "boolean",
+							"default": true,
+							"description": "true OR false"
+						},
+						"moca-warning-diagnostics-enabled": {
+							"type": "boolean",
+							"default": true,
+							"description": "true OR false"
+						},
+						"moca-info-diagnostics-enabled": {
+							"type": "boolean",
+							"default": true,
+							"description": "true OR false"
+						},
+						"moca-hint-diagnostics-enabled": {
+							"type": "boolean",
+							"default": true,
+							"description": "true OR false"
+						},
+						"mocasql-error-diagnostics-enabled": {
+							"type": "boolean",
+							"default": true,
+							"description": "true OR false"
+						},
+						"mocasql-warning-diagnostics-enabled": {
+							"type": "boolean",
+							"default": true,
+							"description": "true OR false"
+						},
+						"mocasql-info-diagnostics-enabled": {
+							"type": "boolean",
+							"default": true,
+							"description": "true OR false"
+						},
+						"mocasql-hint-diagnostics-enabled": {
+							"type": "boolean",
+							"default": true,
+							"description": "true OR false"
+						},
+						"groovy-error-diagnostics-enabled": {
+							"type": "boolean",
+							"default": true,
+							"description": "true OR false"
+						},
+						"groovy-warning-diagnostics-enabled": {
+							"type": "boolean",
+							"default": true,
+							"description": "true OR false"
+						},
+						"groovy-info-diagnostics-enabled": {
+							"type": "boolean",
+							"default": true,
+							"description": "true OR false"
+						},
+						"groovy-hint-diagnostics-enabled": {
+							"type": "boolean",
+							"default": true,
+							"description": "true OR false"
+						},
+						"moca-formatting-enabled": {
+							"type": "boolean",
+							"default": true,
+							"description": "true OR false"
+						},
+						"mocasql-formatting-enabled": {
+							"type": "boolean",
+							"default": true,
+							"description": "true OR false"
+						},
+						"groovy-formatting-enabled": {
+							"type": "boolean",
+							"default": true,
+							"description": "true OR false"
+						}
+					}
 				}
 			}
 		}

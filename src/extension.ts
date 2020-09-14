@@ -24,9 +24,8 @@ export const CONFIGURATION_NAME = "mocaclient";
 export const CONFIGURATION_CONNECTIONS_NAME = "connections";
 export const CONFIGURATION_TRACE_NAME = "trace";
 export const CONFIGURATION_AUTO_EXECUTION_NAME = "autoExecution";
-export const CONFIGURATION_SQL_RANGE_COLOR_NAME = "sqlRangeColor";
-export const CONFIGURATION_GROOVY_RANGE_COLOR_NAME = "groovyRangeColor";
-export const CONFIGURATION_DATA_TABLE_PAGINATION = "dataTablePagination";
+export const CONFIGURATION_CLIENT_OPTIONS = "clientOptions";
+export const CONFIGURATION_LANGUAGE_SERVER_OPTIONS = "languageServerOptions";
 
 
 // Client commands.
@@ -616,9 +615,9 @@ export function activate(context: vscode.ExtensionContext) {
 	// Events registration.
 	context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {
 
-		// Checking if user changed sql or groovy range color config.
-		// If so, we need to re-color things!
-		if (e.affectsConfiguration((CONFIGURATION_NAME + "." + CONFIGURATION_SQL_RANGE_COLOR_NAME)) || e.affectsConfiguration((CONFIGURATION_NAME + "." + CONFIGURATION_GROOVY_RANGE_COLOR_NAME))) {
+		// Checking if user changed client options config (object has mocasql & groovy range color config).
+		// If so, we potentially need to re-color things!
+		if (e.affectsConfiguration((CONFIGURATION_NAME + "." + CONFIGURATION_CLIENT_OPTIONS))) {
 			GlobalSemanticHighlightingVars.semanticHighlightingFeature.loadCurrentTheme();
 		}
 

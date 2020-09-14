@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { MocaResults } from './mocaResults';
-import { CONFIGURATION_NAME, CONFIGURATION_DATA_TABLE_PAGINATION } from '../extension';
+import { CONFIGURATION_NAME, CONFIGURATION_CLIENT_OPTIONS } from '../extension';
 
 export class ResultViewPanel {
     public static resultViewPanels: Map<string, ResultViewPanel> = new Map<string, ResultViewPanel>();
@@ -136,10 +136,13 @@ export class ResultViewPanel {
         const jsuitesCssUri = webview.asWebviewUri(jsuitesCssPathOnDisk);
 
 
+        // Get data table page size from client options configuration.
         const config = vscode.workspace.getConfiguration(CONFIGURATION_NAME);
-        var dataTablePaginationRows = JSON.parse(JSON.stringify(config.get(CONFIGURATION_DATA_TABLE_PAGINATION)));
-        if (dataTablePaginationRows < 1)
-            dataTablePaginationRows = 100;
+        var clientOptsConfigObj = JSON.parse(JSON.stringify(config.get(CONFIGURATION_CLIENT_OPTIONS)));
+        var dataTablePageSize = clientOptsConfigObj['dataTablePageSize'];
+        // If less than 1, set to default.
+        if (dataTablePageSize < 1)
+            dataTablePageSize = 100;
 
 
         var htmlStr = `<html lang="en">
@@ -172,7 +175,7 @@ export class ResultViewPanel {
                     columnDrag:true,
                     parseFormulas:false,
                     search:true,
-                    pagination:${dataTablePaginationRows},
+                    pagination:${dataTablePageSize},
                 });
             </script>
         </html>`;
