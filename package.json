@@ -254,12 +254,9 @@
 				"moca.languageServerOptions": {
 					"type": "object",
 					"default": {
-						"moca-error-diagnostics-enabled": true,
-						"moca-warning-diagnostics-enabled": true,
-						"mocasql-error-diagnostics-enabled": true,
-						"mocasql-warning-diagnostics-enabled": true,
-						"groovy-error-diagnostics-enabled": true,
-						"groovy-warning-diagnostics-enabled": true,
+						"moca-diagnostics-enabled": true,
+						"mocasql-diagnostics-enabled": true,
+						"groovy-diagnostics-enabled": true,
 						"mocasql-formatting-enabled": true,
 						"groovy-formatting-enabled": true,
 						"groovy-static-type-checking-enabled": true
