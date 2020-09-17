@@ -127,27 +127,27 @@
 							"name": {
 								"type": "string",
 								"default": "",
-								"description": "Connection Name"
+								"description": "Connection Name\nREQUIRED"
 							},
 							"url": {
 								"type": "string",
 								"default": "",
-								"description": "URL (host:port) - only http/https supported"
+								"description": "URL (host:port) - only http/https supported\nREQUIRED"
 							},
 							"user": {
 								"type": "string",
 								"default": "",
-								"description": "User ID"
+								"description": "User ID\nOPTIONAL (will be prompted for if blank)"
 							},
 							"password": {
 								"type": "string",
 								"default": "",
-								"description": "Password"
+								"description": "Password\nOPTIONAL (will be prompted for if blank)"
 							},
 							"groovyclasspath": {
 								"type": "array",
 								"default": null,
-								"description": "Specifies additional entries to add to the classpath. May contain both folders and individual .jar files.",
+								"description": "Additional entries to add to the classpath. May contain both folders and individual .jar files.\nOPTIONAL",
 								"items": {
 									"type": "string"
 								}
@@ -166,7 +166,7 @@
 						"fileName": {
 							"type": "string",
 							"default": "",
-							"description": "Trace File Name(user name if blank)"
+							"description": "Trace File Name (user name if blank)\n'.log' does not need to be added"
 						},
 						"mode": {
 							"type": "string",
@@ -263,32 +263,17 @@
 					},
 					"description": "MOCA Language Server Options",
 					"properties": {
-						"moca-error-diagnostics-enabled": {
+						"moca-diagnostics-enabled": {
 							"type": "boolean",
 							"default": true,
 							"description": "true | false"
 						},
-						"moca-warning-diagnostics-enabled": {
+						"mocasql-diagnostics-enabled": {
 							"type": "boolean",
 							"default": true,
 							"description": "true | false"
 						},
-						"mocasql-error-diagnostics-enabled": {
-							"type": "boolean",
-							"default": true,
-							"description": "true | false"
-						},
-						"mocasql-warning-diagnostics-enabled": {
-							"type": "boolean",
-							"default": true,
-							"description": "true | false"
-						},
-						"groovy-error-diagnostics-enabled": {
-							"type": "boolean",
-							"default": true,
-							"description": "true | false"
-						},
-						"groovy-warning-diagnostics-enabled": {
+						"groovy-diagnostics-enabled": {
 							"type": "boolean",
 							"default": true,
 							"description": "true | false"
