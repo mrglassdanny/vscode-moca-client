@@ -205,7 +205,7 @@ export class ResultViewPanel {
                 case "D": // Date.
                     colStr += `'text', `;
                     break;
-                case "O": // Flag?
+                case "O": // ?
                 default:
                     colStr += `'text',`
                     break;
