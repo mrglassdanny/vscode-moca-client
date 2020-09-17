@@ -92,33 +92,53 @@ function activate(context) {
     });
     // Command registration.
     context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.CONNECT, () => __awaiter(this, void 0, void 0, function* () {
+        var connectionNames = new Array();
         var connections = new Map();
-        var names = new Array();
         const config = vscode.workspace.getConfiguration(exports.CONFIGURATION_NAME);
-        var connObj = config.get(exports.CONFIGURATION_CONNECTIONS_NAME);
-        if (connObj) {
-            var connObjArr = connObj;
-            for (var i = 0; i < connObjArr.length; i++) {
-                var connElem = JSON.parse(JSON.stringify(connObjArr[i]));
-                var values = Object.keys(connElem).map(function (key) { return connElem[key]; });
-                names.push(values[0]);
-                connections.set(values[0], values);
+        const connectionConfig = config.get(exports.CONFIGURATION_CONNECTIONS_NAME);
+        if (connectionConfig) {
+            const connectionConfigObjArr = connectionConfig;
+            for (var i = 0; i < connectionConfigObjArr.length; i++) {
+                const connectionObj = JSON.parse(JSON.stringify(connectionConfigObjArr[i]));
+                connectionNames.push(connectionObj.name);
+                connections.set(connectionObj.name, connectionObj);
             }
         }
-        let quickPickRes = yield vscode.window.showQuickPick(names);
-        var selectedConnection = connections.get(quickPickRes);
-        if (!selectedConnection) {
+        let connectionNameQuickPickRes = yield vscode.window.showQuickPick(connectionNames);
+        const selectedConnectionObj = connections.get(connectionNameQuickPickRes);
+        if (!selectedConnectionObj) {
             return null;
         }
-        var selectedConnectionJsonStr = JSON.stringify(selectedConnection);
-        var selectedConnectionJsonObj = JSON.parse(selectedConnectionJsonStr);
+        // Now let's see if selected connection possesses a user/password.
+        // If not, we need to get from the user.
+        if (!selectedConnectionObj.user) {
+            let userQuickPickRes = yield vscode.window.showInputBox({ prompt: "User ID", ignoreFocusOut: true });
+            if (!userQuickPickRes) {
+                return null;
+            }
+            selectedConnectionObj.user = userQuickPickRes;
+            let passwordQuickPickRes = yield vscode.window.showInputBox({ prompt: "Password", password: true, ignoreFocusOut: true });
+            if (!passwordQuickPickRes) {
+                return null;
+            }
+            selectedConnectionObj.password = passwordQuickPickRes;
+        }
+        else {
+            if (!selectedConnectionObj.password) {
+                let passwordQuickPickRes = yield vscode.window.showInputBox({ prompt: "Password", password: true, ignoreFocusOut: true });
+                if (!passwordQuickPickRes) {
+                    return null;
+                }
+                selectedConnectionObj.password = passwordQuickPickRes;
+            }
+        }
         // Analyze selected connection to determine if we will need to reload moca repo.
         var useExistingMocaRepo = false;
-        if (lastAttemptedConnectionName.localeCompare(selectedConnectionJsonObj[0]) === 0) {
+        if (lastAttemptedConnectionName.localeCompare(selectedConnectionObj.name) === 0) {
             useExistingMocaRepo = true;
         }
         else {
-            lastAttemptedConnectionName = selectedConnectionJsonObj[0];
+            lastAttemptedConnectionName = selectedConnectionObj.name;
         }
         // Refering to moca server, not moca language server.
         var connectionSuccess = false;
@@ -129,7 +149,7 @@ function activate(context) {
         }, (progress, token) => {
             progress.report({
                 increment: Infinity,
-                message: ("Connecting To " + selectedConnectionJsonObj[0])
+                message: ("Connecting To " + selectedConnectionObj.name)
             });
             var p = new Promise(progressResolve => {
                 // Purpose of this is to indicate that cancellation was requested down below.
@@ -143,18 +163,18 @@ function activate(context) {
                     return p;
                 });
                 // Language server will be started at this point.
-                vscode.commands.executeCommand(LanguageServerCommands.CONNECT, selectedConnection, useExistingMocaRepo).then((connResponse) => {
+                vscode.commands.executeCommand(LanguageServerCommands.CONNECT, selectedConnectionObj, useExistingMocaRepo).then((connResponse) => {
                     // If cancellation requested, skip this part.
                     if (!cancellationRequested) {
                         var connResponseJsonObj = JSON.parse(JSON.stringify(connResponse));
                         var eOk = connResponseJsonObj["eOk"];
                         if (eOk === true) {
                             connectionSuccess = true;
-                            connectionStatusBarItem.text = CONNECTED_PREFIX_STR + selectedConnectionJsonObj[0];
+                            connectionStatusBarItem.text = CONNECTED_PREFIX_STR + selectedConnectionObj.name;
                         }
                         else {
                             var exceptionJsonObj = JSON.parse(JSON.stringify(connResponseJsonObj["exception"]));
-                            vscode.window.showErrorMessage(selectedConnectionJsonObj[0] + ": " + exceptionJsonObj["message"]);
+                            vscode.window.showErrorMessage(selectedConnectionObj.name + ": " + exceptionJsonObj["message"]);
                             connectionStatusBarItem.text = NOT_CONNECTED_STR;
                         }
                     }
@@ -526,6 +546,7 @@ function activate(context) {
         if (e.affectsConfiguration((exports.CONFIGURATION_NAME + "." + exports.CONFIGURATION_LANGUAGE_SERVER_OPTIONS))) {
             vscode.commands.executeCommand(LanguageServerCommands.SET_LANGUAGE_SERVER_OPTIONS, vscode.workspace.getConfiguration(exports.CONFIGURATION_NAME).get(exports.CONFIGURATION_LANGUAGE_SERVER_OPTIONS));
         }
+        // Checking if user changed moca connection object(s). If so, we need to re-hash passwords.
     }));
     // Get status bar items up and running now.
     connectionStatusBarItem.text = NOT_CONNECTED_STR;
@@ -579,9 +600,9 @@ function startMocaLanguageServer() {
                     protocol2Code: value => vscode.Uri.parse(value)
                 }
             };
-            let args = ["-jar", path.resolve(globalExtensionContext.extensionPath, "bin", MOCA_LANGUAGE_SERVER)];
+            // let args = ["-jar", path.resolve(globalExtensionContext.extensionPath, "bin", MOCA_LANGUAGE_SERVER)];
             // Below 'args' is used for testing.
-            // let args = ["-jar", path.resolve("C:\\dev\\moca-language-server\\build\\", "libs", MOCA_LANGUAGE_SERVER)];
+            let args = ["-jar", path.resolve("C:\\dev\\moca-language-server\\build\\", "libs", MOCA_LANGUAGE_SERVER)];
             let executable = {
                 command: javaPath,
                 args: args
