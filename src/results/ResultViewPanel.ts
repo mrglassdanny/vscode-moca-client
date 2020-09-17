@@ -13,7 +13,7 @@ export class ResultViewPanel {
 
     private fileName: string;
     private res: MocaResults;
-    private curColWidths: number[];
+    private curColWidths: number[] = [];
 
     public static createOrShow(extensionPath: string, fileName: string, res: MocaResults) {
 
@@ -190,33 +190,25 @@ export class ResultViewPanel {
         const colWidPixelMultiplier = 10;
         const maxAllowedColWid = 300;
 
-
         this.res.cols.forEach(col => {
 
             colStr += '{ type: '
 
-            if (col[0].toString().endsWith('flg')) {
-                colStr += `'checkbox',`
-            } else {
-
-                // Types info from com.redprairie.moca.MocaType
-                switch (col[1]) {
-                    case "S": // String.
-                        colStr += `'text', `;
-                        break;
-                    case "I": // Number.
-                        colStr += `'numeric',`
-                        break;
-                    case "D": // Date.
-                        colStr += `'text', `;
-                        break;
-                    case "O": // Flag?
-                    default:
-                        colStr += `'text',`
-                        break;
-                }
-
-
+            // Types info from com.redprairie.moca.MocaType
+            switch (col[1]) {
+                case "S": // String.
+                    colStr += `'text', `;
+                    break;
+                case "I": // Number.
+                    colStr += `'numeric',`
+                    break;
+                case "D": // Date.
+                    colStr += `'text', `;
+                    break;
+                case "O": // Flag?
+                default:
+                    colStr += `'text',`
+                    break;
             }
 
             let colWid: number;
