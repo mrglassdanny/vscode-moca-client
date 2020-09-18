@@ -255,8 +255,11 @@
 					"type": "object",
 					"default": {
 						"moca-diagnostics-enabled": true,
+						"moca-warning-diagnostics-enabled": true,
 						"mocasql-diagnostics-enabled": true,
+						"mocasql-warning-diagnostics-enabled": true,
 						"groovy-diagnostics-enabled": true,
+						"groovy-warning-diagnostics-enabled": true,
 						"mocasql-formatting-enabled": true,
 						"groovy-formatting-enabled": true,
 						"groovy-static-type-checking-enabled": true
@@ -268,12 +271,27 @@
 							"default": true,
 							"description": "true | false"
 						},
+						"moca-warning-diagnostics-enabled": {
+							"type": "boolean",
+							"default": true,
+							"description": "true | false"
+						},
 						"mocasql-diagnostics-enabled": {
 							"type": "boolean",
 							"default": true,
 							"description": "true | false"
 						},
+						"mocasql-warning-diagnostics-enabled": {
+							"type": "boolean",
+							"default": true,
+							"description": "true | false"
+						},
 						"groovy-diagnostics-enabled": {
+							"type": "boolean",
+							"default": true,
+							"description": "true | false"
+						},
+						"groovy-warning-diagnostics-enabled": {
 							"type": "boolean",
 							"default": true,
 							"description": "true | false"
@@ -286,7 +304,7 @@
 						"groovy-formatting-enabled": {
 							"type": "boolean",
 							"default": true,
-							"description": "true | false -- not currently supported!"
+							"description": "true | false\nNOT CURRENTLY SUPPORTED"
 						},
 						"groovy-static-type-checking-enabled": {
 							"type": "boolean",
