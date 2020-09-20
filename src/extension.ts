@@ -184,7 +184,7 @@ export function activate(context: vscode.ExtensionContext) {
 				});
 
 				// Language server will be started at this point.
-				vscode.commands.executeCommand(LanguageServerCommands.CONNECT, selectedConnectionObj, useExistingMocaRepo).then((connResponse) => {
+				vscode.commands.executeCommand(LanguageServerCommands.CONNECT, selectedConnectionObj).then((connResponse) => {
 
 					// If cancellation requested, skip this part.
 					if (!cancellationRequested) {
