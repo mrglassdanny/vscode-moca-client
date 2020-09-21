@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { LanguageClient, LanguageClientOptions, Executable, CancellationToken } from "vscode-languageclient";
+import { LanguageClient, LanguageClientOptions, Executable } from "vscode-languageclient";
 import * as path from "path";
 import * as fs from "fs";
 import { SemanticHighlightingFeature, GlobalSemanticHighlightingVars } from './semanticHighlighting/semanticHighlighting';
