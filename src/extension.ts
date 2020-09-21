@@ -188,8 +188,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 					// If cancellation requested, skip this part.
 					if (!cancellationRequested) {
-						var connResponseJsonObj = JSON.parse(JSON.stringify(connResponse));
-						var eOk = connResponseJsonObj["eOk"];
+						const connResponseJsonObj = JSON.parse(JSON.stringify(connResponse));
+						const eOk = connResponseJsonObj["eOk"];
 
 						if (eOk === true) {
 							connectionSuccess = true;
@@ -366,23 +366,55 @@ export function activate(context: vscode.ExtensionContext) {
 			var fileName = traceConfigJsonObj.fileName;
 			var mode = traceConfigJsonObj.mode;
 
-			if (fileName === undefined) {
+			if (!fileName) {
 				fileName = "";
 			}
-			if (mode === undefined || (mode !== "w" && mode !== "W" && mode !== "a" && mode !== "A")) {
+			if (!mode || (mode !== "w" && mode !== "a")) {
 				mode = "w";
 			}
 
-			// Start/stop trace.
-			traceStarted = !traceStarted;
-			if (traceStarted) {
-				traceStatusBarItem.text = STOP_TRACE_STR;
-			} else {
-				traceStatusBarItem.text = START_TRACE_STR;
-			}
+			vscode.window.withProgress({
+				location: vscode.ProgressLocation.Notification,
+				title: (traceStarted ? "MOCA: Stopping trace" : "MOCA: Starting trace"),
+				cancellable: false
+			}, (progress) => {
 
-			vscode.commands.executeCommand(LanguageServerCommands.TRACE, traceStarted, fileName, mode).then((traceRes) => {
+				progress.report({ increment: Infinity });
+
+				// Start/stop trace.
+				traceStarted = !traceStarted;
+				if (traceStarted) {
+					traceStatusBarItem.text = STOP_TRACE_STR;
+				} else {
+					traceStatusBarItem.text = START_TRACE_STR;
+				}
+
+				var p = new Promise(progressResolve => {
+					console.log(traceStarted);
+					vscode.commands.executeCommand(LanguageServerCommands.TRACE, traceStarted, fileName, mode).then((traceRes) => {
+						const traceResponseJsonObj = JSON.parse(JSON.stringify(traceRes));
+
+						// If exception of any kind, we need to return the message/status and indicate that the trace is not running. This includes if we are not even connected to a MOCA env at all.
+						if (traceResponseJsonObj["mocaResultsResponse"]["exception"]) {
+							var exceptionJsonObj = JSON.parse(JSON.stringify(traceResponseJsonObj["mocaResultsResponse"]["exception"]));
+							vscode.window.showErrorMessage("Trace error: " + exceptionJsonObj["message"]);
+
+							// Reset trace status if currently running.
+							if (traceStarted) {
+								traceStarted = false;
+								traceStatusBarItem.text = START_TRACE_STR;
+							}
+						}
+
+						// Resolve progress indicator.
+						progress.report({ increment: Infinity });
+						progressResolve();
+					});
+				});
+				return p;
 			});
+
+
 		}
 
 
@@ -716,11 +748,9 @@ function startMocaLanguageServer() {
 					}
 				};
 
-
-				let args = ["-jar", path.resolve(globalExtensionContext.extensionPath, "bin", MOCA_LANGUAGE_SERVER)];
+				// let args = ["-jar", path.resolve(globalExtensionContext.extensionPath, "bin", MOCA_LANGUAGE_SERVER)];
 				// Below 'args' is used for testing.
-				// let args = ["-jar", path.resolve("C:\\dev\\moca-language-server\\build\\", "libs", MOCA_LANGUAGE_SERVER)];
-
+				let args = ["-jar", path.resolve("C:\\dev\\moca-language-server\\build\\", "libs", MOCA_LANGUAGE_SERVER)];
 
 				let executable: Executable = {
 					command: javaPath,
