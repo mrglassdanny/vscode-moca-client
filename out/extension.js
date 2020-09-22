@@ -571,7 +571,6 @@ function activate(context) {
         if (e.affectsConfiguration((exports.CONFIGURATION_NAME + "." + exports.CONFIGURATION_LANGUAGE_SERVER_OPTIONS))) {
             vscode.commands.executeCommand(LanguageServerCommands.SET_LANGUAGE_SERVER_OPTIONS, vscode.workspace.getConfiguration(exports.CONFIGURATION_NAME).get(exports.CONFIGURATION_LANGUAGE_SERVER_OPTIONS));
         }
-        // Checking if user changed moca connection object(s). If so, we need to re-hash passwords.
     }));
     // Get status bar items up and running now.
     connectionStatusBarItem.text = NOT_CONNECTED_STR;
