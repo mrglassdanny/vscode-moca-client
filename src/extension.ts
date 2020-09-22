@@ -9,7 +9,7 @@ import { MocaCommand, MocaTrigger } from './mocaCommandLookup/mocaCommandLookup'
 import { performance } from 'perf_hooks';
 
 // Language server constants.
-const MOCA_LANGUAGE_SERVER_VERSION = "0.0.1";
+const MOCA_LANGUAGE_SERVER_VERSION = "1.0.0";
 const MOCA_LANGUAGE_SERVER = "moca-language-server-" + MOCA_LANGUAGE_SERVER_VERSION + "-all.jar";
 const MOCA_LANGUAGE_SERVER_INITIALIZING_MESSAGE = "MOCA: Initializing language server";
 const MOCA_LANGUAGE_SERVER_ERR_STARTUP = "The MOCA extension failed to start.";
@@ -746,9 +746,9 @@ function startMocaLanguageServer() {
 					}
 				};
 
-				// let args = ["-jar", path.resolve(globalExtensionContext.extensionPath, "bin", MOCA_LANGUAGE_SERVER)];
-				// Below 'args' is used for testing.
-				let args = ["-jar", path.resolve("C:\\dev\\moca-language-server\\build\\", "libs", MOCA_LANGUAGE_SERVER)];
+				let args = ["-jar", path.resolve(globalExtensionContext.extensionPath, "bin", MOCA_LANGUAGE_SERVER)];
+				// Below 'args' is used for lang server testing.
+				// let args = ["-jar", path.resolve("C:\\dev\\moca-language-server\\build\\", "libs", MOCA_LANGUAGE_SERVER)];
 
 				let executable: Executable = {
 					command: javaPath,
