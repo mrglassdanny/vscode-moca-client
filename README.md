@@ -14,7 +14,7 @@ Provides MOCA client and language support via [MOCA Language Server].
 
 ## Features
 
-![ screencast ](https://raw.githubusercontent.com/mrglassdanny/vscode-moca-client/master/resources/demo.gif)
+![ screencast ](https://github.com/mrglassdanny/vscode-moca-client/blob/master/resources/demo.gif)
 
 - Syntax highlighting
 - [Intellisense]
