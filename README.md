@@ -14,9 +14,11 @@ Provides MOCA client and language support via [MOCA Language Server].
 
 ## Features
 
+![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-java/master/images/vscode-java.0.0.1.gif)
+
 - Syntax highlighting
 - [Intellisense]
-- [Commands]
+- [Command Execution]
 
 
 ## Commands
@@ -30,7 +32,7 @@ Provides MOCA client and language support via [MOCA Language Server].
 
 ## Settings
 
-*can hover over configuration items below in settings.json for more information*
+*can hover over configuration items below in vscode settings.json for more information*
 
 - `moca.connections`: Array object that stores MOCA connection information.
 ```json
@@ -48,6 +50,9 @@ Provides MOCA client and language support via [MOCA Language Server].
     }
 ]
 ```
+
+*can remove/leave empty `user` and/or `password` fields in order to be prompted for them upon MOCA connection attempt*
+
 - `moca.trace`: Trace options.
 ```json
 "moca.trace": {
@@ -100,4 +105,4 @@ Contact mrglassdanny@gmail.com
 [minimum Java version]: https://github.com/mrglassdanny/moca-language-server
 [set JAVA_HOME(for JDK) or JRE_HOME(for JRE) environment variable]: https://confluence.atlassian.com/doc/setting-the-java_home-variable-in-windows-8895.html
 [Intellisense]: https://github.com/mrglassdanny/moca-language-server
-[Commands]: https://github.com/mrglassdanny/moca-language-server
+[Command Execution]: https://github.com/mrglassdanny/moca-language-server
