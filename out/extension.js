@@ -562,7 +562,7 @@ function activate(context) {
     // Events registration.
     // Configuration listener.
     context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {
-        // Checking if user changed client options config (object has mocasql & groovy range color config).
+        // Checking if user changed client options config (object has sql & groovy range color config).
         // If so, we potentially need to re-color things!
         if (e.affectsConfiguration((exports.CONFIGURATION_NAME + "." + exports.CONFIGURATION_CLIENT_OPTIONS))) {
             semanticHighlighting_1.GlobalSemanticHighlightingVars.semanticHighlightingFeature.loadCurrentTheme();

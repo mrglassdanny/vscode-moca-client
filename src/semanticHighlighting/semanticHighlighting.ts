@@ -175,9 +175,9 @@ export function decodeTokens(tokens: string): SemanticHighlightingToken[] {
 export class Highlighter {
 
     // Custom moca decorations.
-    private mocasqlRangeDecoration: vscode.TextEditorDecorationType;
+    private sqlRangeDecoration: vscode.TextEditorDecorationType;
     private groovyRangeDecoration: vscode.TextEditorDecorationType;
-    private mocasqlRangeLastLineDecoration: vscode.TextEditorDecorationType;
+    private sqlRangeLastLineDecoration: vscode.TextEditorDecorationType;
     private groovyRangeLastLineDecoration: vscode.TextEditorDecorationType;
     private mocaCommandStreamEndDecoration: vscode.TextEditorDecorationType;
 
@@ -210,37 +210,37 @@ export class Highlighter {
         // Create decoration types.
         const config = vscode.workspace.getConfiguration(CONFIGURATION_NAME);
         const clientOptsConfigObj = JSON.parse(JSON.stringify(config.get(CONFIGURATION_CLIENT_OPTIONS)));
-        var mocasqlRangeColorLightObj = clientOptsConfigObj['mocasql-range-color-light'];
-        var mocasqlRangeColorDarkObj = clientOptsConfigObj['mocasql-range-color-dark'];
+        var sqlRangeColorLightObj = clientOptsConfigObj['sql-range-color-light'];
+        var sqlRangeColorDarkObj = clientOptsConfigObj['sql-range-color-dark'];
 
-        this.mocasqlRangeDecoration = vscode.window.createTextEditorDecorationType(
+        this.sqlRangeDecoration = vscode.window.createTextEditorDecorationType(
             {
                 overviewRulerLane: vscode.OverviewRulerLane.Right,
                 isWholeLine: true,
 
                 light: {
-                    overviewRulerColor: mocasqlRangeColorLightObj,
-                    backgroundColor: mocasqlRangeColorLightObj
+                    overviewRulerColor: sqlRangeColorLightObj,
+                    backgroundColor: sqlRangeColorLightObj
                 },
                 dark: {
-                    overviewRulerColor: mocasqlRangeColorDarkObj,
-                    backgroundColor: mocasqlRangeColorDarkObj
+                    overviewRulerColor: sqlRangeColorDarkObj,
+                    backgroundColor: sqlRangeColorDarkObj
                 }
             }
         );
 
-        this.mocasqlRangeLastLineDecoration = vscode.window.createTextEditorDecorationType(
+        this.sqlRangeLastLineDecoration = vscode.window.createTextEditorDecorationType(
             {
                 overviewRulerLane: vscode.OverviewRulerLane.Right,
                 isWholeLine: false,
 
                 light: {
-                    overviewRulerColor: mocasqlRangeColorLightObj,
-                    backgroundColor: mocasqlRangeColorLightObj
+                    overviewRulerColor: sqlRangeColorLightObj,
+                    backgroundColor: sqlRangeColorLightObj
                 },
                 dark: {
-                    overviewRulerColor: mocasqlRangeColorDarkObj,
-                    backgroundColor: mocasqlRangeColorDarkObj
+                    overviewRulerColor: sqlRangeColorDarkObj,
+                    backgroundColor: sqlRangeColorDarkObj
                 }
             }
         );
@@ -300,9 +300,9 @@ export class Highlighter {
                 case "moca.commandstream.end":
                     return this.mocaCommandStreamEndDecoration;
                 case "moca.sql":
-                    return this.mocasqlRangeDecoration;
+                    return this.sqlRangeDecoration;
                 case "moca.sql.lastline":
-                    return this.mocasqlRangeLastLineDecoration;
+                    return this.sqlRangeLastLineDecoration;
                 case "moca.groovy":
                     return this.groovyRangeDecoration;
                 case "moca.groovy.lastline":

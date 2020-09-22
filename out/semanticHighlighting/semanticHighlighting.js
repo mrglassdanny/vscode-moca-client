@@ -140,30 +140,30 @@ class Highlighter {
         // Create decoration types.
         const config = vscode.workspace.getConfiguration(extension_1.CONFIGURATION_NAME);
         const clientOptsConfigObj = JSON.parse(JSON.stringify(config.get(extension_1.CONFIGURATION_CLIENT_OPTIONS)));
-        var mocasqlRangeColorLightObj = clientOptsConfigObj['mocasql-range-color-light'];
-        var mocasqlRangeColorDarkObj = clientOptsConfigObj['mocasql-range-color-dark'];
-        this.mocasqlRangeDecoration = vscode.window.createTextEditorDecorationType({
+        var sqlRangeColorLightObj = clientOptsConfigObj['sql-range-color-light'];
+        var sqlRangeColorDarkObj = clientOptsConfigObj['sql-range-color-dark'];
+        this.sqlRangeDecoration = vscode.window.createTextEditorDecorationType({
             overviewRulerLane: vscode.OverviewRulerLane.Right,
             isWholeLine: true,
             light: {
-                overviewRulerColor: mocasqlRangeColorLightObj,
-                backgroundColor: mocasqlRangeColorLightObj
+                overviewRulerColor: sqlRangeColorLightObj,
+                backgroundColor: sqlRangeColorLightObj
             },
             dark: {
-                overviewRulerColor: mocasqlRangeColorDarkObj,
-                backgroundColor: mocasqlRangeColorDarkObj
+                overviewRulerColor: sqlRangeColorDarkObj,
+                backgroundColor: sqlRangeColorDarkObj
             }
         });
-        this.mocasqlRangeLastLineDecoration = vscode.window.createTextEditorDecorationType({
+        this.sqlRangeLastLineDecoration = vscode.window.createTextEditorDecorationType({
             overviewRulerLane: vscode.OverviewRulerLane.Right,
             isWholeLine: false,
             light: {
-                overviewRulerColor: mocasqlRangeColorLightObj,
-                backgroundColor: mocasqlRangeColorLightObj
+                overviewRulerColor: sqlRangeColorLightObj,
+                backgroundColor: sqlRangeColorLightObj
             },
             dark: {
-                overviewRulerColor: mocasqlRangeColorDarkObj,
-                backgroundColor: mocasqlRangeColorDarkObj
+                overviewRulerColor: sqlRangeColorDarkObj,
+                backgroundColor: sqlRangeColorDarkObj
             }
         });
         var groovyRangeColorLightObj = clientOptsConfigObj['groovy-range-color-light'];
@@ -210,9 +210,9 @@ class Highlighter {
                 case "moca.commandstream.end":
                     return this.mocaCommandStreamEndDecoration;
                 case "moca.sql":
-                    return this.mocasqlRangeDecoration;
+                    return this.sqlRangeDecoration;
                 case "moca.sql.lastline":
-                    return this.mocasqlRangeLastLineDecoration;
+                    return this.sqlRangeLastLineDecoration;
                 case "moca.groovy":
                     return this.groovyRangeDecoration;
                 case "moca.groovy.lastline":

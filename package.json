@@ -216,20 +216,20 @@
 				"moca.clientOptions": {
 					"type": "object",
 					"default": {
-						"mocasql-range-color-light": "rgba(0,150,225,0.15)",
-						"mocasql-range-color-dark": "rgba(0,80,180,0.25)",
+						"sql-range-color-light": "rgba(0,150,225,0.15)",
+						"sql-range-color-dark": "rgba(0,80,180,0.25)",
 						"groovy-range-color-light": "rgba(225,100,0,0.15)",
 						"groovy-range-color-dark": "rgba(175,45,0,0.25)",
 						"dataTablePageSize": 100
 					},
 					"description": "",
 					"properties": {
-						"mocasql-range-color-light": {
+						"sql-range-color-light": {
 							"type": "string",
 							"default": "rgba(0,150,225,0.15)",
 							"description": "RGBA String"
 						},
-						"mocasql-range-color-dark": {
+						"sql-range-color-dark": {
 							"type": "string",
 							"default": "rgba(0,80,180,0.25)",
 							"description": "RGBA String"
@@ -256,11 +256,11 @@
 					"default": {
 						"moca-diagnostics-enabled": true,
 						"moca-warning-diagnostics-enabled": true,
-						"mocasql-diagnostics-enabled": true,
-						"mocasql-warning-diagnostics-enabled": true,
+						"sql-diagnostics-enabled": true,
+						"sql-warning-diagnostics-enabled": true,
 						"groovy-diagnostics-enabled": true,
 						"groovy-warning-diagnostics-enabled": true,
-						"mocasql-formatting-enabled": true,
+						"sql-formatting-enabled": true,
 						"groovy-formatting-enabled": true,
 						"groovy-static-type-checking-enabled": true
 					},
@@ -276,12 +276,12 @@
 							"default": true,
 							"description": "true | false"
 						},
-						"mocasql-diagnostics-enabled": {
+						"sql-diagnostics-enabled": {
 							"type": "boolean",
 							"default": true,
 							"description": "true | false"
 						},
-						"mocasql-warning-diagnostics-enabled": {
+						"sql-warning-diagnostics-enabled": {
 							"type": "boolean",
 							"default": true,
 							"description": "true | false"
@@ -296,7 +296,7 @@
 							"default": true,
 							"description": "true | false"
 						},
-						"mocasql-formatting-enabled": {
+						"sql-formatting-enabled": {
 							"type": "boolean",
 							"default": true,
 							"description": "true | false"
