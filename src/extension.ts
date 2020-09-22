@@ -682,8 +682,6 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.commands.executeCommand(LanguageServerCommands.SET_LANGUAGE_SERVER_OPTIONS, vscode.workspace.getConfiguration(CONFIGURATION_NAME).get(CONFIGURATION_LANGUAGE_SERVER_OPTIONS));
 		}
 
-		// Checking if user changed moca connection object(s). If so, we need to re-hash passwords.
-
 	}));
 
 
