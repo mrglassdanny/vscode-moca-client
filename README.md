@@ -14,7 +14,7 @@ Provides MOCA client and language support via [MOCA Language Server].
 
 ## Features
 
-![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-java/master/images/vscode-java.0.0.1.gif)
+![ screencast ](https://raw.githubusercontent.com/mrglassdanny/vscode-moca-client/master/resources/demo.gif)
 
 - Syntax highlighting
 - [Intellisense]
