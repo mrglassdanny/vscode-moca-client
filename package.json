@@ -221,7 +221,7 @@
 						"groovy-range-color-dark": "rgba(175,45,0,0.25)",
 						"dataTablePageSize": 100
 					},
-					"description": "",
+					"description": "vscode Language Client Options",
 					"properties": {
 						"sql-range-color-light": {
 							"type": "string",
