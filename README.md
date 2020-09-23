@@ -98,7 +98,12 @@ Provides MOCA client and language support via [MOCA Language Server].
 
 ## Contribute
 
-Contact mrglassdanny@gmail.com
+If you think something is missing or could be improved, please open issues and pull requests.
+
+
+## Contact
+
+- mrglassdanny@gmail.com
 
 
 [MOCA Language Server]: https://github.com/mrglassdanny/moca-language-server
