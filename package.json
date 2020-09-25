@@ -215,30 +215,30 @@
 				"moca.clientOptions": {
 					"type": "object",
 					"default": {
-						"sql-range-color-light": "rgba(0,150,225,0.15)",
-						"sql-range-color-dark": "rgba(0,80,180,0.25)",
-						"groovy-range-color-light": "rgba(225,100,0,0.15)",
-						"groovy-range-color-dark": "rgba(175,45,0,0.25)",
+						"sqlRangeColorLight": "rgba(0,150,225,0.15)",
+						"sqlRangeColorDark": "rgba(0,80,180,0.25)",
+						"groovyRangeColorLight": "rgba(225,100,0,0.15)",
+						"groovyRangeColorDark": "rgba(175,45,0,0.25)",
 						"dataTablePageSize": 100
 					},
 					"description": "vscode Language Client Options",
 					"properties": {
-						"sql-range-color-light": {
+						"sqlRangeColorLight": {
 							"type": "string",
 							"default": "rgba(0,150,225,0.15)",
 							"description": "RGBA String"
 						},
-						"sql-range-color-dark": {
+						"sqlRangeColorDark": {
 							"type": "string",
 							"default": "rgba(0,80,180,0.25)",
 							"description": "RGBA String"
 						},
-						"groovy-range-color-light": {
+						"groovyRangeColorLight": {
 							"type": "string",
 							"default": "rgba(0,150,225,0.15)",
 							"description": "RGBA String"
 						},
-						"groovy-range-color-dark": {
+						"groovyRangeColorDark": {
 							"type": "string",
 							"default": "rgba(0,80,180,0.25)",
 							"description": "RGBA String"

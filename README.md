@@ -73,10 +73,10 @@ Provides MOCA client and language support for Visual Studio Code via the [MOCA L
 - `moca.clientOptions`: vscode extension configuration options.
 ```json
 "moca.clientOptions": {
-        "sql-range-color-light": "rgba(0,150,225,0.15)",
-        "sql-range-color-dark": "rgba(0,80,180,0.25)",
-        "groovy-range-color-light": "rgba(225,100,0,0.15)",
-        "groovy-range-color-dark": "rgba(175,45,0,0.25)",
+        "sqlRangeColorLight": "rgba(0,150,225,0.15)",
+        "sqlRangeColorDark": "rgba(0,80,180,0.25)",
+        "groovyRangeColorLight": "rgba(225,100,0,0.15)",
+        "groovyRangeColorDark": "rgba(175,45,0,0.25)",
         "dataTablePageSize": 100
     }
 ```
