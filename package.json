@@ -1,9 +1,9 @@
 {
 	"name": "vscode-moca-client",
 	"icon": "resources/local-syntax-logo.png",
-	"displayName": "MOCA Client and Local Syntax programming support",
-	"description": "MOCA Client and Local Syntax programming support",
-	"version": "1.0.1",
+	"displayName": "MOCA Client",
+	"description": "MOCA Client and Local Syntax programming support for Visual Studio Code",
+	"version": "1.0.2",
 	"author": {
 		"name": "Danny Glass",
 		"email": "mrglassdanny@gmail.com",

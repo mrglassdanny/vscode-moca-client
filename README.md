@@ -1,4 +1,4 @@
-# Visual Studio Code MOCA Client Extension
+# MOCA Client Extension for Visual Studio Code
 
 Provides MOCA client and language support for Visual Studio Code via the [MOCA Language Server].
 
@@ -43,9 +43,8 @@ Provides MOCA client and language support for Visual Studio Code via the [MOCA L
         "user": "USER",
         "password": "PASSWORD",
         "groovyclasspath": [
-            "path-to-jar",
-            "path-to-jar",
-            "path-to-jar"
+            "path\\to\\jar\\folder\\*",
+            "path\\to\\jar\\folder\\file.jar"
         ]
     }
 ]
