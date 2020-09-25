@@ -103,7 +103,7 @@ If you think something is missing or could be improved, please open issues and p
 
 ## Contact
 
-- mrglassdanny@gmail.com
+- Danny Glass - mrglassdanny@gmail.com
 
 
 [MOCA Language Server]: https://github.com/mrglassdanny/moca-language-server
