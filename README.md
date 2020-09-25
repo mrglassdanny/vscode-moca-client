@@ -5,6 +5,7 @@ Provides MOCA client and language support for Visual Studio Code via the [MOCA L
 
 ## Quick Start
 1. Install extension
+![Demo](resources/install.gif)
 2. Make sure [minimum Java version] installed and [set JAVA_HOME(for JDK) or JRE_HOME(for JRE) environment variable]
     * If Java standard library intellisense in Groovy context is desired, you will need a JDK. Otherwise, JRE will work just fine.
 3. Extension is activated after you **either**:
