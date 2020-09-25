@@ -1,6 +1,8 @@
 # Visual Studio Code MOCA Client Extension
 
-Provides MOCA client and language support via [MOCA Language Server].
+![Logo](resources/local-syntax-logo.png)
+
+Provides MOCA client and language support for Visual Studio Code via the [MOCA Language Server].
 
 
 ## Quick Start
