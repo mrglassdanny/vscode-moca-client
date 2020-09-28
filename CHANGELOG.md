@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.5 (September 27, 2020)
+* MOCA language server update
+
 ## 1.0.4 (September 27, 2020)
 * MOCA language server update
 
