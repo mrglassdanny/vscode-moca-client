@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.4 (September 27, 2020)
+* MOCA language server update
+
 ## 1.0.3 (September 25, 2020)
 * Range color configuration naming change
 
