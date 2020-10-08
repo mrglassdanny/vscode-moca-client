@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.11 (October 7, 2020)
+* MOCA language server update
+* Issue #1 fix
+
 ## 1.0.10 (October 1, 2020)
 * MOCA language server update
 
