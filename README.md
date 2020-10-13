@@ -94,7 +94,13 @@ Provides MOCA client and language support for Visual Studio Code via the [MOCA L
         "groovy-static-type-checking-enabled": true
     }
 ```
-
+- `moca.defaultGroovyclasspath`: Additional entries to add to the classpath. May contain both folders and individual .jar files. This configuration can be overriden by groovyclasspath specified in MOCA connection.
+```json
+"moca.defaultGroovyclasspath": [
+    "path\\to\\jar\\folder\\*",
+    "path\\to\\jar\\folder\\file.jar"
+]
+```
 
 ## Contribute
 

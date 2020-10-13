@@ -1,29 +1,33 @@
 # Changelog
 
+## 1.1.11 (October ?, 2020)
+* MOCA language server update -- https://github.com/mrglassdanny/moca-language-server/blob/master/CHANGELOG.md
+* Issue #3 enhancement -- https://github.com/mrglassdanny/vscode-moca-client/issues/3
+
 ## 1.0.11 (October 7, 2020)
-* MOCA language server update
-* Issue #1 fix
+* MOCA language server update -- https://github.com/mrglassdanny/moca-language-server/blob/master/CHANGELOG.md
+* Issue #1 fix -- https://github.com/mrglassdanny/vscode-moca-client/issues/1
 
 ## 1.0.10 (October 1, 2020)
-* MOCA language server update
+* MOCA language server update -- https://github.com/mrglassdanny/moca-language-server/blob/master/CHANGELOG.md
 
 ## 1.0.9 (September 28, 2020)
-* MOCA language server update
+* MOCA language server update -- https://github.com/mrglassdanny/moca-language-server/blob/master/CHANGELOG.md
 
 ## 1.0.8 (September 28, 2020)
-* MOCA language server update
+* MOCA language server update -- https://github.com/mrglassdanny/moca-language-server/blob/master/CHANGELOG.md
 
 ## 1.0.7 (September 28, 2020)
-* MOCA language server update
+* MOCA language server update -- https://github.com/mrglassdanny/moca-language-server/blob/master/CHANGELOG.md
 
 ## 1.0.6 (September 28, 2020)
-* MOCA language server update
+* MOCA language server update -- https://github.com/mrglassdanny/moca-language-server/blob/master/CHANGELOG.md
 
 ## 1.0.5 (September 27, 2020)
-* MOCA language server update
+* MOCA language server update -- https://github.com/mrglassdanny/moca-language-server/blob/master/CHANGELOG.md
 
 ## 1.0.4 (September 27, 2020)
-* MOCA language server update
+* MOCA language server update -- https://github.com/mrglassdanny/moca-language-server/blob/master/CHANGELOG.md
 
 ## 1.0.3 (September 25, 2020)
 * Range color configuration naming change

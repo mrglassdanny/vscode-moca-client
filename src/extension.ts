@@ -9,10 +9,10 @@ import { MocaCommand, MocaTrigger } from './mocaCommandLookup/mocaCommandLookup'
 import { performance } from 'perf_hooks';
 
 // Language server constants.
-const MOCA_LANGUAGE_SERVER_VERSION = "1.2.5";
+const MOCA_LANGUAGE_SERVER_VERSION = "1.3.5";
 const MOCA_LANGUAGE_SERVER = "moca-language-server-" + MOCA_LANGUAGE_SERVER_VERSION + "-all.jar";
 const MOCA_LANGUAGE_SERVER_INITIALIZING_MESSAGE = "MOCA: Initializing language server";
-const MOCA_LANGUAGE_SERVER_ERR_STARTUP = "The MOCA extension failed to start.";
+const MOCA_LANGUAGE_SERVER_ERR_STARTUP = "The MOCA extension failed to start";
 
 // Client vars.
 let globalExtensionContext: vscode.ExtensionContext;
@@ -26,6 +26,7 @@ export const CONFIGURATION_TRACE_NAME = "trace";
 export const CONFIGURATION_AUTO_EXECUTION_NAME = "autoExecution";
 export const CONFIGURATION_CLIENT_OPTIONS = "clientOptions";
 export const CONFIGURATION_LANGUAGE_SERVER_OPTIONS = "languageServerOptions";
+export const CONFIGURATION_DEFAULT_GROOVY_CLASSPATH = "defaultGroovyclasspath";
 
 
 // Client commands.
@@ -86,7 +87,7 @@ export function activate(context: vscode.ExtensionContext) {
 	// Start language server on extension activate.
 	startMocaLanguageServer().then(() => {
 
-		vscode.commands.executeCommand(LanguageServerCommands.ACTIVATE, context.globalStoragePath, vscode.workspace.getConfiguration(CONFIGURATION_NAME).get(CONFIGURATION_LANGUAGE_SERVER_OPTIONS)).then((activateResponse) => {
+		vscode.commands.executeCommand(LanguageServerCommands.ACTIVATE, context.globalStoragePath, vscode.workspace.getConfiguration(CONFIGURATION_NAME).get(CONFIGURATION_LANGUAGE_SERVER_OPTIONS), vscode.workspace.getConfiguration(CONFIGURATION_NAME).get(CONFIGURATION_DEFAULT_GROOVY_CLASSPATH)).then((activateResponse) => {
 			var activateResponseJsonObj = JSON.parse(JSON.stringify(activateResponse));
 			if (activateResponseJsonObj["exception"]) {
 				vscode.window.showErrorMessage("Error occuring during MOCA Language Server activation: " + activateResponseJsonObj["exception"]["message"]);
@@ -155,6 +156,10 @@ export function activate(context: vscode.ExtensionContext) {
 			lastAttemptedConnectionName = selectedConnectionObj.name;
 		}
 
+		// If no entries in groovy classpath for selected connection, set to default groovy classpath.
+		if (!selectedConnectionObj.groovyclasspath || selectedConnectionObj.groovyclasspath.length === 0) {
+			selectedConnectionObj.groovyclasspath = vscode.workspace.getConfiguration(CONFIGURATION_NAME).get(CONFIGURATION_DEFAULT_GROOVY_CLASSPATH);
+		}
 
 		// Refering to moca server, not moca language server.
 		var connectionSuccess = false;

@@ -3,7 +3,7 @@
 	"icon": "resources/local-syntax-logo.png",
 	"displayName": "MOCA Client",
 	"description": "MOCA Client and Local Syntax programming support for Visual Studio Code",
-	"version": "1.0.11",
+	"version": "1.1.11",
 	"author": {
 		"name": "Danny Glass",
 		"email": "mrglassdanny@gmail.com",
@@ -114,9 +114,7 @@
 							"url": "",
 							"user": "",
 							"password": "",
-							"groovyclasspath": [
-								""
-							]
+							"groovyclasspath": []
 						}
 					],
 					"description": "MOCA connections",
@@ -145,8 +143,8 @@
 							},
 							"groovyclasspath": {
 								"type": "array",
-								"default": null,
-								"description": "Additional entries to add to the classpath. May contain both folders and individual .jar files.\nOPTIONAL",
+								"default": [],
+								"description": "Additional entries to add to the classpath. May contain both folders and individual .jar files.\nOPTIONAL (will override default groovy classpath configuration if not empty)",
 								"items": {
 									"type": "string"
 								}
@@ -310,6 +308,14 @@
 							"default": true,
 							"description": "true | false"
 						}
+					}
+				},
+				"moca.defaultGroovyclasspath": {
+					"type": "array",
+					"default": [],
+					"description": "Additional entries to add to the classpath. May contain both folders and individual .jar files. This configuration can be overriden by groovyclasspath specified in MOCA connection.",
+					"items": {
+						"type": "string"
 					}
 				}
 			}
