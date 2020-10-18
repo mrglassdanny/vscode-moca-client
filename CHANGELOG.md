@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.1.17 (October 18, 2020)
+* MOCA language server update -- https://github.com/mrglassdanny/moca-language-server/blob/master/CHANGELOG.md
+
 ## 1.1.16 (October 18, 2020)
 * MOCA language server update -- https://github.com/mrglassdanny/moca-language-server/blob/master/CHANGELOG.md
 
