@@ -6,15 +6,15 @@ Provides MOCA client and language support for Visual Studio Code via the [MOCA L
 ## Quick Start
 1. Install extension
 ![Install](resources/install.gif)
-2. Make sure [minimum Java version] installed and [set JAVA_HOME(for JDK) or JRE_HOME(for JRE) environment variable]
-    * If Java standard library intellisense in Groovy context is desired, you will need a JDK. Otherwise, JRE will work just fine.
+
+2. Make sure [minimum Java version] is installed and either:
+    - set [JRE_HOME] environment variable
+    - set [JAVA_HOME] environment variable
+    - set javapath in PATH environment variable
+
 3. Extension is activated after you **either**:
     - open MOCA file (.moca **OR** .msql)
     - make MOCA connection
-
-
-## FAQ
-Please refer to [FAQ] to see if questions has already been asked/answered!
 
 
 ## Features
@@ -113,6 +113,10 @@ If you think something is missing or could be improved, please open issues and p
 Please refer to the [contribution guide] for specifics.
 
 
+## FAQ
+Please refer to [FAQ] to see if questions have already been asked/answered!
+
+
 ## Contact
 
 - Danny Glass - mrglassdanny@gmail.com
@@ -121,7 +125,8 @@ Please refer to the [contribution guide] for specifics.
 [MOCA Language Server]: https://github.com/mrglassdanny/moca-language-server
 [FAQ]: https://github.com/mrglassdanny/vscode-moca-client/blob/master/FAQ.md
 [minimum Java version]: https://github.com/mrglassdanny/moca-language-server
-[set JAVA_HOME(for JDK) or JRE_HOME(for JRE) environment variable]: https://confluence.atlassian.com/doc/setting-the-java_home-variable-in-windows-8895.html
+[JAVA_HOME]: https://confluence.atlassian.com/doc/setting-the-java_home-variable-in-windows-8895.html
+[JRE_HOME]: https://confluence.atlassian.com/doc/setting-the-java_home-variable-in-windows-8895.html
 [Intellisense]: https://github.com/mrglassdanny/moca-language-server
 [Command Execution]: https://github.com/mrglassdanny/moca-language-server
 [contribution guide]: https://github.com/mrglassdanny/vscode-moca-client/blob/master/CONTRIBUTE.md

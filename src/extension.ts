@@ -787,17 +787,17 @@ export default function findJava(): string {
 		executableFile += ".exe";
 	}
 
-	if ("JAVA_HOME" in process.env) {
-		let javaHome = process.env.JAVA_HOME as string;
-		let javaPath = path.join(javaHome, "bin", executableFile);
+	if ("JRE_HOME" in process.env) {
+		let jreHome = process.env.JRE_HOME as string;
+		let javaPath = path.join(jreHome, "bin", executableFile);
 		if (validate(javaPath)) {
 			return javaPath;
 		}
 	}
 
-	if ("JRE_HOME" in process.env) {
-		let jreHome = process.env.JRE_HOME as string;
-		let javaPath = path.join(jreHome, "bin", executableFile);
+	if ("JAVA_HOME" in process.env) {
+		let javaHome = process.env.JAVA_HOME as string;
+		let javaPath = path.join(javaHome, "bin", executableFile);
 		if (validate(javaPath)) {
 			return javaPath;
 		}
