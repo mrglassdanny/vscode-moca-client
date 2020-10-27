@@ -12,7 +12,7 @@ Provides MOCA client and language support for Visual Studio Code via the [MOCA L
     - set [JAVA_HOME] environment variable
     - set javapath in PATH environment variable
 
-3. Extension is activated after you **either**:
+3. Extension is activated after you either:
     - open MOCA file (.moca **OR** .msql)
     - make MOCA connection
 
