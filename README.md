@@ -13,6 +13,10 @@ Provides MOCA client and language support for Visual Studio Code via the [MOCA L
     - make MOCA connection
 
 
+## FAQ
+Please refer to [FAQ] to see if questions has already been asked/answered!
+
+
 ## Features
 
 ![Demo](resources/demo.gif)
@@ -104,7 +108,9 @@ Provides MOCA client and language support for Visual Studio Code via the [MOCA L
 
 ## Contribute
 
-If you think something is missing or could be improved, please open issues and pull requests.
+If you think something is missing or could be improved, please open issues and pull requests. 
+
+Please refer to the [contribution guide] for specifics.
 
 
 ## Contact
@@ -113,7 +119,9 @@ If you think something is missing or could be improved, please open issues and p
 
 
 [MOCA Language Server]: https://github.com/mrglassdanny/moca-language-server
+[FAQ]: https://github.com/mrglassdanny/vscode-moca-client/blob/master/FAQ.md
 [minimum Java version]: https://github.com/mrglassdanny/moca-language-server
 [set JAVA_HOME(for JDK) or JRE_HOME(for JRE) environment variable]: https://confluence.atlassian.com/doc/setting-the-java_home-variable-in-windows-8895.html
 [Intellisense]: https://github.com/mrglassdanny/moca-language-server
 [Command Execution]: https://github.com/mrglassdanny/moca-language-server
+[contribution guide]: https://github.com/mrglassdanny/vscode-moca-client/blob/master/CONTRIBUTE.md
