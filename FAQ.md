@@ -13,10 +13,10 @@ A: In your `settings.json` file (global vscode settings), you can set the follow
 A: Yes! In your `settings.json` file (global vscode settings), you can set the following:
 ```json
 "moca.languageServerOptions": {
-    ...
+    
     "sql-formatting-enabled": false,
     "groovy-formatting-enabled": false,
-    ...
+    
 }
 ```
 
@@ -25,9 +25,9 @@ A: Yes! In your `settings.json` file (global vscode settings), you can set the f
 A: Yes! In your `settings.json` file (global vscode settings), you can set the following:
 ```json
 "moca.languageServerOptions": {
-    ...
+    
     "sql-warning-diagnostics-enabled": false,
-    ...
+    
 },
 ```
 
