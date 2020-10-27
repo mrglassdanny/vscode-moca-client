@@ -5,7 +5,7 @@ This document provides information for developers who wish to contribute to the 
 ## Building
 
 #### Node.js
-vscode extensions are built with node.js -- any version >= 10 should be okay.
+vscode extensions are built with node.js; Any version >= 10 should be okay.
 
 #### Dependencies
 npm is used for dependency management. Dependency information can be found in `package.json`.
