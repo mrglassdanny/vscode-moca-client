@@ -28,7 +28,7 @@ A: Yes! In your `settings.json` file (global vscode settings), you can set the f
     
     "sql-warning-diagnostics-enabled": false,
     
-},
+}
 ```
 
 There are other useful settings as well in the `moca.languageServerOptions` configuration.
