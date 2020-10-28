@@ -71,9 +71,9 @@ const CONNECTED_PREFIX_STR = "MOCA: $(database) ";
 const START_TRACE_STR = "$(debug-start) Start Trace";
 const STOP_TRACE_STR = "$(debug-stop) Stop Trace";
 // Constants for unsafe script executions in production envionment configuration.
-const UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_PROMPT = "You are attempting to run unsafe code in a production environment. Continue?";
-const UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_OPTION_YES = "yes";
-const UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_OPTION_NO = "no";
+const UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_PROMPT = "You are attempting to run unsafe code in a production environment. Do you want to continue?";
+const UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_OPTION_YES = "Yes";
+const UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_OPTION_NO = "No";
 // Save the last successful connection. Reason being, is that if the user tries to re-connect to the same connection, we do not necessarily
 // want to reload the cache.
 let lastAttemptedConnectionName = "";
@@ -247,21 +247,25 @@ function activate(context) {
                         if (!cancellationRequested) {
                             var mocaResults = new mocaResults_1.MocaResults(res);
                             // If lang server says env is prod and script is unsafe, we need to ask the user if they truly want to run script.
-                            // NOTE: if cancellation is requested before we get here, lang server does not run unsafe scripts in prod envs by default.
+                            // NOTE: if cancellation is requested before we get here, lang server does not run unsafe scripts in prod envs by default -- assuming that approval is configured.
                             if (mocaResults.isProdEnvAndScriptUnsafe) {
                                 var approvalOptionRes = yield vscode.window.showWarningMessage(UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_PROMPT, UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_OPTION_YES, UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_OPTION_NO);
-                                if (approvalOptionRes === UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_OPTION_YES) {
-                                    // User says yes; run script!
-                                    vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, script, curFileNameShortened, true).then((approvedRes) => __awaiter(this, void 0, void 0, function* () {
-                                        // If cancellation requested, skip this part.
-                                        if (!cancellationRequested) {
-                                            var approvedMocaResults = new mocaResults_1.MocaResults(approvedRes);
-                                            ResultViewPanel_1.ResultViewPanel.createOrShow(context.extensionPath, curFileNameShortened, approvedMocaResults);
-                                            if (approvedMocaResults.msg && approvedMocaResults.msg.length > 0) {
-                                                vscode.window.showErrorMessage(curFileNameShortened + ": " + approvedMocaResults.msg);
+                                // Check again if cancellation is requested.
+                                // If so, just exit and do not worry about approval option result.
+                                if (!cancellationRequested) {
+                                    if (approvalOptionRes === UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_OPTION_YES) {
+                                        // User says yes; run script!
+                                        vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, script, curFileNameShortened, true).then((approvedRes) => __awaiter(this, void 0, void 0, function* () {
+                                            // If cancellation requested, skip this part.
+                                            if (!cancellationRequested) {
+                                                var approvedMocaResults = new mocaResults_1.MocaResults(approvedRes);
+                                                ResultViewPanel_1.ResultViewPanel.createOrShow(context.extensionPath, curFileNameShortened, approvedMocaResults);
+                                                if (approvedMocaResults.msg && approvedMocaResults.msg.length > 0) {
+                                                    vscode.window.showErrorMessage(curFileNameShortened + ": " + approvedMocaResults.msg);
+                                                }
                                             }
-                                        }
-                                    }));
+                                        }));
+                                    }
                                 }
                             }
                             else {
@@ -312,21 +316,25 @@ function activate(context) {
                             if (!cancellationRequested) {
                                 var mocaResults = new mocaResults_1.MocaResults(res);
                                 // If lang server says env is prod and script is unsafe, we need to ask the user if they truly want to run script.
-                                // NOTE: if cancellation is requested before we get here, lang server does not run unsafe scripts in prod envs by default.
+                                // NOTE: if cancellation is requested before we get here, lang server does not run unsafe scripts in prod envs by default -- assuming that approval is configured.
                                 if (mocaResults.isProdEnvAndScriptUnsafe) {
                                     var approvalOptionRes = yield vscode.window.showWarningMessage(UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_PROMPT, UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_OPTION_YES, UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_OPTION_NO);
-                                    if (approvalOptionRes === UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_OPTION_YES) {
-                                        // User says yes; run script!
-                                        vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, selectedScript, curFileNameShortened, true).then((approvedRes) => __awaiter(this, void 0, void 0, function* () {
-                                            // If cancellation requested, skip this part.
-                                            if (!cancellationRequested) {
-                                                var approvedMocaResults = new mocaResults_1.MocaResults(approvedRes);
-                                                ResultViewPanel_1.ResultViewPanel.createOrShow(context.extensionPath, curFileNameShortened, approvedMocaResults);
-                                                if (approvedMocaResults.msg && approvedMocaResults.msg.length > 0) {
-                                                    vscode.window.showErrorMessage(curFileNameShortened + ": " + approvedMocaResults.msg);
+                                    // Check again if cancellation is requested.
+                                    // If so, just exit and do not worry about approval option result.
+                                    if (!cancellationRequested) {
+                                        if (approvalOptionRes === UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_OPTION_YES) {
+                                            // User says yes; run script!
+                                            vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, selectedScript, curFileNameShortened, true).then((approvedRes) => __awaiter(this, void 0, void 0, function* () {
+                                                // If cancellation requested, skip this part.
+                                                if (!cancellationRequested) {
+                                                    var approvedMocaResults = new mocaResults_1.MocaResults(approvedRes);
+                                                    ResultViewPanel_1.ResultViewPanel.createOrShow(context.extensionPath, curFileNameShortened, approvedMocaResults);
+                                                    if (approvedMocaResults.msg && approvedMocaResults.msg.length > 0) {
+                                                        vscode.window.showErrorMessage(curFileNameShortened + ": " + approvedMocaResults.msg);
+                                                    }
                                                 }
-                                            }
-                                        }));
+                                            }));
+                                        }
                                     }
                                 }
                                 else {
