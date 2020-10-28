@@ -32,6 +32,12 @@ class MocaResults {
         else {
             this.msg = "";
         }
+        if (data['isProductionEnvionmentAndScriptIsUnsafe']) {
+            this.isProdEnvAndScriptUnsafe = true;
+        }
+        else {
+            this.isProdEnvAndScriptUnsafe = false;
+        }
     }
 }
 exports.MocaResults = MocaResults;

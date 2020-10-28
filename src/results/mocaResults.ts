@@ -9,6 +9,7 @@ export class MocaResults {
     cols: Object[][];
     rows: Object[][];
     msg: string;
+    isProdEnvAndScriptUnsafe: boolean;
 
     constructor(data: any) {
         if (data['results']) {
@@ -37,6 +38,12 @@ export class MocaResults {
             }
         } else {
             this.msg = "";
+        }
+
+        if (data['isProductionEnvionmentAndScriptIsUnsafe']) {
+            this.isProdEnvAndScriptUnsafe = true;
+        } else {
+            this.isProdEnvAndScriptUnsafe = false;
         }
 
 

@@ -259,7 +259,8 @@
 						"groovy-warning-diagnostics-enabled": true,
 						"sql-formatting-enabled": true,
 						"groovy-formatting-enabled": true,
-						"groovy-static-type-checking-enabled": true
+						"groovy-static-type-checking-enabled": true,
+						"approve-unsafe-scripts-in-production-environment": true
 					},
 					"description": "MOCA Language Server Options",
 					"properties": {
@@ -304,6 +305,11 @@
 							"description": "true | false\nNOT CURRENTLY SUPPORTED"
 						},
 						"groovy-static-type-checking-enabled": {
+							"type": "boolean",
+							"default": true,
+							"description": "true | false"
+						},
+						"approve-unsafe-scripts-in-production-environment": {
 							"type": "boolean",
 							"default": true,
 							"description": "true | false"
