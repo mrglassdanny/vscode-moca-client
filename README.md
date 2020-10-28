@@ -95,7 +95,8 @@ Provides MOCA client and language support for Visual Studio Code via the [MOCA L
         "groovy-warning-diagnostics-enabled": true,
         "sql-formatting-enabled": true,
         "groovy-formatting-enabled": true,
-        "groovy-static-type-checking-enabled": true
+        "groovy-static-type-checking-enabled": true,
+        "approve-unsafe-scripts-in-production-environment": true
     }
 ```
 - `moca.defaultGroovyclasspath`: Additional entries to add to the classpath. May contain both folders and individual .jar files. This configuration can be overriden by groovyclasspath specified in MOCA connection.
