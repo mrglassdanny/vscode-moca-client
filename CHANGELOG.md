@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.17 (October ??, 2020)
+* Issue #6 enhancement -- https://github.com/mrglassdanny/vscode-moca-client/issues/6
+* MOCA language server update -- https://github.com/mrglassdanny/moca-language-server/blob/master/CHANGELOG.md
+* Misc. changes
+
 ## 1.1.17 (October 18, 2020)
 * MOCA language server update -- https://github.com/mrglassdanny/moca-language-server/blob/master/CHANGELOG.md
 
