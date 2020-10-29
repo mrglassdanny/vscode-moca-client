@@ -10,32 +10,52 @@ A: In your `settings.json` file (global vscode settings), you can set the follow
 
 **Q: Can I have MOCA formatting turned on, but not SQL/Groovy?**
 
-A: Yes! In your `settings.json` file (global vscode settings), you can set the following:
+A: Yes! In your `settings.json` file, you can set the following:
 ```json
 "moca.languageServerOptions": {
-    
-    "sql-formatting-enabled": false,
-    "groovy-formatting-enabled": false,
-    
+    "moca-diagnostics-enabled": true,
+    "moca-warning-diagnostics-enabled": true,
+    "sql-diagnostics-enabled": true,
+    "sql-warning-diagnostics-enabled": true,
+    "groovy-diagnostics-enabled": true,
+    "groovy-warning-diagnostics-enabled": true,
+    -----> "sql-formatting-enabled": false,
+    -----> "groovy-formatting-enabled": false,
+    "groovy-static-type-checking-enabled": true
 }
 ```
 
 **Q: I do not like the 'tables not existing' warnings, can I turn them off?**
 
-A: Yes! In your `settings.json` file (global vscode settings), you can set the following:
+A: Yes! In your `settings.json` file, you can set the following:
 ```json
 "moca.languageServerOptions": {
-    
-    "sql-warning-diagnostics-enabled": false,
-    
+    "moca-diagnostics-enabled": true,
+    "moca-warning-diagnostics-enabled": true,
+    "sql-diagnostics-enabled": true,
+    -----> "sql-warning-diagnostics-enabled": false,
+    "groovy-diagnostics-enabled": true,
+    "groovy-warning-diagnostics-enabled": true,
+    "sql-formatting-enabled": true,
+    "groovy-formatting-enabled": true,
+    "groovy-static-type-checking-enabled": true
 }
 ```
 
-There are other useful settings as well in the `moca.languageServerOptions` configuration.
+**Q: Is there a way I can avoid accidentally executing 'unsafe' scripts in PRODUCTION environments?**
 
-**Q: What is recommended for editting .MCMD/.MTRG files?**
+A: Yes! Each MOCA connection you configure in your `settings.json` file allows you to enable unsafe code execution approval. If you set this to TRUE, you will be prompted for approval upon attempting execution of unsafe script. Here is an example MOCA connection with this configured:
+```json
+{
+    "name": "Example MOCA Connection",
+    "url": "http://connectionstring/service",
+    -----> "approveUnsafeScripts": true
+}
+```
 
-A: You can associate .MCMD/.MTRG files with the XML language automatically by setting the following in `settings.json` (global vscode settings):
+**Q: What is recommended for editing .MCMD/.MTRG files?**
+
+A: You can associate .MCMD/.MTRG files with the XML language automatically by setting the following in `settings.json`:
 ```json
 "files.associations": {
     "*.mcmd": "xml",

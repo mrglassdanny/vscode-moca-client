@@ -9,7 +9,7 @@ import { MocaCommand, MocaTrigger } from './mocaCommandLookup/mocaCommandLookup'
 import { performance } from 'perf_hooks';
 
 // Language server constants.
-const MOCA_LANGUAGE_SERVER_VERSION = "1.5.10";
+const MOCA_LANGUAGE_SERVER_VERSION = "1.6.10";
 const MOCA_LANGUAGE_SERVER = "moca-language-server-" + MOCA_LANGUAGE_SERVER_VERSION + "-all.jar";
 const MOCA_LANGUAGE_SERVER_INITIALIZING_MESSAGE = "MOCA: Initializing language server";
 const MOCA_LANGUAGE_SERVER_ERR_STARTUP = "The MOCA extension failed to start";
@@ -66,10 +66,10 @@ const CONNECTED_PREFIX_STR = "MOCA: $(database) ";
 const START_TRACE_STR = "$(debug-start) Start Trace";
 const STOP_TRACE_STR = "$(debug-stop) Stop Trace";
 
-// Constants for unsafe script executions in production envionment configuration.
-const UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_PROMPT = "You are attempting to run unsafe code in a production environment. Do you want to continue?";
-const UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_OPTION_YES = "Yes";
-const UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_OPTION_NO = "No";
+// Constants for unsafe script executions configuration.
+const UNSAFE_CODE_APPROVAL_PROMPT = "You are attempting to run unsafe code. Do you want to continue?";
+const UNSAFE_CODE_APPROVAL_OPTION_YES = "Yes";
+const UNSAFE_CODE_APPROVAL_OPTION_NO = "No";
 
 // Save the last successful connection. Reason being, is that if the user tries to re-connect to the same connection, we do not necessarily
 // want to reload the cache.
@@ -79,7 +79,7 @@ let lastAttemptedConnectionName: string = "";
 let traceStarted: boolean = false;
 
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
 
 	// Set some vars.
 	globalExtensionContext = context;
@@ -90,16 +90,13 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\command-lookup"));
 
 	// Start language server on extension activate.
-	startMocaLanguageServer().then(() => {
+	await startMocaLanguageServer();
 
-		vscode.commands.executeCommand(LanguageServerCommands.ACTIVATE, context.globalStoragePath, vscode.workspace.getConfiguration(CONFIGURATION_NAME).get(CONFIGURATION_LANGUAGE_SERVER_OPTIONS), vscode.workspace.getConfiguration(CONFIGURATION_NAME).get(CONFIGURATION_DEFAULT_GROOVY_CLASSPATH)).then((activateResponse) => {
-			var activateResponseJsonObj = JSON.parse(JSON.stringify(activateResponse));
-			if (activateResponseJsonObj["exception"]) {
-				vscode.window.showErrorMessage("Error occuring during MOCA Language Server activation: " + activateResponseJsonObj["exception"]["message"]);
-			}
-		})
-	});
-
+	var activateResponse = await vscode.commands.executeCommand(LanguageServerCommands.ACTIVATE, context.globalStoragePath, vscode.workspace.getConfiguration(CONFIGURATION_NAME).get(CONFIGURATION_LANGUAGE_SERVER_OPTIONS), vscode.workspace.getConfiguration(CONFIGURATION_NAME).get(CONFIGURATION_DEFAULT_GROOVY_CLASSPATH));
+	var activateResponseJsonObj = JSON.parse(JSON.stringify(activateResponse));
+	if (activateResponseJsonObj["exception"]) {
+		vscode.window.showErrorMessage("Error occuring during MOCA Language Server activation: " + activateResponseJsonObj["exception"]["message"]);
+	}
 
 
 	// Command registration.
@@ -122,7 +119,7 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 		}
 
-		let connectionNameQuickPickRes = await vscode.window.showQuickPick(connectionNames);
+		let connectionNameQuickPickRes = await vscode.window.showQuickPick(connectionNames, { ignoreFocusOut: true });
 		const selectedConnectionObj = connections.get(connectionNameQuickPickRes);
 		if (!selectedConnectionObj) {
 			return null;
@@ -131,25 +128,25 @@ export function activate(context: vscode.ExtensionContext) {
 		// Now let's see if selected connection possesses a user/password.
 		// If not, we need to get from the user.
 		if (!selectedConnectionObj.user) {
-			let userQuickPickRes = await vscode.window.showInputBox({ prompt: "User ID", ignoreFocusOut: true });
-			if (!userQuickPickRes) {
+			let userInputRes = await vscode.window.showInputBox({ prompt: "User ID", ignoreFocusOut: true });
+			if (!userInputRes) {
 				return null;
 			}
-			selectedConnectionObj.user = userQuickPickRes;
+			selectedConnectionObj.user = userInputRes;
 
 
-			let passwordQuickPickRes = await vscode.window.showInputBox({ prompt: "Password", password: true, ignoreFocusOut: true });
-			if (!passwordQuickPickRes) {
+			let passwordInputRes = await vscode.window.showInputBox({ prompt: "Password", password: true, ignoreFocusOut: true });
+			if (!passwordInputRes) {
 				return null;
 			}
-			selectedConnectionObj.password = passwordQuickPickRes;
+			selectedConnectionObj.password = passwordInputRes;
 		} else {
 			if (!selectedConnectionObj.password) {
-				let passwordQuickPickRes = await vscode.window.showInputBox({ prompt: "Password", password: true, ignoreFocusOut: true });
-				if (!passwordQuickPickRes) {
+				let passwordInputRes = await vscode.window.showInputBox({ prompt: "Password", password: true, ignoreFocusOut: true });
+				if (!passwordInputRes) {
 					return null;
 				}
-				selectedConnectionObj.password = passwordQuickPickRes;
+				selectedConnectionObj.password = passwordInputRes;
 			}
 		}
 
@@ -166,6 +163,11 @@ export function activate(context: vscode.ExtensionContext) {
 			selectedConnectionObj.groovyclasspath = vscode.workspace.getConfiguration(CONFIGURATION_NAME).get(CONFIGURATION_DEFAULT_GROOVY_CLASSPATH);
 		}
 
+		// If no entry for unsafe approval config, just default to false.
+		if (!selectedConnectionObj.approveUnsafeScripts) {
+			selectedConnectionObj.approveUnsafeScripts = false;
+		}
+
 		// Refering to moca server, not moca language server.
 		var connectionSuccess = false;
 
@@ -173,51 +175,36 @@ export function activate(context: vscode.ExtensionContext) {
 			location: vscode.ProgressLocation.Notification,
 			title: "MOCA",
 			cancellable: true
-		}, (progress, token) => {
+		}, async (progress, token) => {
 			progress.report({
 				increment: Infinity,
 				message: ("Connecting To " + selectedConnectionObj.name)
 			});
 
-			var p = new Promise(progressResolve => {
+			// Purpose of this is to indicate that cancellation was requested down below.
+			var cancellationRequested = false;
 
-				// Purpose of this is to indicate that cancellation was requested down below.
-				var cancellationRequested = false;
-
-				token.onCancellationRequested(() => {
-					// Go ahead and resolve progress, then quit.
-					// Also make sure we do not send any notifications regarding
-					// connection success status.
-					cancellationRequested = true;
-					progressResolve();
-					return p;
-				});
-
-				// Language server will be started at this point.
-				vscode.commands.executeCommand(LanguageServerCommands.CONNECT, selectedConnectionObj).then((connResponse) => {
-
-					// If cancellation requested, skip this part.
-					if (!cancellationRequested) {
-						const connResponseJsonObj = JSON.parse(JSON.stringify(connResponse));
-						const eOk = connResponseJsonObj["eOk"];
-
-						if (eOk === true) {
-							connectionSuccess = true;
-							connectionStatusBarItem.text = CONNECTED_PREFIX_STR + selectedConnectionObj.name;
-						} else {
-							var exceptionJsonObj = JSON.parse(JSON.stringify(connResponseJsonObj["exception"]));
-							vscode.window.showErrorMessage(selectedConnectionObj.name + ": " + exceptionJsonObj["message"]);
-							connectionStatusBarItem.text = NOT_CONNECTED_STR;
-						}
-					}
-
-				}).then(() => {
-					// Resolve progress indicator.
-					progress.report({ increment: Infinity });
-					progressResolve();
-				});
+			token.onCancellationRequested(() => {
+				cancellationRequested = true;
 			});
-			return p;
+
+			// Language server will be started at this point.
+			var connResponse = await vscode.commands.executeCommand(LanguageServerCommands.CONNECT, selectedConnectionObj);
+
+			// If cancellation requested, skip this part.
+			if (!cancellationRequested) {
+				const connResponseJsonObj = JSON.parse(JSON.stringify(connResponse));
+				const eOk = connResponseJsonObj["eOk"];
+
+				if (eOk === true) {
+					connectionSuccess = true;
+					connectionStatusBarItem.text = CONNECTED_PREFIX_STR + selectedConnectionObj.name;
+				} else {
+					var exceptionJsonObj = JSON.parse(JSON.stringify(connResponseJsonObj["exception"]));
+					vscode.window.showErrorMessage(selectedConnectionObj.name + ": " + exceptionJsonObj["message"]);
+					connectionStatusBarItem.text = NOT_CONNECTED_STR;
+				}
+			}
 		}).then(() => {
 			// If successful connection and we are not just re-connecting to current connection, load repo.
 			if (connectionSuccess && !useExistingMocaRepo) {
@@ -232,19 +219,9 @@ export function activate(context: vscode.ExtensionContext) {
 			location: vscode.ProgressLocation.Window,
 			title: "MOCA: Loading Cache",
 			cancellable: false
-		}, (progress) => {
-
+		}, async (progress) => {
 			progress.report({ increment: Infinity });
-
-			var p = new Promise(progressResolve => {
-
-				vscode.commands.executeCommand(LanguageServerCommands.LOAD_CACHE).then(() => {
-					// Resolve progress indicator.
-					progress.report({ increment: Infinity });
-					progressResolve();
-				});
-			});
-			return p;
+			await vscode.commands.executeCommand(LanguageServerCommands.LOAD_CACHE);
 		});
 	}));
 
@@ -262,66 +239,52 @@ export function activate(context: vscode.ExtensionContext) {
 				location: vscode.ProgressLocation.Notification,
 				title: "MOCA",
 				cancellable: true
-			}, (progress, token) => {
+			}, async (progress, token) => {
 				progress.report({
 					increment: Infinity,
 					message: "Executing " + curFileNameShortened
 				});
 
-				var p = new Promise(progressResolve => {
+				// Purpose of this is to indicate that cancellation was requested down below.
+				var cancellationRequested = false;
 
-					// Purpose of this is to indicate that cancellation was requested down below.
-					var cancellationRequested = false;
-
-					token.onCancellationRequested(() => {
-						// Go ahead and resolve progress, send cancellation, then quit.
-						cancellationRequested = true;
-						progressResolve();
-						return p;
-					});
+				token.onCancellationRequested(() => {
+					cancellationRequested = true;
+				});
 
 
-					vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, script, curFileNameShortened, false).then(async (res) => {
+				var res = await vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, script, curFileNameShortened, false);
+				// If cancellation requested, skip this part.
+				if (!cancellationRequested) {
+					var mocaResults = new MocaResults(res);
 
-						// If cancellation requested, skip this part.
+					// If lang server says we need approval before executing(due to unsafe code config on connection), we need to ask the user if they truly want to run script.
+					// NOTE: if cancellation is requested before we get here, lang server does not run unsafe scripts in configured envs by default -- assuming that approval is required.
+					if (mocaResults.needsApprovalToExecute) {
+						var approvalOptionRes = await vscode.window.showWarningMessage(UNSAFE_CODE_APPROVAL_PROMPT, UNSAFE_CODE_APPROVAL_OPTION_YES, UNSAFE_CODE_APPROVAL_OPTION_NO);
+						// Check again if cancellation is requested.
+						// If so, just exit and do not worry about approval option result.
 						if (!cancellationRequested) {
-							var mocaResults = new MocaResults(res);
-
-							// If lang server says env is prod and script is unsafe, we need to ask the user if they truly want to run script.
-							// NOTE: if cancellation is requested before we get here, lang server does not run unsafe scripts in prod envs by default -- assuming that approval is configured.
-							if (mocaResults.isProdEnvAndScriptUnsafe) {
-								var approvalOptionRes = await vscode.window.showWarningMessage(UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_PROMPT, UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_OPTION_YES, UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_OPTION_NO);
-								// Check again if cancellation is requested.
-								// If so, just exit and do not worry about approval option result.
+							if (approvalOptionRes === UNSAFE_CODE_APPROVAL_OPTION_YES) {
+								// User says yes; run script!
+								var approvedRes = await vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, script, curFileNameShortened, true);
+								// If cancellation requested, skip this part.
 								if (!cancellationRequested) {
-									if (approvalOptionRes === UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_OPTION_YES) {
-										// User says yes; run script!
-										vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, script, curFileNameShortened, true).then(async (approvedRes) => {
-											// If cancellation requested, skip this part.
-											if (!cancellationRequested) {
-												var approvedMocaResults = new MocaResults(approvedRes);
-												ResultViewPanel.createOrShow(context.extensionPath, curFileNameShortened, approvedMocaResults);
-												if (approvedMocaResults.msg && approvedMocaResults.msg.length > 0) {
-													vscode.window.showErrorMessage(curFileNameShortened + ": " + approvedMocaResults.msg);
-												}
-											}
-										});
+									var approvedMocaResults = new MocaResults(approvedRes);
+									ResultViewPanel.createOrShow(context.extensionPath, curFileNameShortened, approvedMocaResults);
+									if (approvedMocaResults.msg && approvedMocaResults.msg.length > 0) {
+										vscode.window.showErrorMessage(curFileNameShortened + ": " + approvedMocaResults.msg);
 									}
-								}
-							} else {
-								ResultViewPanel.createOrShow(context.extensionPath, curFileNameShortened, mocaResults);
-								if (mocaResults.msg && mocaResults.msg.length > 0) {
-									vscode.window.showErrorMessage(curFileNameShortened + ": " + mocaResults.msg);
 								}
 							}
 						}
-					}).then(() => {
-						// Resolve progress indicator.
-						progress.report({ increment: Infinity });
-						progressResolve();
-					});
-				});
-				return p;
+					} else {
+						ResultViewPanel.createOrShow(context.extensionPath, curFileNameShortened, mocaResults);
+						if (mocaResults.msg && mocaResults.msg.length > 0) {
+							vscode.window.showErrorMessage(curFileNameShortened + ": " + mocaResults.msg);
+						}
+					}
+				}
 			});
 		}
 	}));
@@ -342,65 +305,51 @@ export function activate(context: vscode.ExtensionContext) {
 					location: vscode.ProgressLocation.Notification,
 					title: "MOCA",
 					cancellable: true
-				}, (progress, token) => {
+				}, async (progress, token) => {
 					progress.report({
 						increment: Infinity,
 						message: "Executing Selection " + curFileNameShortened
 					});
 
-					var p = new Promise(progressResolve => {
+					// Purpose of this is to indicate that cancellation was requested down below.
+					var cancellationRequested = false;
 
-						// Purpose of this is to indicate that cancellation was requested down below.
-						var cancellationRequested = false;
+					token.onCancellationRequested(() => {
+						cancellationRequested = true;
+					});
 
-						token.onCancellationRequested(() => {
-							// Go ahead and resolve progress, send cancellation, then quit.
-							cancellationRequested = true;
-							progressResolve();
-							return p;
-						});
+					var res = await vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, selectedScript, curFileNameShortened, false);
+					// If cancellation requested, skip this part.
+					if (!cancellationRequested) {
+						var mocaResults = new MocaResults(res);
 
-						vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, selectedScript, curFileNameShortened, false).then(async (res) => {
-
-							// If cancellation requested, skip this part.
+						// If lang server says we need approval before executing(due to unsafe code config on connection), we need to ask the user if they truly want to run script.
+						// NOTE: if cancellation is requested before we get here, lang server does not run unsafe scripts in configured envs by default -- assuming that approval is required.
+						if (mocaResults.needsApprovalToExecute) {
+							var approvalOptionRes = await vscode.window.showWarningMessage(UNSAFE_CODE_APPROVAL_PROMPT, UNSAFE_CODE_APPROVAL_OPTION_YES, UNSAFE_CODE_APPROVAL_OPTION_NO);
+							// Check again if cancellation is requested.
+							// If so, just exit and do not worry about approval option result.
 							if (!cancellationRequested) {
-								var mocaResults = new MocaResults(res);
-
-								// If lang server says env is prod and script is unsafe, we need to ask the user if they truly want to run script.
-								// NOTE: if cancellation is requested before we get here, lang server does not run unsafe scripts in prod envs by default -- assuming that approval is configured.
-								if (mocaResults.isProdEnvAndScriptUnsafe) {
-									var approvalOptionRes = await vscode.window.showWarningMessage(UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_PROMPT, UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_OPTION_YES, UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_OPTION_NO);
-									// Check again if cancellation is requested.
-									// If so, just exit and do not worry about approval option result.
+								if (approvalOptionRes === UNSAFE_CODE_APPROVAL_OPTION_YES) {
+									// User says yes; run script!
+									var approvedRes = await vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, selectedScript, curFileNameShortened, true);
+									// If cancellation requested, skip this part.
 									if (!cancellationRequested) {
-										if (approvalOptionRes === UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_OPTION_YES) {
-											// User says yes; run script!
-											vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, selectedScript, curFileNameShortened, true).then(async (approvedRes) => {
-												// If cancellation requested, skip this part.
-												if (!cancellationRequested) {
-													var approvedMocaResults = new MocaResults(approvedRes);
-													ResultViewPanel.createOrShow(context.extensionPath, curFileNameShortened, approvedMocaResults);
-													if (approvedMocaResults.msg && approvedMocaResults.msg.length > 0) {
-														vscode.window.showErrorMessage(curFileNameShortened + ": " + approvedMocaResults.msg);
-													}
-												}
-											});
+										var approvedMocaResults = new MocaResults(approvedRes);
+										ResultViewPanel.createOrShow(context.extensionPath, curFileNameShortened, approvedMocaResults);
+										if (approvedMocaResults.msg && approvedMocaResults.msg.length > 0) {
+											vscode.window.showErrorMessage(curFileNameShortened + ": " + approvedMocaResults.msg);
 										}
-									}
-								} else {
-									ResultViewPanel.createOrShow(context.extensionPath, curFileNameShortened, mocaResults);
-									if (mocaResults.msg && mocaResults.msg.length > 0) {
-										vscode.window.showErrorMessage(curFileNameShortened + ": " + mocaResults.msg);
 									}
 								}
 							}
-						}).then(() => {
-							// Resolve progress indicator.
-							progress.report({ increment: Infinity });
-							progressResolve();
-						});
-					});
-					return p;
+						} else {
+							ResultViewPanel.createOrShow(context.extensionPath, curFileNameShortened, mocaResults);
+							if (mocaResults.msg && mocaResults.msg.length > 0) {
+								vscode.window.showErrorMessage(curFileNameShortened + ": " + mocaResults.msg);
+							}
+						}
+					}
 				});
 			}
 		}
@@ -430,7 +379,7 @@ export function activate(context: vscode.ExtensionContext) {
 				location: vscode.ProgressLocation.Notification,
 				title: (traceStarted ? "MOCA: Stopping trace" : "MOCA: Starting trace"),
 				cancellable: false
-			}, (progress) => {
+			}, async (progress) => {
 
 				progress.report({ increment: Infinity });
 
@@ -442,29 +391,20 @@ export function activate(context: vscode.ExtensionContext) {
 					traceStatusBarItem.text = START_TRACE_STR;
 				}
 
-				var p = new Promise(progressResolve => {
-					console.log(traceStarted);
-					vscode.commands.executeCommand(LanguageServerCommands.TRACE, traceStarted, fileName, mode).then((traceRes) => {
-						const traceResponseJsonObj = JSON.parse(JSON.stringify(traceRes));
+				var traceRes = await vscode.commands.executeCommand(LanguageServerCommands.TRACE, traceStarted, fileName, mode);
+				const traceResponseJsonObj = JSON.parse(JSON.stringify(traceRes));
 
-						// If exception of any kind, we need to return the message/status and indicate that the trace is not running. This includes if we are not even connected to a MOCA env at all.
-						if (traceResponseJsonObj["mocaResultsResponse"]["exception"]) {
-							var exceptionJsonObj = JSON.parse(JSON.stringify(traceResponseJsonObj["mocaResultsResponse"]["exception"]));
-							vscode.window.showErrorMessage("Trace error: " + exceptionJsonObj["message"]);
+				// If exception of any kind, we need to return the message/status and indicate that the trace is not running. This includes if we are not even connected to a MOCA env at all.
+				if (traceResponseJsonObj["mocaResultsResponse"]["exception"]) {
+					var exceptionJsonObj = JSON.parse(JSON.stringify(traceResponseJsonObj["mocaResultsResponse"]["exception"]));
+					vscode.window.showErrorMessage("Trace error: " + exceptionJsonObj["message"]);
 
-							// Reset trace status if currently running.
-							if (traceStarted) {
-								traceStarted = false;
-								traceStatusBarItem.text = START_TRACE_STR;
-							}
-						}
-
-						// Resolve progress indicator.
-						progress.report({ increment: Infinity });
-						progressResolve();
-					});
-				});
-				return p;
+					// Reset trace status if currently running.
+					if (traceStarted) {
+						traceStarted = false;
+						traceStatusBarItem.text = START_TRACE_STR;
+					}
+				}
 			});
 
 
@@ -475,80 +415,78 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.COMMAND_LOOKUP, async () => {
 
-		vscode.commands.executeCommand(LanguageServerCommands.COMMAND_LOOKUP).then(async (commandLookupRes) => {
-			// We should have a string array of distinct moca command names.
-			var commandLookupObj = JSON.parse(JSON.stringify(commandLookupRes));
-			if (commandLookupObj.distinctMocaCommands) {
-				var distinctCommands = commandLookupObj.distinctMocaCommands as string[];
-				// Now sit tight while the user picks one.
-				await vscode.window.showQuickPick(distinctCommands).then((distinctCommandSelected) => {
-					// Now that we have a command, we can request command data from server.
-					vscode.commands.executeCommand(LanguageServerCommands.COMMAND_LOOKUP, distinctCommandSelected).then(async (commandDataRes) => {
-						// Make sure we have a command to work with.
-						if (distinctCommandSelected != null && distinctCommandSelected !== "") {
-							// We have our object. Now we need to let the user pick a command at a certain level or pick a trigger to look at.
-							var commandDataJsonObj = JSON.parse(JSON.stringify(commandDataRes));
-							var commandData = new Array();
-							if (commandDataJsonObj.commandsAtLevels) {
-								var commandsAtLevels = commandDataJsonObj.commandsAtLevels as MocaCommand[];
-								for (var i = 0; i < commandsAtLevels.length; i++) {
-									commandData.push(commandsAtLevels[i].cmplvl + ": " + commandsAtLevels[i].command + " (" + commandsAtLevels[i].type + ")");
-								}
-							}
-							if (commandDataJsonObj.triggers) {
-								var triggers = commandDataJsonObj.triggers as MocaTrigger[];
-								for (var i = 0; i < triggers.length; i++) {
-									commandData.push("Trigger: " + triggers[i].trgseq + " - " + triggers[i].name);
-								}
-							}
+		var commandLookupRes = await vscode.commands.executeCommand(LanguageServerCommands.COMMAND_LOOKUP);
+		// We should have a string array of distinct moca command names.
+		var commandLookupObj = JSON.parse(JSON.stringify(commandLookupRes));
+		if (commandLookupObj.distinctMocaCommands) {
+			var distinctCommands = commandLookupObj.distinctMocaCommands as string[];
+			// Now sit tight while the user picks one.
+			var distinctCommandSelected = await vscode.window.showQuickPick(distinctCommands, { ignoreFocusOut: true });
+			// Now that we have a command, we can request command data from server.
+			var commandDataRes = await vscode.commands.executeCommand(LanguageServerCommands.COMMAND_LOOKUP, distinctCommandSelected);
+			// Make sure we have a command to work with.
+			if (distinctCommandSelected != null && distinctCommandSelected !== "") {
+				// We have our object. Now we need to let the user pick a command at a certain level or pick a trigger to look at.
+				var commandDataJsonObj = JSON.parse(JSON.stringify(commandDataRes));
+				var commandData = new Array();
+				if (commandDataJsonObj.commandsAtLevels) {
+					var commandsAtLevels = commandDataJsonObj.commandsAtLevels as MocaCommand[];
+					for (var i = 0; i < commandsAtLevels.length; i++) {
+						commandData.push(commandsAtLevels[i].cmplvl + ": " + commandsAtLevels[i].command + " (" + commandsAtLevels[i].type + ")");
+					}
+				}
+				if (commandDataJsonObj.triggers) {
+					var triggers = commandDataJsonObj.triggers as MocaTrigger[];
+					for (var i = 0; i < triggers.length; i++) {
+						commandData.push("Trigger: " + triggers[i].trgseq + " - " + triggers[i].name);
+					}
+				}
 
-							await vscode.window.showQuickPick(commandData).then((commandDataSelectedRes) => {
-								// Now that the user has selected something specific from the command looked up, we can load the file.
-								var commandDataSelected = commandDataSelectedRes as string;
-								if (commandDataJsonObj.commandsAtLevels) {
-									var commandsAtLevels = commandDataJsonObj.commandsAtLevels as MocaCommand[];
-									for (var i = 0; i < commandsAtLevels.length; i++) {
-										if (commandDataSelected.localeCompare(commandsAtLevels[i].cmplvl + ": " + commandsAtLevels[i].command + " (" + commandsAtLevels[i].type + ")") === 0) {
-											var uri = vscode.Uri.file(context.globalStoragePath + "\\command-lookup\\" + (commandsAtLevels[i].cmplvl + "-" + commandsAtLevels[i].command).replace(/ /g, "_") + ".moca.readonly");
-											// Before we attempt to write, we need to make sure code is local syntax.
-											if (commandsAtLevels[i].type.localeCompare("Local Syntax") !== 0) {
-												vscode.window.showErrorMessage("Command Lookup: Cannot view non Local Syntax commands!");
-											} else {
-												vscode.workspace.fs.writeFile(uri, Buffer.from(commandsAtLevels[i].syntax)).then(() => {
+				var commandDataSelectedRes = await vscode.window.showQuickPick(commandData, { ignoreFocusOut: true, canPickMany: true });
+				// Now that the user has selected something specific from the command looked up, we can load the file(s).
+				var commandDataSelectedArr = commandDataSelectedRes as string[];
 
-													vscode.workspace.openTextDocument(uri).then(doc => {
-														vscode.window.showTextDocument(doc);
-													});
-												});
-											}
-											return;
-										}
-									}
-								}
-								if (commandDataJsonObj.triggers) {
-									var triggers = commandDataJsonObj.triggers as MocaTrigger[];
-									for (var i = 0; i < triggers.length; i++) {
-										commandData.push("Trigger: " + triggers[i].name);
-										if (commandDataSelected.localeCompare("Trigger: " + triggers[i].trgseq + " - " + triggers[i].name) === 0) {
-											var uri = vscode.Uri.file(context.globalStoragePath + "\\command-lookup\\" + (distinctCommandSelected + "-" + triggers[i].name).replace(/ /g, "_") + ".moca.readonly");
-											// Triggers are always local syntax.
-											vscode.workspace.fs.writeFile(uri, Buffer.from(triggers[i].syntax)).then(() => {
-												vscode.workspace.openTextDocument(uri).then(doc => {
-													vscode.window.showTextDocument(doc);
-												});
-											});
-											return;
-										}
-									}
-								}
-							});
+				// Put commands & triggers in arrays here if we have them.
+				var commandsAtLevels: MocaCommand[] = [];
+				if (commandDataJsonObj.commandsAtLevels) {
+					var commandsAtLevels = commandDataJsonObj.commandsAtLevels as MocaCommand[];
+				}
+				var triggers: MocaTrigger[] = [];
+				if (commandDataJsonObj.triggers) {
+					triggers = commandDataJsonObj.triggers as MocaTrigger[];
+				}
+
+				for (var i = 0; i < commandDataSelectedArr.length; i++) {
+					var commandDataSelected = commandDataSelectedArr[i];
+
+					// Checking commands.
+					for (var j = 0; j < commandsAtLevels.length; j++) {
+						if (commandDataSelected.localeCompare(commandsAtLevels[j].cmplvl + ": " + commandsAtLevels[j].command + " (" + commandsAtLevels[j].type + ")") === 0) {
+							var uri = vscode.Uri.file(context.globalStoragePath + "\\command-lookup\\" + (commandsAtLevels[j].cmplvl + "-" + commandsAtLevels[j].command).replace(/ /g, "_") + ".moca.readonly");
+							// Before we attempt to write, we need to make sure code is local syntax.
+							if (commandsAtLevels[j].type.localeCompare("Local Syntax") !== 0) {
+								vscode.window.showErrorMessage("Command Lookup: Cannot view non Local Syntax commands!");
+							} else {
+								await vscode.workspace.fs.writeFile(uri, Buffer.from(commandsAtLevels[j].syntax));
+								var doc = await vscode.workspace.openTextDocument(uri);
+								await vscode.window.showTextDocument(doc, { preview: false });
+							}
 						}
+					}
 
-					});
-				});
+					// Checking triggers.
+					for (var j = 0; j < triggers.length; j++) {
+						if (commandDataSelected.localeCompare("Trigger: " + triggers[j].trgseq + " - " + triggers[j].name) === 0) {
+							var uri = vscode.Uri.file(context.globalStoragePath + "\\command-lookup\\" + (distinctCommandSelected + "-" + triggers[j].name).replace(/ /g, "_") + ".moca.readonly");
+							// Triggers are always local syntax.
+							await vscode.workspace.fs.writeFile(uri, Buffer.from(triggers[j].syntax));
+							var doc = await vscode.workspace.openTextDocument(uri);
+							await vscode.window.showTextDocument(doc, { preview: false });
+						}
+					}
+				}
 			}
-
-		});
+		}
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.AUTO_EXECUTE, async () => {
@@ -620,99 +558,70 @@ export function activate(context: vscode.ExtensionContext) {
 					// Start with initial duration.
 					await sleepFunc(initialDuration);
 
-					var autoExecP = new Promise(autoExecProgressResolve => {
+					// Purpose of this is to indicate that cancellation was requested down below.
+					var autoExecCancellationRequested = false;
 
-						// Purpose of this is to indicate that cancellation was requested down below.
-						var autoExecCancellationRequested = false;
+					autoExecToken.onCancellationRequested(() => {
+						autoExecCancellationRequested = true;
+					});
 
-						autoExecToken.onCancellationRequested(() => {
-							// Go ahead and resolve progress, send cancellation, then quit.
-							autoExecCancellationRequested = true;
-							autoExecProgressResolve();
-							return autoExecP;
-						});
+					var executionCountIncrementAmount = (1 / stopIfExecutionCountExceeds) * 100;
+					var elapsedTimeIncrementAmount = (1000 / stopIfTimeElapses) * 100;
+					var incrementAmount = (executionCountIncrementAmount > elapsedTimeIncrementAmount ? executionCountIncrementAmount : elapsedTimeIncrementAmount);
 
-						var innerAutoExecP = new Promise(async (innerAutoExecResolve) => {
+					while (executionCount < stopIfExecutionCountExceeds && (curTime - startTime) < stopIfTimeElapses && !stopExecutionBecauseOfError && !autoExecCancellationRequested) {
 
-							var executionCountIncrementAmount = (1 / stopIfExecutionCountExceeds) * 100;
-							var elapsedTimeIncrementAmount = (1000 / stopIfTimeElapses) * 100;
-							var incrementAmount = (executionCountIncrementAmount > elapsedTimeIncrementAmount ? executionCountIncrementAmount : elapsedTimeIncrementAmount);
+						// Sleep before execution.
+						await sleepFunc(sleepDuration);
 
-							while (executionCount < stopIfExecutionCountExceeds && (curTime - startTime) < stopIfTimeElapses && !stopExecutionBecauseOfError) {
-
-								// Sleep before execution.
-								await sleepFunc(sleepDuration);
-
-								// Execute.
-								vscode.window.withProgress({
-									location: vscode.ProgressLocation.Notification,
-									title: "MOCA",
-									cancellable: true
-								}, (execProgress, execToken) => {
-									execProgress.report({
-										increment: Infinity,
-										message: "Auto Executing " + curFileNameShortened + " (" + (executionCount + 1) + ")"
-									});
-
-									var execP = new Promise(execProgressResolve => {
-
-										// Purpose of this is to indicate that cancellation was requested down below.
-										var execCancellationRequested = false;
-
-										execToken.onCancellationRequested(() => {
-											// Go ahead and resolve progress, send cancellation, then quit.
-											execCancellationRequested = true;
-											execProgressResolve();
-											return execP;
-										});
-
-										// NOTE: just assume user does not want 'approvedForRun' unsafe prod env code config here.
-										vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, script, curFileNameShortened, true).then((res) => {
-
-											// If cancellation requested, skip this part.
-											if (!execCancellationRequested && !autoExecCancellationRequested) {
-												var mocaResults = new MocaResults(res);
-												ResultViewPanel.createOrShow(context.extensionPath, curFileNameShortened, mocaResults);
-												if (mocaResults.msg && mocaResults.msg.length > 0) {
-													vscode.window.showErrorMessage(curFileNameShortened + "(Auto Execution): " + mocaResults.msg);
-													// This means we have an error. Check if we need to quit auto exec.
-													if (stopIfExecutionError) {
-														stopExecutionBecauseOfError = true;
-													}
-												}
-											}
-										}).then(() => {
-											// Resolve progress indicator.
-											execProgress.report({ increment: Infinity });
-											execProgressResolve();
-										});
-									});
-									return execP;
+						if (!autoExecCancellationRequested) {
+							// Execute.
+							vscode.window.withProgress({
+								location: vscode.ProgressLocation.Notification,
+								title: "MOCA",
+								cancellable: true
+							}, async (execProgress, execToken) => {
+								execProgress.report({
+									increment: Infinity,
+									message: "Auto Executing " + curFileNameShortened + " (" + (executionCount + 1) + ")"
 								});
 
-								executionCount++;
-								curTime = performance.now();
+								// Purpose of this is to indicate that cancellation was requested down below.
+								var execCancellationRequested = false;
 
-								autoExecProgress.report({ increment: incrementAmount });
+								execToken.onCancellationRequested(() => {
+									execCancellationRequested = true;
+								});
 
-								// Quit if cancellation requested above.
-								if (autoExecCancellationRequested) {
-									break;
+								if (!autoExecCancellationRequested && !execCancellationRequested) {
+									// NOTE: just assume user does not care about unsafe code config here.
+									var res = await vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, script, curFileNameShortened, true);
+
+									// If cancellation requested, skip this part.
+									if (!execCancellationRequested) {
+										var mocaResults = new MocaResults(res);
+										ResultViewPanel.createOrShow(context.extensionPath, curFileNameShortened, mocaResults);
+										if (mocaResults.msg && mocaResults.msg.length > 0) {
+											vscode.window.showErrorMessage(curFileNameShortened + "(Auto Execution): " + mocaResults.msg);
+											// This means we have an error. Check if we need to quit auto exec.
+											if (stopIfExecutionError) {
+												stopExecutionBecauseOfError = true;
+											}
+										}
+									}
 								}
-							}
+							});
 
-							// Resolve promise.
-							innerAutoExecResolve();
-						}).then(() => {
-							// Resolve progress indicator.
-							autoExecProgressResolve();
-						});
-					});
-					return autoExecP;
+							executionCount++;
+							curTime = performance.now();
+
+							autoExecProgress.report({ increment: incrementAmount });
+						}
+					}
 				});
 			}
 		} else {
-			vscode.window.showErrorMessage("Must Configure Auto Exection!");
+			vscode.window.showErrorMessage("Must Configure Auto Execution!");
 		}
 	}));
 
