@@ -71,10 +71,6 @@ const UNSAFE_CODE_APPROVAL_PROMPT = "You are attempting to run unsafe code. Do y
 const UNSAFE_CODE_APPROVAL_OPTION_YES = "Yes";
 const UNSAFE_CODE_APPROVAL_OPTION_NO = "No";
 
-// Save the last successful connection. Reason being, is that if the user tries to re-connect to the same connection, we do not necessarily
-// want to reload the cache.
-let lastAttemptedConnectionName: string = "";
-
 // Need to keep track of trace status.
 let traceStarted: boolean = false;
 
@@ -107,7 +103,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
 		const config = vscode.workspace.getConfiguration(CONFIGURATION_NAME);
 		const connectionConfig = config.get(CONFIGURATION_CONNECTIONS_NAME);
-
 
 		if (connectionConfig) {
 			const connectionConfigObjArr = connectionConfig as Object[];
@@ -148,14 +143,6 @@ export async function activate(context: vscode.ExtensionContext) {
 				}
 				selectedConnectionObj.password = passwordInputRes;
 			}
-		}
-
-		// Analyze selected connection to determine if we will need to reload moca repo.
-		var useExistingMocaRepo = false;
-		if (lastAttemptedConnectionName.localeCompare(selectedConnectionObj.name) === 0) {
-			useExistingMocaRepo = true;
-		} else {
-			lastAttemptedConnectionName = selectedConnectionObj.name;
 		}
 
 		// If no entries in groovy classpath for selected connection, set to default groovy classpath.
@@ -207,7 +194,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			}
 		}).then(() => {
 			// If successful connection and we are not just re-connecting to current connection, load repo.
-			if (connectionSuccess && !useExistingMocaRepo) {
+			if (connectionSuccess) {
 				vscode.commands.executeCommand(LanguageClientCommands.LOAD_CACHE);
 			}
 		});

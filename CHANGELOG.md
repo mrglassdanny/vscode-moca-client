@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.3.17 (October ??, 2020)
+## 1.3.17 (October 29, 2020)
 * Issue #7 enhancement -- https://github.com/mrglassdanny/vscode-moca-client/issues/7
 * Allow user to select multiple command levels/triggers for viewing in command lookup
 * Code cleanup
