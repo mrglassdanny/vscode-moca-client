@@ -237,7 +237,7 @@ function activate(context) {
                     increment: Infinity,
                     message: "Executing " + curFileNameShortened
                 });
-                var p = new Promise(progressResolve => {
+                var p = new Promise((progressResolve) => __awaiter(this, void 0, void 0, function* () {
                     // Purpose of this is to indicate that cancellation was requested down below.
                     var cancellationRequested = false;
                     token.onCancellationRequested(() => {
@@ -246,45 +246,42 @@ function activate(context) {
                         progressResolve();
                         return p;
                     });
-                    vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, script, curFileNameShortened, false).then((res) => __awaiter(this, void 0, void 0, function* () {
-                        // If cancellation requested, skip this part.
-                        if (!cancellationRequested) {
-                            var mocaResults = new mocaResults_1.MocaResults(res);
-                            // If lang server says we need approval before executing(due to unsafe code config on connection), we need to ask the user if they truly want to run script.
-                            // NOTE: if cancellation is requested before we get here, lang server does not run unsafe scripts in configured envs by default -- assuming that approval is required.
-                            if (mocaResults.needsApprovalToExecute) {
-                                var approvalOptionRes = yield vscode.window.showWarningMessage(UNSAFE_CODE_APPROVAL_PROMPT, UNSAFE_CODE_APPROVAL_OPTION_YES, UNSAFE_CODE_APPROVAL_OPTION_NO);
-                                // Check again if cancellation is requested.
-                                // If so, just exit and do not worry about approval option result.
-                                if (!cancellationRequested) {
-                                    if (approvalOptionRes === UNSAFE_CODE_APPROVAL_OPTION_YES) {
-                                        // User says yes; run script!
-                                        vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, script, curFileNameShortened, true).then((approvedRes) => __awaiter(this, void 0, void 0, function* () {
-                                            // If cancellation requested, skip this part.
-                                            if (!cancellationRequested) {
-                                                var approvedMocaResults = new mocaResults_1.MocaResults(approvedRes);
-                                                ResultViewPanel_1.ResultViewPanel.createOrShow(context.extensionPath, curFileNameShortened, approvedMocaResults);
-                                                if (approvedMocaResults.msg && approvedMocaResults.msg.length > 0) {
-                                                    vscode.window.showErrorMessage(curFileNameShortened + ": " + approvedMocaResults.msg);
-                                                }
-                                            }
-                                        }));
+                    var res = yield vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, script, curFileNameShortened, false);
+                    // If cancellation requested, skip this part.
+                    if (!cancellationRequested) {
+                        var mocaResults = new mocaResults_1.MocaResults(res);
+                        // If lang server says we need approval before executing(due to unsafe code config on connection), we need to ask the user if they truly want to run script.
+                        // NOTE: if cancellation is requested before we get here, lang server does not run unsafe scripts in configured envs by default -- assuming that approval is required.
+                        if (mocaResults.needsApprovalToExecute) {
+                            var approvalOptionRes = yield vscode.window.showWarningMessage(UNSAFE_CODE_APPROVAL_PROMPT, UNSAFE_CODE_APPROVAL_OPTION_YES, UNSAFE_CODE_APPROVAL_OPTION_NO);
+                            // Check again if cancellation is requested.
+                            // If so, just exit and do not worry about approval option result.
+                            if (!cancellationRequested) {
+                                if (approvalOptionRes === UNSAFE_CODE_APPROVAL_OPTION_YES) {
+                                    // User says yes; run script!
+                                    var approvedRes = yield vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, script, curFileNameShortened, true);
+                                    // If cancellation requested, skip this part.
+                                    if (!cancellationRequested) {
+                                        var approvedMocaResults = new mocaResults_1.MocaResults(approvedRes);
+                                        ResultViewPanel_1.ResultViewPanel.createOrShow(context.extensionPath, curFileNameShortened, approvedMocaResults);
+                                        if (approvedMocaResults.msg && approvedMocaResults.msg.length > 0) {
+                                            vscode.window.showErrorMessage(curFileNameShortened + ": " + approvedMocaResults.msg);
+                                        }
                                     }
                                 }
                             }
-                            else {
-                                ResultViewPanel_1.ResultViewPanel.createOrShow(context.extensionPath, curFileNameShortened, mocaResults);
-                                if (mocaResults.msg && mocaResults.msg.length > 0) {
-                                    vscode.window.showErrorMessage(curFileNameShortened + ": " + mocaResults.msg);
-                                }
+                        }
+                        else {
+                            ResultViewPanel_1.ResultViewPanel.createOrShow(context.extensionPath, curFileNameShortened, mocaResults);
+                            if (mocaResults.msg && mocaResults.msg.length > 0) {
+                                vscode.window.showErrorMessage(curFileNameShortened + ": " + mocaResults.msg);
                             }
                         }
-                    })).then(() => {
-                        // Resolve progress indicator.
-                        progress.report({ increment: Infinity });
-                        progressResolve();
-                    });
-                });
+                    }
+                    // Resolve progress indicator.
+                    progress.report({ increment: Infinity });
+                    progressResolve();
+                }));
                 return p;
             });
         }
@@ -306,7 +303,7 @@ function activate(context) {
                         increment: Infinity,
                         message: "Executing Selection " + curFileNameShortened
                     });
-                    var p = new Promise(progressResolve => {
+                    var p = new Promise((progressResolve) => __awaiter(this, void 0, void 0, function* () {
                         // Purpose of this is to indicate that cancellation was requested down below.
                         var cancellationRequested = false;
                         token.onCancellationRequested(() => {
@@ -315,45 +312,42 @@ function activate(context) {
                             progressResolve();
                             return p;
                         });
-                        vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, selectedScript, curFileNameShortened, false).then((res) => __awaiter(this, void 0, void 0, function* () {
-                            // If cancellation requested, skip this part.
-                            if (!cancellationRequested) {
-                                var mocaResults = new mocaResults_1.MocaResults(res);
-                                // If lang server says we need approval before executing(due to unsafe code config on connection), we need to ask the user if they truly want to run script.
-                                // NOTE: if cancellation is requested before we get here, lang server does not run unsafe scripts in configured envs by default -- assuming that approval is required.
-                                if (mocaResults.needsApprovalToExecute) {
-                                    var approvalOptionRes = yield vscode.window.showWarningMessage(UNSAFE_CODE_APPROVAL_PROMPT, UNSAFE_CODE_APPROVAL_OPTION_YES, UNSAFE_CODE_APPROVAL_OPTION_NO);
-                                    // Check again if cancellation is requested.
-                                    // If so, just exit and do not worry about approval option result.
-                                    if (!cancellationRequested) {
-                                        if (approvalOptionRes === UNSAFE_CODE_APPROVAL_OPTION_YES) {
-                                            // User says yes; run script!
-                                            vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, selectedScript, curFileNameShortened, true).then((approvedRes) => __awaiter(this, void 0, void 0, function* () {
-                                                // If cancellation requested, skip this part.
-                                                if (!cancellationRequested) {
-                                                    var approvedMocaResults = new mocaResults_1.MocaResults(approvedRes);
-                                                    ResultViewPanel_1.ResultViewPanel.createOrShow(context.extensionPath, curFileNameShortened, approvedMocaResults);
-                                                    if (approvedMocaResults.msg && approvedMocaResults.msg.length > 0) {
-                                                        vscode.window.showErrorMessage(curFileNameShortened + ": " + approvedMocaResults.msg);
-                                                    }
-                                                }
-                                            }));
+                        var res = yield vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, selectedScript, curFileNameShortened, false);
+                        // If cancellation requested, skip this part.
+                        if (!cancellationRequested) {
+                            var mocaResults = new mocaResults_1.MocaResults(res);
+                            // If lang server says we need approval before executing(due to unsafe code config on connection), we need to ask the user if they truly want to run script.
+                            // NOTE: if cancellation is requested before we get here, lang server does not run unsafe scripts in configured envs by default -- assuming that approval is required.
+                            if (mocaResults.needsApprovalToExecute) {
+                                var approvalOptionRes = yield vscode.window.showWarningMessage(UNSAFE_CODE_APPROVAL_PROMPT, UNSAFE_CODE_APPROVAL_OPTION_YES, UNSAFE_CODE_APPROVAL_OPTION_NO);
+                                // Check again if cancellation is requested.
+                                // If so, just exit and do not worry about approval option result.
+                                if (!cancellationRequested) {
+                                    if (approvalOptionRes === UNSAFE_CODE_APPROVAL_OPTION_YES) {
+                                        // User says yes; run script!
+                                        var approvedRes = yield vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, selectedScript, curFileNameShortened, true);
+                                        // If cancellation requested, skip this part.
+                                        if (!cancellationRequested) {
+                                            var approvedMocaResults = new mocaResults_1.MocaResults(approvedRes);
+                                            ResultViewPanel_1.ResultViewPanel.createOrShow(context.extensionPath, curFileNameShortened, approvedMocaResults);
+                                            if (approvedMocaResults.msg && approvedMocaResults.msg.length > 0) {
+                                                vscode.window.showErrorMessage(curFileNameShortened + ": " + approvedMocaResults.msg);
+                                            }
                                         }
                                     }
                                 }
-                                else {
-                                    ResultViewPanel_1.ResultViewPanel.createOrShow(context.extensionPath, curFileNameShortened, mocaResults);
-                                    if (mocaResults.msg && mocaResults.msg.length > 0) {
-                                        vscode.window.showErrorMessage(curFileNameShortened + ": " + mocaResults.msg);
-                                    }
+                            }
+                            else {
+                                ResultViewPanel_1.ResultViewPanel.createOrShow(context.extensionPath, curFileNameShortened, mocaResults);
+                                if (mocaResults.msg && mocaResults.msg.length > 0) {
+                                    vscode.window.showErrorMessage(curFileNameShortened + ": " + mocaResults.msg);
                                 }
                             }
-                        })).then(() => {
-                            // Resolve progress indicator.
-                            progress.report({ increment: Infinity });
-                            progressResolve();
-                        });
-                    });
+                        }
+                        // Resolve progress indicator.
+                        progress.report({ increment: Infinity });
+                        progressResolve();
+                    }));
                     return p;
                 });
             }
@@ -388,25 +382,24 @@ function activate(context) {
                 else {
                     traceStatusBarItem.text = START_TRACE_STR;
                 }
-                var p = new Promise(progressResolve => {
+                var p = new Promise((progressResolve) => __awaiter(this, void 0, void 0, function* () {
                     console.log(traceStarted);
-                    vscode.commands.executeCommand(LanguageServerCommands.TRACE, traceStarted, fileName, mode).then((traceRes) => {
-                        const traceResponseJsonObj = JSON.parse(JSON.stringify(traceRes));
-                        // If exception of any kind, we need to return the message/status and indicate that the trace is not running. This includes if we are not even connected to a MOCA env at all.
-                        if (traceResponseJsonObj["mocaResultsResponse"]["exception"]) {
-                            var exceptionJsonObj = JSON.parse(JSON.stringify(traceResponseJsonObj["mocaResultsResponse"]["exception"]));
-                            vscode.window.showErrorMessage("Trace error: " + exceptionJsonObj["message"]);
-                            // Reset trace status if currently running.
-                            if (traceStarted) {
-                                traceStarted = false;
-                                traceStatusBarItem.text = START_TRACE_STR;
-                            }
+                    var traceRes = yield vscode.commands.executeCommand(LanguageServerCommands.TRACE, traceStarted, fileName, mode);
+                    const traceResponseJsonObj = JSON.parse(JSON.stringify(traceRes));
+                    // If exception of any kind, we need to return the message/status and indicate that the trace is not running. This includes if we are not even connected to a MOCA env at all.
+                    if (traceResponseJsonObj["mocaResultsResponse"]["exception"]) {
+                        var exceptionJsonObj = JSON.parse(JSON.stringify(traceResponseJsonObj["mocaResultsResponse"]["exception"]));
+                        vscode.window.showErrorMessage("Trace error: " + exceptionJsonObj["message"]);
+                        // Reset trace status if currently running.
+                        if (traceStarted) {
+                            traceStarted = false;
+                            traceStatusBarItem.text = START_TRACE_STR;
                         }
-                        // Resolve progress indicator.
-                        progress.report({ increment: Infinity });
-                        progressResolve();
-                    });
-                });
+                    }
+                    // Resolve progress indicator.
+                    progress.report({ increment: Infinity });
+                    progressResolve();
+                }));
                 return p;
             });
         }
