@@ -412,78 +412,74 @@ function activate(context) {
         }
     })));
     context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.COMMAND_LOOKUP, () => __awaiter(this, void 0, void 0, function* () {
-        vscode.commands.executeCommand(LanguageServerCommands.COMMAND_LOOKUP).then((commandLookupRes) => __awaiter(this, void 0, void 0, function* () {
-            // We should have a string array of distinct moca command names.
-            var commandLookupObj = JSON.parse(JSON.stringify(commandLookupRes));
-            if (commandLookupObj.distinctMocaCommands) {
-                var distinctCommands = commandLookupObj.distinctMocaCommands;
-                // Now sit tight while the user picks one.
-                yield vscode.window.showQuickPick(distinctCommands, { ignoreFocusOut: true }).then((distinctCommandSelected) => {
-                    // Now that we have a command, we can request command data from server.
-                    vscode.commands.executeCommand(LanguageServerCommands.COMMAND_LOOKUP, distinctCommandSelected).then((commandDataRes) => __awaiter(this, void 0, void 0, function* () {
-                        // Make sure we have a command to work with.
-                        if (distinctCommandSelected != null && distinctCommandSelected !== "") {
-                            // We have our object. Now we need to let the user pick a command at a certain level or pick a trigger to look at.
-                            var commandDataJsonObj = JSON.parse(JSON.stringify(commandDataRes));
-                            var commandData = new Array();
-                            if (commandDataJsonObj.commandsAtLevels) {
-                                var commandsAtLevels = commandDataJsonObj.commandsAtLevels;
-                                for (var i = 0; i < commandsAtLevels.length; i++) {
-                                    commandData.push(commandsAtLevels[i].cmplvl + ": " + commandsAtLevels[i].command + " (" + commandsAtLevels[i].type + ")");
-                                }
+        var commandLookupRes = yield vscode.commands.executeCommand(LanguageServerCommands.COMMAND_LOOKUP);
+        // We should have a string array of distinct moca command names.
+        var commandLookupObj = JSON.parse(JSON.stringify(commandLookupRes));
+        if (commandLookupObj.distinctMocaCommands) {
+            var distinctCommands = commandLookupObj.distinctMocaCommands;
+            // Now sit tight while the user picks one.
+            var distinctCommandSelected = yield vscode.window.showQuickPick(distinctCommands, { ignoreFocusOut: true });
+            // Now that we have a command, we can request command data from server.
+            var commandDataRes = yield vscode.commands.executeCommand(LanguageServerCommands.COMMAND_LOOKUP, distinctCommandSelected);
+            // Make sure we have a command to work with.
+            if (distinctCommandSelected != null && distinctCommandSelected !== "") {
+                // We have our object. Now we need to let the user pick a command at a certain level or pick a trigger to look at.
+                var commandDataJsonObj = JSON.parse(JSON.stringify(commandDataRes));
+                var commandData = new Array();
+                if (commandDataJsonObj.commandsAtLevels) {
+                    var commandsAtLevels = commandDataJsonObj.commandsAtLevels;
+                    for (var i = 0; i < commandsAtLevels.length; i++) {
+                        commandData.push(commandsAtLevels[i].cmplvl + ": " + commandsAtLevels[i].command + " (" + commandsAtLevels[i].type + ")");
+                    }
+                }
+                if (commandDataJsonObj.triggers) {
+                    var triggers = commandDataJsonObj.triggers;
+                    for (var i = 0; i < triggers.length; i++) {
+                        commandData.push("Trigger: " + triggers[i].trgseq + " - " + triggers[i].name);
+                    }
+                }
+                var commandDataSelectedRes = yield vscode.window.showQuickPick(commandData, { ignoreFocusOut: true, canPickMany: true });
+                // Now that the user has selected something specific from the command looked up, we can load the file(s).
+                var commandDataSelectedArr = commandDataSelectedRes;
+                // Put commands & triggers in arrays here if we have them.
+                var commandsAtLevels = [];
+                if (commandDataJsonObj.commandsAtLevels) {
+                    var commandsAtLevels = commandDataJsonObj.commandsAtLevels;
+                }
+                var triggers = [];
+                if (commandDataJsonObj.triggers) {
+                    triggers = commandDataJsonObj.triggers;
+                }
+                for (var i = 0; i < commandDataSelectedArr.length; i++) {
+                    var commandDataSelected = commandDataSelectedArr[i];
+                    // Checking commands.
+                    for (var j = 0; j < commandsAtLevels.length; j++) {
+                        if (commandDataSelected.localeCompare(commandsAtLevels[j].cmplvl + ": " + commandsAtLevels[j].command + " (" + commandsAtLevels[j].type + ")") === 0) {
+                            var uri = vscode.Uri.file(context.globalStoragePath + "\\command-lookup\\" + (commandsAtLevels[j].cmplvl + "-" + commandsAtLevels[j].command).replace(/ /g, "_") + ".moca.readonly");
+                            // Before we attempt to write, we need to make sure code is local syntax.
+                            if (commandsAtLevels[j].type.localeCompare("Local Syntax") !== 0) {
+                                vscode.window.showErrorMessage("Command Lookup: Cannot view non Local Syntax commands!");
                             }
-                            if (commandDataJsonObj.triggers) {
-                                var triggers = commandDataJsonObj.triggers;
-                                for (var i = 0; i < triggers.length; i++) {
-                                    commandData.push("Trigger: " + triggers[i].trgseq + " - " + triggers[i].name);
-                                }
+                            else {
+                                yield vscode.workspace.fs.writeFile(uri, Buffer.from(commandsAtLevels[j].syntax));
+                                var doc = yield vscode.workspace.openTextDocument(uri);
+                                yield vscode.window.showTextDocument(doc, { preview: false });
                             }
-                            yield vscode.window.showQuickPick(commandData, { ignoreFocusOut: true, canPickMany: true }).then((commandDataSelectedRes) => __awaiter(this, void 0, void 0, function* () {
-                                // Now that the user has selected something specific from the command looked up, we can load the file(s).
-                                var commandDataSelectedArr = commandDataSelectedRes;
-                                // Put commands & triggers in arrays here if we have them.
-                                var commandsAtLevels = [];
-                                if (commandDataJsonObj.commandsAtLevels) {
-                                    var commandsAtLevels = commandDataJsonObj.commandsAtLevels;
-                                }
-                                var triggers = [];
-                                if (commandDataJsonObj.triggers) {
-                                    triggers = commandDataJsonObj.triggers;
-                                }
-                                for (var i = 0; i < commandDataSelectedArr.length; i++) {
-                                    var commandDataSelected = commandDataSelectedArr[i];
-                                    // Checking commands.
-                                    for (var j = 0; j < commandsAtLevels.length; j++) {
-                                        if (commandDataSelected.localeCompare(commandsAtLevels[j].cmplvl + ": " + commandsAtLevels[j].command + " (" + commandsAtLevels[j].type + ")") === 0) {
-                                            var uri = vscode.Uri.file(context.globalStoragePath + "\\command-lookup\\" + (commandsAtLevels[j].cmplvl + "-" + commandsAtLevels[j].command).replace(/ /g, "_") + ".moca.readonly");
-                                            // Before we attempt to write, we need to make sure code is local syntax.
-                                            if (commandsAtLevels[j].type.localeCompare("Local Syntax") !== 0) {
-                                                vscode.window.showErrorMessage("Command Lookup: Cannot view non Local Syntax commands!");
-                                            }
-                                            else {
-                                                yield vscode.workspace.fs.writeFile(uri, Buffer.from(commandsAtLevels[j].syntax));
-                                                var doc = yield vscode.workspace.openTextDocument(uri);
-                                                yield vscode.window.showTextDocument(doc, { preview: false });
-                                            }
-                                        }
-                                    }
-                                    // Checking triggers.
-                                    for (var j = 0; j < triggers.length; j++) {
-                                        if (commandDataSelected.localeCompare("Trigger: " + triggers[j].trgseq + " - " + triggers[j].name) === 0) {
-                                            var uri = vscode.Uri.file(context.globalStoragePath + "\\command-lookup\\" + (distinctCommandSelected + "-" + triggers[j].name).replace(/ /g, "_") + ".moca.readonly");
-                                            // Triggers are always local syntax.
-                                            yield vscode.workspace.fs.writeFile(uri, Buffer.from(triggers[j].syntax));
-                                            var doc = yield vscode.workspace.openTextDocument(uri);
-                                            yield vscode.window.showTextDocument(doc, { preview: false });
-                                        }
-                                    }
-                                }
-                            }));
                         }
-                    }));
-                });
+                    }
+                    // Checking triggers.
+                    for (var j = 0; j < triggers.length; j++) {
+                        if (commandDataSelected.localeCompare("Trigger: " + triggers[j].trgseq + " - " + triggers[j].name) === 0) {
+                            var uri = vscode.Uri.file(context.globalStoragePath + "\\command-lookup\\" + (distinctCommandSelected + "-" + triggers[j].name).replace(/ /g, "_") + ".moca.readonly");
+                            // Triggers are always local syntax.
+                            yield vscode.workspace.fs.writeFile(uri, Buffer.from(triggers[j].syntax));
+                            var doc = yield vscode.workspace.openTextDocument(uri);
+                            yield vscode.window.showTextDocument(doc, { preview: false });
+                        }
+                    }
+                }
             }
-        }));
+        }
     })));
     context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.AUTO_EXECUTE, () => __awaiter(this, void 0, void 0, function* () {
         // Read in configuration and execute.
