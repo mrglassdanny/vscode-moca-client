@@ -32,11 +32,11 @@ class MocaResults {
         else {
             this.msg = "";
         }
-        if (data['isProductionEnvionmentAndScriptIsUnsafe']) {
-            this.isProdEnvAndScriptUnsafe = true;
+        if (data['needsApprovalToExecute']) {
+            this.needsApprovalToExecute = true;
         }
         else {
-            this.isProdEnvAndScriptUnsafe = false;
+            this.needsApprovalToExecute = false;
         }
     }
 }

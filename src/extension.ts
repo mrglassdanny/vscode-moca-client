@@ -66,10 +66,10 @@ const CONNECTED_PREFIX_STR = "MOCA: $(database) ";
 const START_TRACE_STR = "$(debug-start) Start Trace";
 const STOP_TRACE_STR = "$(debug-stop) Stop Trace";
 
-// Constants for unsafe script executions in production envionment configuration.
-const UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_PROMPT = "You are attempting to run unsafe code in a production environment. Do you want to continue?";
-const UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_OPTION_YES = "Yes";
-const UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_OPTION_NO = "No";
+// Constants for unsafe script executions configuration.
+const UNSAFE_CODE_APPROVAL_PROMPT = "You are attempting to run unsafe code. Do you want to continue?";
+const UNSAFE_CODE_APPROVAL_OPTION_YES = "Yes";
+const UNSAFE_CODE_APPROVAL_OPTION_NO = "No";
 
 // Save the last successful connection. Reason being, is that if the user tries to re-connect to the same connection, we do not necessarily
 // want to reload the cache.
@@ -164,6 +164,11 @@ export function activate(context: vscode.ExtensionContext) {
 		// If no entries in groovy classpath for selected connection, set to default groovy classpath.
 		if (!selectedConnectionObj.groovyclasspath || selectedConnectionObj.groovyclasspath.length === 0) {
 			selectedConnectionObj.groovyclasspath = vscode.workspace.getConfiguration(CONFIGURATION_NAME).get(CONFIGURATION_DEFAULT_GROOVY_CLASSPATH);
+		}
+
+		// If no entry for unsafe approval config, just default to false.
+		if (!selectedConnectionObj.approveUnsafeScripts) {
+			selectedConnectionObj.approveUnsafeScripts = false;
 		}
 
 		// Refering to moca server, not moca language server.
@@ -287,14 +292,14 @@ export function activate(context: vscode.ExtensionContext) {
 						if (!cancellationRequested) {
 							var mocaResults = new MocaResults(res);
 
-							// If lang server says env is prod and script is unsafe, we need to ask the user if they truly want to run script.
-							// NOTE: if cancellation is requested before we get here, lang server does not run unsafe scripts in prod envs by default -- assuming that approval is configured.
-							if (mocaResults.isProdEnvAndScriptUnsafe) {
-								var approvalOptionRes = await vscode.window.showWarningMessage(UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_PROMPT, UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_OPTION_YES, UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_OPTION_NO);
+							// If lang server says we need approval before executing(due to unsafe code config on connection), we need to ask the user if they truly want to run script.
+							// NOTE: if cancellation is requested before we get here, lang server does not run unsafe scripts in configured envs by default -- assuming that approval is required.
+							if (mocaResults.needsApprovalToExecute) {
+								var approvalOptionRes = await vscode.window.showWarningMessage(UNSAFE_CODE_APPROVAL_PROMPT, UNSAFE_CODE_APPROVAL_OPTION_YES, UNSAFE_CODE_APPROVAL_OPTION_NO);
 								// Check again if cancellation is requested.
 								// If so, just exit and do not worry about approval option result.
 								if (!cancellationRequested) {
-									if (approvalOptionRes === UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_OPTION_YES) {
+									if (approvalOptionRes === UNSAFE_CODE_APPROVAL_OPTION_YES) {
 										// User says yes; run script!
 										vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, script, curFileNameShortened, true).then(async (approvedRes) => {
 											// If cancellation requested, skip this part.
@@ -366,14 +371,14 @@ export function activate(context: vscode.ExtensionContext) {
 							if (!cancellationRequested) {
 								var mocaResults = new MocaResults(res);
 
-								// If lang server says env is prod and script is unsafe, we need to ask the user if they truly want to run script.
-								// NOTE: if cancellation is requested before we get here, lang server does not run unsafe scripts in prod envs by default -- assuming that approval is configured.
-								if (mocaResults.isProdEnvAndScriptUnsafe) {
-									var approvalOptionRes = await vscode.window.showWarningMessage(UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_PROMPT, UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_OPTION_YES, UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_OPTION_NO);
+								// If lang server says we need approval before executing(due to unsafe code config on connection), we need to ask the user if they truly want to run script.
+								// NOTE: if cancellation is requested before we get here, lang server does not run unsafe scripts in configured envs by default -- assuming that approval is required.
+								if (mocaResults.needsApprovalToExecute) {
+									var approvalOptionRes = await vscode.window.showWarningMessage(UNSAFE_CODE_APPROVAL_PROMPT, UNSAFE_CODE_APPROVAL_OPTION_YES, UNSAFE_CODE_APPROVAL_OPTION_NO);
 									// Check again if cancellation is requested.
 									// If so, just exit and do not worry about approval option result.
 									if (!cancellationRequested) {
-										if (approvalOptionRes === UNSAFE_CODE_IN_PRODUCTION_ENVIRONMENT_OPTION_YES) {
+										if (approvalOptionRes === UNSAFE_CODE_APPROVAL_OPTION_YES) {
 											// User says yes; run script!
 											vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, selectedScript, curFileNameShortened, true).then(async (approvedRes) => {
 												// If cancellation requested, skip this part.
@@ -666,7 +671,7 @@ export function activate(context: vscode.ExtensionContext) {
 											return execP;
 										});
 
-										// NOTE: just assume user does not want 'approvedForRun' unsafe prod env code config here.
+										// NOTE: just assume user does not care about unsafe code config here.
 										vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, script, curFileNameShortened, true).then((res) => {
 
 											// If cancellation requested, skip this part.

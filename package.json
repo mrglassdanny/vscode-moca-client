@@ -114,7 +114,8 @@
 							"url": "",
 							"user": "",
 							"password": "",
-							"groovyclasspath": []
+							"groovyclasspath": [],
+							"approveUnsafeScripts": false
 						}
 					],
 					"description": "MOCA connections",
@@ -129,7 +130,7 @@
 							"url": {
 								"type": "string",
 								"default": "",
-								"description": "URL (host:port) - only http/https supported\nREQUIRED"
+								"description": "URL - only http/https supported\nREQUIRED"
 							},
 							"user": {
 								"type": "string",
@@ -148,6 +149,11 @@
 								"items": {
 									"type": "string"
 								}
+							},
+							"approveUnsafeScripts": {
+								"type": "boolean",
+								"default": false,
+								"description": "If set to TRUE, any unsafe script executed against connection will prompt user to approve before it is executed. DOES NOT apply to Auto Execution!\n   - Unsafe MOCA verbs: create | change | remove\n   - Unsafe SQL: insert | update | delete | DML clauses\nOPTIONAL (defaults to FALSE)"
 							}
 						}
 					}
@@ -224,22 +230,22 @@
 						"sqlRangeColorLight": {
 							"type": "string",
 							"default": "rgba(0,150,225,0.15)",
-							"description": "RGBA String"
+							"description": "Controls SQL range background color for light theme. Format is RGBA string."
 						},
 						"sqlRangeColorDark": {
 							"type": "string",
 							"default": "rgba(0,80,180,0.25)",
-							"description": "RGBA String"
+							"description": "Controls SQL range background color for dark theme. Format is RGBA string."
 						},
 						"groovyRangeColorLight": {
 							"type": "string",
 							"default": "rgba(0,150,225,0.15)",
-							"description": "RGBA String"
+							"description": "Controls Groovy range background color for light theme. Format is RGBA string."
 						},
 						"groovyRangeColorDark": {
 							"type": "string",
 							"default": "rgba(0,80,180,0.25)",
-							"description": "RGBA String"
+							"description": "Controls Groovy range background color for dark theme. Format is RGBA string."
 						},
 						"dataTablePageSize": {
 							"type": "integer",
@@ -259,8 +265,7 @@
 						"groovy-warning-diagnostics-enabled": true,
 						"sql-formatting-enabled": true,
 						"groovy-formatting-enabled": true,
-						"groovy-static-type-checking-enabled": true,
-						"approve-unsafe-scripts-in-production-environment": true
+						"groovy-static-type-checking-enabled": true
 					},
 					"description": "MOCA Language Server Options",
 					"properties": {
@@ -305,11 +310,6 @@
 							"description": "true | false\nNOT CURRENTLY SUPPORTED"
 						},
 						"groovy-static-type-checking-enabled": {
-							"type": "boolean",
-							"default": true,
-							"description": "true | false"
-						},
-						"approve-unsafe-scripts-in-production-environment": {
 							"type": "boolean",
 							"default": true,
 							"description": "true | false"

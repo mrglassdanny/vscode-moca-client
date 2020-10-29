@@ -9,7 +9,7 @@ export class MocaResults {
     cols: Object[][];
     rows: Object[][];
     msg: string;
-    isProdEnvAndScriptUnsafe: boolean;
+    needsApprovalToExecute: boolean;
 
     constructor(data: any) {
         if (data['results']) {
@@ -40,10 +40,10 @@ export class MocaResults {
             this.msg = "";
         }
 
-        if (data['isProductionEnvionmentAndScriptIsUnsafe']) {
-            this.isProdEnvAndScriptUnsafe = true;
+        if (data['needsApprovalToExecute']) {
+            this.needsApprovalToExecute = true;
         } else {
-            this.isProdEnvAndScriptUnsafe = false;
+            this.needsApprovalToExecute = false;
         }
 
 
