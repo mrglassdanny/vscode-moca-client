@@ -153,7 +153,7 @@
 							"approveUnsafeScripts": {
 								"type": "boolean",
 								"default": false,
-								"description": "If set to TRUE, any unsafe script executed against connection will prompt user to approve before it is executed. DOES NOT apply to Auto Execution!\n   - Unsafe MOCA verbs: create | change | remove\n   - Unsafe SQL: insert | update | delete | DDL clauses\nOPTIONAL (defaults to FALSE)"
+								"description": "If set to TRUE, any unsafe script executed against connection will prompt user to approve before it is executed. DOES NOT apply to Auto Execution!\n   - Unsafe MOCA verbs: create | change | remove | execute\n   - Unsafe SQL: insert | update | delete | DDL clauses\nOPTIONAL (defaults to FALSE)"
 							}
 						}
 					}
