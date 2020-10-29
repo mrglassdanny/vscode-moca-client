@@ -438,46 +438,47 @@ function activate(context) {
                                     commandData.push("Trigger: " + triggers[i].trgseq + " - " + triggers[i].name);
                                 }
                             }
-                            yield vscode.window.showQuickPick(commandData, { ignoreFocusOut: true }).then((commandDataSelectedRes) => {
-                                // Now that the user has selected something specific from the command looked up, we can load the file.
-                                var commandDataSelected = commandDataSelectedRes;
+                            yield vscode.window.showQuickPick(commandData, { ignoreFocusOut: true, canPickMany: true }).then((commandDataSelectedRes) => __awaiter(this, void 0, void 0, function* () {
+                                // Now that the user has selected something specific from the command looked up, we can load the file(s).
+                                var commandDataSelectedArr = commandDataSelectedRes;
+                                // Put commands & triggers in arrays here if we have them.
+                                var commandsAtLevels = [];
                                 if (commandDataJsonObj.commandsAtLevels) {
                                     var commandsAtLevels = commandDataJsonObj.commandsAtLevels;
-                                    for (var i = 0; i < commandsAtLevels.length; i++) {
-                                        if (commandDataSelected.localeCompare(commandsAtLevels[i].cmplvl + ": " + commandsAtLevels[i].command + " (" + commandsAtLevels[i].type + ")") === 0) {
-                                            var uri = vscode.Uri.file(context.globalStoragePath + "\\command-lookup\\" + (commandsAtLevels[i].cmplvl + "-" + commandsAtLevels[i].command).replace(/ /g, "_") + ".moca.readonly");
+                                }
+                                var triggers = [];
+                                if (commandDataJsonObj.triggers) {
+                                    triggers = commandDataJsonObj.triggers;
+                                }
+                                for (var i = 0; i < commandDataSelectedArr.length; i++) {
+                                    var commandDataSelected = commandDataSelectedArr[i];
+                                    // Checking commands.
+                                    for (var j = 0; j < commandsAtLevels.length; j++) {
+                                        if (commandDataSelected.localeCompare(commandsAtLevels[j].cmplvl + ": " + commandsAtLevels[j].command + " (" + commandsAtLevels[j].type + ")") === 0) {
+                                            var uri = vscode.Uri.file(context.globalStoragePath + "\\command-lookup\\" + (commandsAtLevels[j].cmplvl + "-" + commandsAtLevels[j].command).replace(/ /g, "_") + ".moca.readonly");
                                             // Before we attempt to write, we need to make sure code is local syntax.
-                                            if (commandsAtLevels[i].type.localeCompare("Local Syntax") !== 0) {
+                                            if (commandsAtLevels[j].type.localeCompare("Local Syntax") !== 0) {
                                                 vscode.window.showErrorMessage("Command Lookup: Cannot view non Local Syntax commands!");
                                             }
                                             else {
-                                                vscode.workspace.fs.writeFile(uri, Buffer.from(commandsAtLevels[i].syntax)).then(() => {
-                                                    vscode.workspace.openTextDocument(uri).then(doc => {
-                                                        vscode.window.showTextDocument(doc);
-                                                    });
-                                                });
+                                                yield vscode.workspace.fs.writeFile(uri, Buffer.from(commandsAtLevels[j].syntax));
+                                                var doc = yield vscode.workspace.openTextDocument(uri);
+                                                yield vscode.window.showTextDocument(doc, { preview: false });
                                             }
-                                            return;
                                         }
                                     }
-                                }
-                                if (commandDataJsonObj.triggers) {
-                                    var triggers = commandDataJsonObj.triggers;
-                                    for (var i = 0; i < triggers.length; i++) {
-                                        commandData.push("Trigger: " + triggers[i].name);
-                                        if (commandDataSelected.localeCompare("Trigger: " + triggers[i].trgseq + " - " + triggers[i].name) === 0) {
-                                            var uri = vscode.Uri.file(context.globalStoragePath + "\\command-lookup\\" + (distinctCommandSelected + "-" + triggers[i].name).replace(/ /g, "_") + ".moca.readonly");
+                                    // Checking triggers.
+                                    for (var j = 0; j < triggers.length; j++) {
+                                        if (commandDataSelected.localeCompare("Trigger: " + triggers[j].trgseq + " - " + triggers[j].name) === 0) {
+                                            var uri = vscode.Uri.file(context.globalStoragePath + "\\command-lookup\\" + (distinctCommandSelected + "-" + triggers[j].name).replace(/ /g, "_") + ".moca.readonly");
                                             // Triggers are always local syntax.
-                                            vscode.workspace.fs.writeFile(uri, Buffer.from(triggers[i].syntax)).then(() => {
-                                                vscode.workspace.openTextDocument(uri).then(doc => {
-                                                    vscode.window.showTextDocument(doc);
-                                                });
-                                            });
-                                            return;
+                                            yield vscode.workspace.fs.writeFile(uri, Buffer.from(triggers[j].syntax));
+                                            var doc = yield vscode.workspace.openTextDocument(uri);
+                                            yield vscode.window.showTextDocument(doc, { preview: false });
                                         }
                                     }
                                 }
-                            });
+                            }));
                         }
                     }));
                 });
