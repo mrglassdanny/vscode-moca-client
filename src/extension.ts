@@ -122,7 +122,7 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 		}
 
-		let connectionNameQuickPickRes = await vscode.window.showQuickPick(connectionNames);
+		let connectionNameQuickPickRes = await vscode.window.showQuickPick(connectionNames, { ignoreFocusOut: true });
 		const selectedConnectionObj = connections.get(connectionNameQuickPickRes);
 		if (!selectedConnectionObj) {
 			return null;
@@ -131,25 +131,25 @@ export function activate(context: vscode.ExtensionContext) {
 		// Now let's see if selected connection possesses a user/password.
 		// If not, we need to get from the user.
 		if (!selectedConnectionObj.user) {
-			let userQuickPickRes = await vscode.window.showInputBox({ prompt: "User ID", ignoreFocusOut: true });
-			if (!userQuickPickRes) {
+			let userInputRes = await vscode.window.showInputBox({ prompt: "User ID", ignoreFocusOut: true });
+			if (!userInputRes) {
 				return null;
 			}
-			selectedConnectionObj.user = userQuickPickRes;
+			selectedConnectionObj.user = userInputRes;
 
 
-			let passwordQuickPickRes = await vscode.window.showInputBox({ prompt: "Password", password: true, ignoreFocusOut: true });
-			if (!passwordQuickPickRes) {
+			let passwordInputRes = await vscode.window.showInputBox({ prompt: "Password", password: true, ignoreFocusOut: true });
+			if (!passwordInputRes) {
 				return null;
 			}
-			selectedConnectionObj.password = passwordQuickPickRes;
+			selectedConnectionObj.password = passwordInputRes;
 		} else {
 			if (!selectedConnectionObj.password) {
-				let passwordQuickPickRes = await vscode.window.showInputBox({ prompt: "Password", password: true, ignoreFocusOut: true });
-				if (!passwordQuickPickRes) {
+				let passwordInputRes = await vscode.window.showInputBox({ prompt: "Password", password: true, ignoreFocusOut: true });
+				if (!passwordInputRes) {
 					return null;
 				}
-				selectedConnectionObj.password = passwordQuickPickRes;
+				selectedConnectionObj.password = passwordInputRes;
 			}
 		}
 
@@ -486,7 +486,7 @@ export function activate(context: vscode.ExtensionContext) {
 			if (commandLookupObj.distinctMocaCommands) {
 				var distinctCommands = commandLookupObj.distinctMocaCommands as string[];
 				// Now sit tight while the user picks one.
-				await vscode.window.showQuickPick(distinctCommands).then((distinctCommandSelected) => {
+				await vscode.window.showQuickPick(distinctCommands, { ignoreFocusOut: true }).then((distinctCommandSelected) => {
 					// Now that we have a command, we can request command data from server.
 					vscode.commands.executeCommand(LanguageServerCommands.COMMAND_LOOKUP, distinctCommandSelected).then(async (commandDataRes) => {
 						// Make sure we have a command to work with.
@@ -507,7 +507,7 @@ export function activate(context: vscode.ExtensionContext) {
 								}
 							}
 
-							await vscode.window.showQuickPick(commandData).then((commandDataSelectedRes) => {
+							await vscode.window.showQuickPick(commandData, { ignoreFocusOut: true }).then((commandDataSelectedRes) => {
 								// Now that the user has selected something specific from the command looked up, we can load the file.
 								var commandDataSelected = commandDataSelectedRes as string;
 								if (commandDataJsonObj.commandsAtLevels) {
