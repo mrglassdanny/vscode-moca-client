@@ -362,10 +362,13 @@ function activate(context) {
                 var distinctCommands = commandLookupObj.distinctMocaCommands;
                 // Now sit tight while the user picks one.
                 var distinctCommandSelected = yield vscode.window.showQuickPick(distinctCommands, { ignoreFocusOut: true });
+                if (!distinctCommandSelected) {
+                    return;
+                }
                 // Now that we have a command, we can request command data from server.
                 var commandDataRes = yield vscode.commands.executeCommand(LanguageServerCommands.COMMAND_LOOKUP, distinctCommandSelected);
                 // Make sure we have a command to work with.
-                if (distinctCommandSelected != null && distinctCommandSelected !== "") {
+                if (commandDataRes) {
                     // Now we need to let the user pick a command at a certain level or pick a trigger to look at.
                     var commandDataObj = JSON.parse(JSON.stringify(commandDataRes));
                     var commandData = new Array();
@@ -382,6 +385,9 @@ function activate(context) {
                         }
                     }
                     var commandDataSelectedRes = yield vscode.window.showQuickPick(commandData, { ignoreFocusOut: true, canPickMany: true });
+                    if (!commandDataSelectedRes) {
+                        return;
+                    }
                     // Now that the user has selected something specific from the command looked up, we can load the file(s).
                     var commandDataSelectedArr = commandDataSelectedRes;
                     // Put commands & triggers in arrays here if we have them.
@@ -549,10 +555,13 @@ function activate(context) {
                 var traceFileNames = traceFileNameLookupObj.traceFileNames;
                 // Now sit tight while the user picks one.
                 var traceFileNameSelected = yield vscode.window.showQuickPick(traceFileNames, { ignoreFocusOut: true });
+                if (!traceFileNameSelected) {
+                    return;
+                }
                 // Now that we have a trace file name, we can request contents from server.
                 var traceFileContentsRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE, traceFileNameSelected);
                 // Make sure we have contents to work with.
-                if (traceFileNameSelected != null && traceFileNameSelected !== "") {
+                if (traceFileContentsRes) {
                     // Now we need to write contents to a file and open it.
                     var traceFileContentsObj = JSON.parse(JSON.stringify(traceFileContentsRes));
                     var uri = vscode.Uri.file(context.globalStoragePath + "\\traces\\" + traceFileNameSelected);

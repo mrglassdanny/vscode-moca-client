@@ -417,10 +417,13 @@ export async function activate(context: vscode.ExtensionContext) {
 			var distinctCommands = commandLookupObj.distinctMocaCommands as string[];
 			// Now sit tight while the user picks one.
 			var distinctCommandSelected = await vscode.window.showQuickPick(distinctCommands, { ignoreFocusOut: true });
+			if (!distinctCommandSelected) {
+				return;
+			}
 			// Now that we have a command, we can request command data from server.
 			var commandDataRes = await vscode.commands.executeCommand(LanguageServerCommands.COMMAND_LOOKUP, distinctCommandSelected);
 			// Make sure we have a command to work with.
-			if (distinctCommandSelected != null && distinctCommandSelected !== "") {
+			if (commandDataRes) {
 				// Now we need to let the user pick a command at a certain level or pick a trigger to look at.
 				var commandDataObj = JSON.parse(JSON.stringify(commandDataRes));
 				var commandData = new Array();
@@ -438,6 +441,10 @@ export async function activate(context: vscode.ExtensionContext) {
 				}
 
 				var commandDataSelectedRes = await vscode.window.showQuickPick(commandData, { ignoreFocusOut: true, canPickMany: true });
+				if (!commandDataSelectedRes) {
+					return;
+				}
+
 				// Now that the user has selected something specific from the command looked up, we can load the file(s).
 				var commandDataSelectedArr = commandDataSelectedRes as string[];
 
@@ -637,10 +644,14 @@ export async function activate(context: vscode.ExtensionContext) {
 			var traceFileNames = traceFileNameLookupObj.traceFileNames as string[];
 			// Now sit tight while the user picks one.
 			var traceFileNameSelected = await vscode.window.showQuickPick(traceFileNames, { ignoreFocusOut: true });
+			if (!traceFileNameSelected) {
+				return;
+			}
+
 			// Now that we have a trace file name, we can request contents from server.
 			var traceFileContentsRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE, traceFileNameSelected);
 			// Make sure we have contents to work with.
-			if (traceFileNameSelected != null && traceFileNameSelected !== "") {
+			if (traceFileContentsRes) {
 				// Now we need to write contents to a file and open it.
 				var traceFileContentsObj = JSON.parse(JSON.stringify(traceFileContentsRes));
 				var uri = vscode.Uri.file(context.globalStoragePath + "\\traces\\" + traceFileNameSelected);
