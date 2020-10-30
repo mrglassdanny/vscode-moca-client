@@ -63,6 +63,11 @@
 				"command": "moca.autoExecute",
 				"title": "Auto Execute MOCA Script",
 				"category": "MOCA"
+			},
+			{
+				"command": "moca.openTrace",
+				"title": "Open MOCA Trace",
+				"category": "MOCA"
 			}
 		],
 		"keybindings": [

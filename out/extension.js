@@ -45,6 +45,7 @@ var LanguageClientCommands;
     LanguageClientCommands.TRACE = "moca.trace";
     LanguageClientCommands.COMMAND_LOOKUP = "moca.commandLookup";
     LanguageClientCommands.AUTO_EXECUTE = "moca.autoExecute";
+    LanguageClientCommands.OPEN_TRACE = "moca.openTrace";
 })(LanguageClientCommands = exports.LanguageClientCommands || (exports.LanguageClientCommands = {}));
 // Language server commands.
 var LanguageServerCommands;
@@ -56,6 +57,7 @@ var LanguageServerCommands;
     LanguageServerCommands.TRACE = "mocalanguageserver.trace";
     LanguageServerCommands.COMMAND_LOOKUP = "mocalanguageserver.commandLookup";
     LanguageServerCommands.SET_LANGUAGE_SERVER_OPTIONS = "mocalanguageserver.setLanguageServerOptions";
+    LanguageServerCommands.OPEN_TRACE = "mocalanguageserver.openTrace";
 })(LanguageServerCommands = exports.LanguageServerCommands || (exports.LanguageServerCommands = {}));
 // Status bar items.
 // Arbitrary number to offset status bar priorities in order to try to keep items together better.
@@ -84,6 +86,7 @@ function activate(context) {
         vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath));
         // Make sure other paths exist.
         vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\command-lookup"));
+        vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\traces"));
         // Start language server on extension activate.
         yield startMocaLanguageServer();
         var activateResponse = yield vscode.commands.executeCommand(LanguageServerCommands.ACTIVATE, context.globalStoragePath, vscode.workspace.getConfiguration(exports.CONFIGURATION_NAME).get(exports.CONFIGURATION_LANGUAGE_SERVER_OPTIONS), vscode.workspace.getConfiguration(exports.CONFIGURATION_NAME).get(exports.CONFIGURATION_DEFAULT_GROOVY_CLASSPATH));
@@ -348,6 +351,10 @@ function activate(context) {
             }
         })));
         context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.COMMAND_LOOKUP, () => __awaiter(this, void 0, void 0, function* () {
+            // We will call COMMAND_LOOKUP lang server command with no args. The lang server will take this as us wanting a list of all commands.
+            // We will pick a command via a quick pick, and call COMMAND_LOOKUP lang server command once more but with a command name arg. This will
+            // let the lang server know which command/triggers to send us. We will then prompt the user to pick what they want to see via another
+            // quick pick. After they have selected what they want to see, we will write to a file, open and display it.
             var commandLookupRes = yield vscode.commands.executeCommand(LanguageServerCommands.COMMAND_LOOKUP);
             // We should have a string array of distinct moca command names.
             var commandLookupObj = JSON.parse(JSON.stringify(commandLookupRes));
@@ -359,17 +366,17 @@ function activate(context) {
                 var commandDataRes = yield vscode.commands.executeCommand(LanguageServerCommands.COMMAND_LOOKUP, distinctCommandSelected);
                 // Make sure we have a command to work with.
                 if (distinctCommandSelected != null && distinctCommandSelected !== "") {
-                    // We have our object. Now we need to let the user pick a command at a certain level or pick a trigger to look at.
-                    var commandDataJsonObj = JSON.parse(JSON.stringify(commandDataRes));
+                    // Now we need to let the user pick a command at a certain level or pick a trigger to look at.
+                    var commandDataObj = JSON.parse(JSON.stringify(commandDataRes));
                     var commandData = new Array();
-                    if (commandDataJsonObj.commandsAtLevels) {
-                        var commandsAtLevels = commandDataJsonObj.commandsAtLevels;
+                    if (commandDataObj.commandsAtLevels) {
+                        var commandsAtLevels = commandDataObj.commandsAtLevels;
                         for (var i = 0; i < commandsAtLevels.length; i++) {
                             commandData.push(commandsAtLevels[i].cmplvl + ": " + commandsAtLevels[i].command + " (" + commandsAtLevels[i].type + ")");
                         }
                     }
-                    if (commandDataJsonObj.triggers) {
-                        var triggers = commandDataJsonObj.triggers;
+                    if (commandDataObj.triggers) {
+                        var triggers = commandDataObj.triggers;
                         for (var i = 0; i < triggers.length; i++) {
                             commandData.push("Trigger: " + triggers[i].trgseq + " - " + triggers[i].name);
                         }
@@ -379,12 +386,12 @@ function activate(context) {
                     var commandDataSelectedArr = commandDataSelectedRes;
                     // Put commands & triggers in arrays here if we have them.
                     var commandsAtLevels = [];
-                    if (commandDataJsonObj.commandsAtLevels) {
-                        var commandsAtLevels = commandDataJsonObj.commandsAtLevels;
+                    if (commandDataObj.commandsAtLevels) {
+                        var commandsAtLevels = commandDataObj.commandsAtLevels;
                     }
                     var triggers = [];
-                    if (commandDataJsonObj.triggers) {
-                        triggers = commandDataJsonObj.triggers;
+                    if (commandDataObj.triggers) {
+                        triggers = commandDataObj.triggers;
                     }
                     for (var i = 0; i < commandDataSelectedArr.length; i++) {
                         var commandDataSelected = commandDataSelectedArr[i];
@@ -418,6 +425,7 @@ function activate(context) {
             }
         })));
         context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.AUTO_EXECUTE, () => __awaiter(this, void 0, void 0, function* () {
+            // Basically this just executes the same script over and over until a stop condition is met.
             // Read in configuration and execute.
             const config = vscode.workspace.getConfiguration(exports.CONFIGURATION_NAME);
             var autoExecutionConfigObj = config.get(exports.CONFIGURATION_AUTO_EXECUTION_NAME);
@@ -528,6 +536,30 @@ function activate(context) {
             }
             else {
                 vscode.window.showErrorMessage("Must Configure Auto Execution!");
+            }
+        })));
+        context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.OPEN_TRACE, () => __awaiter(this, void 0, void 0, function* () {
+            // Below works similarly to COMMAND_LOOKUP. Basically we are going to request a list of trace file names from the language server.
+            // Once the user picks one via the quick pick, we will call OPEN_TRACE from the language server again but with a trace file name argument.
+            // The language server will then send us the contents of the trace file requested.
+            var traceFileNameLookupRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE);
+            // We should have a string array of trace file names.
+            var traceFileNameLookupObj = JSON.parse(JSON.stringify(traceFileNameLookupRes));
+            if (traceFileNameLookupObj.traceFileNames) {
+                var traceFileNames = traceFileNameLookupObj.traceFileNames;
+                // Now sit tight while the user picks one.
+                var traceFileNameSelected = yield vscode.window.showQuickPick(traceFileNames, { ignoreFocusOut: true });
+                // Now that we have a trace file name, we can request contents from server.
+                var traceFileContentsRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE, traceFileNameSelected);
+                // Make sure we have contents to work with.
+                if (traceFileNameSelected != null && traceFileNameSelected !== "") {
+                    // Now we need to write contents to a file and open it.
+                    var traceFileContentsObj = JSON.parse(JSON.stringify(traceFileContentsRes));
+                    var uri = vscode.Uri.file(context.globalStoragePath + "\\traces\\" + traceFileNameSelected);
+                    yield vscode.workspace.fs.writeFile(uri, Buffer.from(traceFileContentsObj.traceFileContents));
+                    var doc = yield vscode.workspace.openTextDocument(uri);
+                    yield vscode.window.showTextDocument(doc, { preview: false });
+                }
             }
         })));
         // Events registration.
