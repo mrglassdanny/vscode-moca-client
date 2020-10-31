@@ -61,6 +61,7 @@ var executeStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAli
 var executeSelectionStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 2 + STATUS_BAR_PRIORITY_OFFSET);
 var commandLookupStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 3 + STATUS_BAR_PRIORITY_OFFSET);
 var traceStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 4 + STATUS_BAR_PRIORITY_OFFSET);
+var openTraceStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 5 + STATUS_BAR_PRIORITY_OFFSET);
 
 // Status bar constants.
 const NOT_CONNECTED_STR = "MOCA: $(database) Not Connected";
@@ -648,21 +649,30 @@ export async function activate(context: vscode.ExtensionContext) {
 				return;
 			}
 
-			// Now that we have a trace file name, we can request contents from server.
-			var traceFileContentsRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE, traceFileNameSelected);
-			// Make sure we have contents to work with.
-			if (traceFileContentsRes) {
-				// Now we need to write contents to a file and open it.
-				var traceFileContentsObj = JSON.parse(JSON.stringify(traceFileContentsRes));
-				var uri = vscode.Uri.file(context.globalStoragePath + "\\traces\\" + traceFileNameSelected);
-				await vscode.workspace.fs.writeFile(uri, Buffer.from(traceFileContentsObj.traceFileContents));
-				var doc = await vscode.workspace.openTextDocument(uri);
-				await vscode.window.showTextDocument(doc, { preview: false });
-			}
+			vscode.window.withProgress({
+				location: vscode.ProgressLocation.Notification,
+				title: "MOCA"
+			}, async (progress, token) => {
+				progress.report({
+					increment: Infinity,
+					message: "Loading trace file " + traceFileNameSelected
+				});
+
+				// Now that we have a trace file name, we can request contents from server.
+				var traceFileContentsRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE, traceFileNameSelected);
+
+				// Make sure we have contents to work with.
+				if (traceFileContentsRes) {
+					// Now we need to write contents to a file and open it.
+					var traceFileContentsObj = JSON.parse(JSON.stringify(traceFileContentsRes));
+					var uri = vscode.Uri.file(context.globalStoragePath + "\\traces\\" + traceFileNameSelected);
+					await vscode.workspace.fs.writeFile(uri, Buffer.from(traceFileContentsObj.traceFileContents));
+					var doc = await vscode.workspace.openTextDocument(uri);
+					await vscode.window.showTextDocument(doc, { preview: false });
+				}
+			});
 		}
 	}));
-
-
 
 
 
@@ -671,13 +681,12 @@ export async function activate(context: vscode.ExtensionContext) {
 	// Configuration listener.
 	context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {
 
-		// Checking if user changed client options config (object has sql & groovy range color config).
-		// If so, we potentially need to re-color things!
+		// Client options.
 		if (e.affectsConfiguration((CONFIGURATION_NAME + "." + CONFIGURATION_CLIENT_OPTIONS))) {
 			GlobalSemanticHighlightingVars.semanticHighlightingFeature.loadCurrentTheme();
 		}
 
-		// Checking if user changed lang server options. If so, we need to let the lang server know!
+		// Language server options.
 		if (e.affectsConfiguration((CONFIGURATION_NAME + "." + CONFIGURATION_LANGUAGE_SERVER_OPTIONS))) {
 			vscode.commands.executeCommand(LanguageServerCommands.SET_LANGUAGE_SERVER_OPTIONS, vscode.workspace.getConfiguration(CONFIGURATION_NAME).get(CONFIGURATION_LANGUAGE_SERVER_OPTIONS));
 		}
@@ -705,6 +714,10 @@ export async function activate(context: vscode.ExtensionContext) {
 	traceStatusBarItem.text = START_TRACE_STR;
 	traceStatusBarItem.command = LanguageClientCommands.TRACE;
 	traceStatusBarItem.show();
+	openTraceStatusBarItem.text = "$(file-text)";
+	openTraceStatusBarItem.command = LanguageClientCommands.OPEN_TRACE;
+	openTraceStatusBarItem.tooltip = "Open Trace";
+	openTraceStatusBarItem.show();
 
 	context.subscriptions.push(connectionStatusBarItem);
 	context.subscriptions.push(executeStatusBarItem);
