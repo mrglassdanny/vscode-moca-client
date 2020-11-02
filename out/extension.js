@@ -180,7 +180,8 @@ function activate(context) {
             })).then(() => {
                 // If successful connection and we are not just re-connecting to current connection, load repo.
                 if (connectionSuccess) {
-                    vscode.commands.executeCommand(LanguageClientCommands.LOAD_CACHE);
+                    // TODO
+                    //vscode.commands.executeCommand(LanguageClientCommands.LOAD_CACHE);
                 }
             });
         })));
@@ -650,7 +651,8 @@ function startMocaLanguageServer() {
                     protocol2Code: value => vscode.Uri.parse(value)
                 }
             };
-            let args = ["-jar", path.resolve(globalExtensionContext.extensionPath, "bin", MOCA_LANGUAGE_SERVER)];
+            //let args = ["-jar", path.resolve(globalExtensionContext.extensionPath, "bin", MOCA_LANGUAGE_SERVER)];
+            let args = ["-jar", path.resolve("C:\\dev\\moca-language-server\\build", "libs", MOCA_LANGUAGE_SERVER)];
             let executable = {
                 command: javaPath,
                 args: args
