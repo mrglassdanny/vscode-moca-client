@@ -424,7 +424,6 @@ export async function activate(context: vscode.ExtensionContext) {
 			}
 			// Now that we have a command, we can request command data from server.
 			var commandDataRes = await vscode.commands.executeCommand(LanguageServerCommands.COMMAND_LOOKUP, distinctCommandSelected);
-			// Make sure we have a command to work with.
 			if (commandDataRes) {
 				// Now we need to let the user pick a command at a certain level or pick a trigger to look at.
 				var commandDataObj = JSON.parse(JSON.stringify(commandDataRes));
@@ -635,7 +634,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 		// Below works similarly to COMMAND_LOOKUP. Basically we are going to request a list of trace file names from the language server.
 		// Once the user picks one via the quick pick, we will call OPEN_TRACE from the language server again but with a trace file name argument.
-		// The language server will then send us the contents of the trace file requested.
+		// The language server will then send us the resulting outline of the trace file requested in HTML format.
 
 		var traceFileNameLookupRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE);
 
@@ -656,17 +655,15 @@ export async function activate(context: vscode.ExtensionContext) {
 			}, async (progress, token) => {
 				progress.report({
 					increment: Infinity,
-					message: "Loading trace file " + traceFileNameSelected
+					message: "Loading trace " + traceFileNameSelected
 				});
 
-				// Now that we have a trace file name, we can request contents from server.
-				var traceOutlineHtmlRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE, traceFileNameSelected);
-
-				// Make sure we have contents to work with.
-				if (traceOutlineHtmlRes) {
-					// Now we need to write contents to a file and open it.
-					var traceOutlineHtmlObj = JSON.parse(JSON.stringify(traceOutlineHtmlRes));
-					TraceViewPanel.createOrShow(context.extensionPath, traceFileNameSelected, traceOutlineHtmlObj.traceOutlineHtml);
+				// Now that we have a trace file name, we can request outline from lang server.
+				var traceOutlineRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE, traceFileNameSelected);
+				if (traceOutlineRes) {
+					// Now we need to open a web view to display the trace outline html sent from lang server.
+					var traceOutlineObj = JSON.parse(JSON.stringify(traceOutlineRes));
+					TraceViewPanel.createOrShow(context.extensionPath, traceFileNameSelected, traceOutlineObj.traceOutlineHtml);
 				}
 			});
 		}
