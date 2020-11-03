@@ -7,6 +7,7 @@ import { MocaResults } from './results/mocaResults';
 import { ResultViewPanel } from './results/ResultViewPanel';
 import { MocaCommand, MocaTrigger } from './mocaCommandLookup/mocaCommandLookup';
 import { performance } from 'perf_hooks';
+import { TraceViewPanel } from './trace/TraceViewPanel';
 
 // Language server constants.
 const MOCA_LANGUAGE_SERVER_VERSION = "1.6.10";
@@ -87,7 +88,6 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath));
 	// Make sure other paths exist.
 	vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\command-lookup"));
-	vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\traces"));
 
 	// Start language server on extension activate.
 	await startMocaLanguageServer();
@@ -660,16 +660,13 @@ export async function activate(context: vscode.ExtensionContext) {
 				});
 
 				// Now that we have a trace file name, we can request contents from server.
-				var traceFileContentsRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE, traceFileNameSelected);
+				var traceOutlineHtmlRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE, traceFileNameSelected);
 
 				// Make sure we have contents to work with.
-				if (traceFileContentsRes) {
+				if (traceOutlineHtmlRes) {
 					// Now we need to write contents to a file and open it.
-					var traceFileContentsObj = JSON.parse(JSON.stringify(traceFileContentsRes));
-					var uri = vscode.Uri.file(context.globalStoragePath + "\\traces\\" + traceFileNameSelected);
-					await vscode.workspace.fs.writeFile(uri, Buffer.from(traceFileContentsObj.traceFileContents));
-					var doc = await vscode.workspace.openTextDocument(uri);
-					await vscode.window.showTextDocument(doc, { preview: false });
+					var traceOutlineHtmlObj = JSON.parse(JSON.stringify(traceOutlineHtmlRes));
+					TraceViewPanel.createOrShow(context.extensionPath, traceFileNameSelected, traceOutlineHtmlObj.traceOutlineHtml);
 				}
 			});
 		}

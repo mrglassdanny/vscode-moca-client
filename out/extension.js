@@ -18,6 +18,7 @@ const semanticHighlighting_1 = require("./semanticHighlighting/semanticHighlight
 const mocaResults_1 = require("./results/mocaResults");
 const ResultViewPanel_1 = require("./results/ResultViewPanel");
 const perf_hooks_1 = require("perf_hooks");
+const TraceViewPanel_1 = require("./trace/TraceViewPanel");
 // Language server constants.
 const MOCA_LANGUAGE_SERVER_VERSION = "1.6.10";
 const MOCA_LANGUAGE_SERVER = "moca-language-server-" + MOCA_LANGUAGE_SERVER_VERSION + "-all.jar";
@@ -87,7 +88,6 @@ function activate(context) {
         vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath));
         // Make sure other paths exist.
         vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\command-lookup"));
-        vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\traces"));
         // Start language server on extension activate.
         yield startMocaLanguageServer();
         var activateResponse = yield vscode.commands.executeCommand(LanguageServerCommands.ACTIVATE, context.globalStoragePath, vscode.workspace.getConfiguration(exports.CONFIGURATION_NAME).get(exports.CONFIGURATION_LANGUAGE_SERVER_OPTIONS), vscode.workspace.getConfiguration(exports.CONFIGURATION_NAME).get(exports.CONFIGURATION_DEFAULT_GROOVY_CLASSPATH));
@@ -569,15 +569,12 @@ function activate(context) {
                         message: "Loading trace file " + traceFileNameSelected
                     });
                     // Now that we have a trace file name, we can request contents from server.
-                    var traceFileContentsRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE, traceFileNameSelected);
+                    var traceOutlineHtmlRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE, traceFileNameSelected);
                     // Make sure we have contents to work with.
-                    if (traceFileContentsRes) {
+                    if (traceOutlineHtmlRes) {
                         // Now we need to write contents to a file and open it.
-                        var traceFileContentsObj = JSON.parse(JSON.stringify(traceFileContentsRes));
-                        var uri = vscode.Uri.file(context.globalStoragePath + "\\traces\\" + traceFileNameSelected);
-                        yield vscode.workspace.fs.writeFile(uri, Buffer.from(traceFileContentsObj.traceFileContents));
-                        var doc = yield vscode.workspace.openTextDocument(uri);
-                        yield vscode.window.showTextDocument(doc, { preview: false });
+                        var traceOutlineHtmlObj = JSON.parse(JSON.stringify(traceOutlineHtmlRes));
+                        TraceViewPanel_1.TraceViewPanel.createOrShow(context.extensionPath, traceFileNameSelected, traceOutlineHtmlObj.traceOutlineHtml);
                     }
                 }));
             }
