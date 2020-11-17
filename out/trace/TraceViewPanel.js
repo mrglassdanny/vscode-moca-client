@@ -74,5 +74,5 @@ class TraceViewPanel {
 }
 exports.TraceViewPanel = TraceViewPanel;
 TraceViewPanel.traceViewPanels = new Map();
-TraceViewPanel.viewType = 'resultView';
+TraceViewPanel.viewType = 'traceView';
 //# sourceMappingURL=TraceViewPanel.js.map

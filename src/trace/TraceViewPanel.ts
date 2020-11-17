@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 
 export class TraceViewPanel {
     public static traceViewPanels: Map<string, TraceViewPanel> = new Map<string, TraceViewPanel>();
-    public static readonly viewType = 'resultView';
+    public static readonly viewType = 'traceView';
 
     private readonly _panel: vscode.WebviewPanel;
     private readonly _extensionPath: string;
