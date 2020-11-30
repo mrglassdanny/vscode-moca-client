@@ -18,7 +18,6 @@ const semanticHighlighting_1 = require("./semanticHighlighting/semanticHighlight
 const mocaResults_1 = require("./results/mocaResults");
 const ResultViewPanel_1 = require("./results/ResultViewPanel");
 const perf_hooks_1 = require("perf_hooks");
-const TraceViewPanel_1 = require("./trace/TraceViewPanel");
 // Language server constants.
 const MOCA_LANGUAGE_SERVER_VERSION = "1.7.10";
 const MOCA_LANGUAGE_SERVER = "moca-language-server-" + MOCA_LANGUAGE_SERVER_VERSION + "-all.jar";
@@ -88,6 +87,7 @@ function activate(context) {
         vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath));
         // Make sure other paths exist.
         vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\command-lookup"));
+        vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\trace"));
         // Start language server on extension activate.
         yield startMocaLanguageServer();
         var activateResponse = yield vscode.commands.executeCommand(LanguageServerCommands.ACTIVATE, context.globalStoragePath, vscode.workspace.getConfiguration(exports.CONFIGURATION_NAME).get(exports.CONFIGURATION_LANGUAGE_SERVER_OPTIONS), vscode.workspace.getConfiguration(exports.CONFIGURATION_NAME).get(exports.CONFIGURATION_DEFAULT_GROOVY_CLASSPATH));
@@ -548,12 +548,12 @@ function activate(context) {
         context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.OPEN_TRACE, () => __awaiter(this, void 0, void 0, function* () {
             // Below works similarly to COMMAND_LOOKUP. Basically we are going to request a list of trace file names from the language server.
             // Once the user picks one via the quick pick, we will call OPEN_TRACE from the language server again but with a trace file name argument.
-            // The language server will then send us the resulting outline of the trace file requested in HTML format.
-            var traceFileNameLookupRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE);
+            // The language server will then send us the resulting outline of the trace file requested.
+            var traceResponseRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE);
             // We should have a string array of trace file names.
-            var traceFileNameLookupObj = JSON.parse(JSON.stringify(traceFileNameLookupRes));
-            if (traceFileNameLookupObj.traceFileNames) {
-                var traceFileNames = traceFileNameLookupObj.traceFileNames;
+            var traceResponseObj = JSON.parse(JSON.stringify(traceResponseRes));
+            if (traceResponseObj.traceFileNames) {
+                var traceFileNames = traceResponseObj.traceFileNames;
                 // Now sit tight while the user picks one.
                 var traceFileNameSelected = yield vscode.window.showQuickPick(traceFileNames, { ignoreFocusOut: true });
                 if (!traceFileNameSelected) {
@@ -568,11 +568,14 @@ function activate(context) {
                         message: "Loading trace " + traceFileNameSelected
                     });
                     // Now that we have a trace file name, we can request outline from lang server.
-                    var traceOutlineRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE, traceFileNameSelected);
-                    if (traceOutlineRes) {
-                        // Now we need to open a web view to display the trace outline html sent from lang server.
-                        var traceOutlineObj = JSON.parse(JSON.stringify(traceOutlineRes));
-                        TraceViewPanel_1.TraceViewPanel.createOrShow(context.extensionPath, traceFileNameSelected, traceOutlineObj.traceOutlineHtml);
+                    traceResponseRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE, traceFileNameSelected);
+                    if (traceResponseRes) {
+                        // Now we need to open a web view to display the trace outline sent from lang server.
+                        traceResponseObj = JSON.parse(JSON.stringify(traceResponseRes));
+                        var uri = vscode.Uri.file(context.globalStoragePath + "\\trace\\" + traceFileNameSelected.replace('.log', '') + ".moca.trace");
+                        yield vscode.workspace.fs.writeFile(uri, Buffer.from(traceResponseObj.traceOutline));
+                        var doc = yield vscode.workspace.openTextDocument(uri);
+                        yield vscode.window.showTextDocument(doc, { preview: false });
                     }
                 }));
             }

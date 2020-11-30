@@ -7,7 +7,6 @@ import { MocaResults } from './results/mocaResults';
 import { ResultViewPanel } from './results/ResultViewPanel';
 import { MocaCommand, MocaTrigger } from './mocaCommandLookup/mocaCommandLookup';
 import { performance } from 'perf_hooks';
-import { TraceViewPanel } from './trace/TraceViewPanel';
 
 // Language server constants.
 const MOCA_LANGUAGE_SERVER_VERSION = "1.7.10";
@@ -88,6 +87,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath));
 	// Make sure other paths exist.
 	vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\command-lookup"));
+	vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\trace"));
 
 	// Start language server on extension activate.
 	await startMocaLanguageServer();
@@ -634,15 +634,15 @@ export async function activate(context: vscode.ExtensionContext) {
 
 		// Below works similarly to COMMAND_LOOKUP. Basically we are going to request a list of trace file names from the language server.
 		// Once the user picks one via the quick pick, we will call OPEN_TRACE from the language server again but with a trace file name argument.
-		// The language server will then send us the resulting outline of the trace file requested in HTML format.
+		// The language server will then send us the resulting outline of the trace file requested.
 
-		var traceFileNameLookupRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE);
+		var traceResponseRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE);
 
 		// We should have a string array of trace file names.
-		var traceFileNameLookupObj = JSON.parse(JSON.stringify(traceFileNameLookupRes));
+		var traceResponseObj = JSON.parse(JSON.stringify(traceResponseRes));
 
-		if (traceFileNameLookupObj.traceFileNames) {
-			var traceFileNames = traceFileNameLookupObj.traceFileNames as string[];
+		if (traceResponseObj.traceFileNames) {
+			var traceFileNames = traceResponseObj.traceFileNames as string[];
 			// Now sit tight while the user picks one.
 			var traceFileNameSelected = await vscode.window.showQuickPick(traceFileNames, { ignoreFocusOut: true });
 			if (!traceFileNameSelected) {
@@ -659,11 +659,14 @@ export async function activate(context: vscode.ExtensionContext) {
 				});
 
 				// Now that we have a trace file name, we can request outline from lang server.
-				var traceOutlineRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE, traceFileNameSelected);
-				if (traceOutlineRes) {
-					// Now we need to open a web view to display the trace outline html sent from lang server.
-					var traceOutlineObj = JSON.parse(JSON.stringify(traceOutlineRes));
-					TraceViewPanel.createOrShow(context.extensionPath, traceFileNameSelected, traceOutlineObj.traceOutlineHtml);
+				traceResponseRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE, traceFileNameSelected);
+				if (traceResponseRes) {
+					// Now we need to open a web view to display the trace outline sent from lang server.
+					traceResponseObj = JSON.parse(JSON.stringify(traceResponseRes));
+					var uri = vscode.Uri.file(context.globalStoragePath + "\\trace\\" + traceFileNameSelected.replace('.log', '') + ".moca.trace");
+					await vscode.workspace.fs.writeFile(uri, Buffer.from(traceResponseObj.traceOutline));
+					var doc = await vscode.workspace.openTextDocument(uri);
+					await vscode.window.showTextDocument(doc, { preview: false });
 				}
 			});
 		}
