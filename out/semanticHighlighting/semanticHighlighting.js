@@ -205,28 +205,126 @@ class Highlighter {
                 borderStyle: "solid"
             }
         });
-        this.traceOutlineConditionalTestFailDecoration = vscode.window.createTextEditorDecorationType({
+        this.traceOutlineServerGotDecoration = vscode.window.createTextEditorDecorationType({
             isWholeLine: false,
             light: {
-                color: groovyRangeColorDarkObj
+                before: {
+                    contentText: 'Server got:',
+                    color: "rgba(66, 66, 66, 1)",
+                    backgroundColor: "rgba(222, 222, 222, .35)",
+                    margin: "0px 15px 0px 0px",
+                }
+            },
+            dark: {
+                before: {
+                    contentText: 'Server got:',
+                    color: "rgba(66, 66, 66, 1)",
+                    backgroundColor: "rgba(222, 222, 222, .35)",
+                    margin: "0px 15px 0px 0px",
+                }
+            }
+        });
+        this.traceOutlineFiringTriggersDecoration = vscode.window.createTextEditorDecorationType({
+            isWholeLine: false,
+            light: {
+                after: {
+                    contentText: 'Firing Triggers',
+                    color: "rgba(68, 2, 116, 1)",
+                    backgroundColor: "rgba(214, 199, 230, .35)",
+                    margin: "0px 15px 0px",
+                },
+                color: "rgba(68, 2, 116, 1)",
+                backgroundColor: "rgba(214, 199, 230, .35)"
+            },
+            dark: {
+                after: {
+                    contentText: 'Firing Triggers',
+                    color: "rgba(68, 2, 116, 1)",
+                    backgroundColor: "rgba(214, 199, 230, .35)",
+                    margin: "0px 15px 0px",
+                },
+                color: "rgba(68, 2, 116, 1)",
+                backgroundColor: "rgba(214, 199, 230, .35)"
+            }
+        });
+        this.traceOutlineTriggerDecoration = vscode.window.createTextEditorDecorationType({
+            isWholeLine: false,
+            light: {
+                after: {
+                    contentText: 'Trigger',
+                    color: "rgba(68, 2, 116, 1)",
+                    backgroundColor: "rgba(214, 199, 230, .35)",
+                    margin: "0px 15px 0px",
+                }
+            },
+            dark: {
+                after: {
+                    contentText: 'Trigger',
+                    color: "rgba(68, 2, 116, 1)",
+                    backgroundColor: "rgba(214, 199, 230, .35)",
+                    margin: "0px 15px 0px",
+                }
+            }
+        });
+        this.traceOutlineErrorDecoration = vscode.window.createTextEditorDecorationType({
+            isWholeLine: false,
+            light: {
+                backgroundColor: groovyRangeColorLightObj
             },
             dark: {
                 backgroundColor: groovyRangeColorDarkObj
+            }
+        });
+        this.traceOutlineErrorCaughtDecoration = vscode.window.createTextEditorDecorationType({
+            isWholeLine: false,
+            light: {
+                backgroundColor: "rgba(238, 220, 139, .25)"
             },
-            fontWeight: 'bold',
-            after: {
-                contentText: '   (failed)',
-                color: "rgba(175,175,175,.75)"
+            dark: {
+                backgroundColor: "rgba(238, 220, 139, .25)"
             }
         });
         this.traceOutlineConditionalTestPassDecoration = vscode.window.createTextEditorDecorationType({
             isWholeLine: false,
             light: {
-                backgroundColor: sqlRangeColorLightObj
+                after: {
+                    contentText: 'Passed',
+                    color: "rgba(26, 183, 84, 1)",
+                    backgroundColor: "rgba(139, 238, 175, .15)",
+                    margin: "0px 15px 0px",
+                }
             },
             dark: {
-                backgroundColor: sqlRangeColorDarkObj
+                after: {
+                    contentText: 'Passed',
+                    color: "rgba(26, 183, 84, 1)",
+                    backgroundColor: "rgba(166, 242, 194, .25)",
+                    margin: "0px 15px 0px",
+                }
             }
+        });
+        this.traceOutlineConditionalTestFailDecoration = vscode.window.createTextEditorDecorationType({
+            isWholeLine: false,
+            light: {
+                after: {
+                    contentText: 'Failed',
+                    color: "rgba(196, 39, 44, 1)",
+                    backgroundColor: "rgba(225,100,0,0.15)",
+                    margin: "0px 15px 0px"
+                }
+            },
+            dark: {
+                after: {
+                    contentText: 'Failed',
+                    color: "rgba(196, 39, 44, 1)",
+                    backgroundColor: "rgba(175,45,0,0.25)",
+                    margin: "0px 15px 0px"
+                }
+            }
+        });
+        this.traceOutlinePreparedStatementDecoration = vscode.window.createTextEditorDecorationType({
+            isWholeLine: false,
+            opacity: ".50"
         });
         this.decorationTypes = this.scopeLookupTable.map((scopes) => {
             switch (scopes[0]) {
@@ -240,10 +338,22 @@ class Highlighter {
                     return this.groovyRangeDecoration;
                 case "moca.groovy.lastline":
                     return this.groovyRangeLastLineDecoration;
-                case "moca.traceoutline.conditionaltest.fail":
-                    return this.traceOutlineConditionalTestFailDecoration;
+                case "moca.traceoutline.servergot":
+                    return this.traceOutlineServerGotDecoration;
+                case "moca.traceoutline.firingtriggers":
+                    return this.traceOutlineFiringTriggersDecoration;
+                case "moca.traceoutline.trigger":
+                    return this.traceOutlineTriggerDecoration;
+                case "moca.traceoutline.error":
+                    return this.traceOutlineErrorDecoration;
+                case "moca.traceoutline.error.caught":
+                    return this.traceOutlineErrorCaughtDecoration;
                 case "moca.traceoutline.conditionaltest.pass":
                     return this.traceOutlineConditionalTestPassDecoration;
+                case "moca.traceoutline.conditionaltest.fail":
+                    return this.traceOutlineConditionalTestFailDecoration;
+                case "moca.traceoutline.preparedstatement":
+                    return this.traceOutlinePreparedStatementDecoration;
                 default: // Let theme matcher do it's thing.
                     const options = {
                         // If there exists no rule for this scope the matcher returns an empty
