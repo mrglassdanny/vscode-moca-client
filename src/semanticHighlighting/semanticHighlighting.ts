@@ -180,6 +180,9 @@ export class Highlighter {
     private sqlRangeLastLineDecoration: vscode.TextEditorDecorationType;
     private groovyRangeLastLineDecoration: vscode.TextEditorDecorationType;
     private mocaCommandStreamEndDecoration: vscode.TextEditorDecorationType;
+    // Custom moca trace outline decorations.
+    private traceOutlineConditionalTestFailDecoration: vscode.TextEditorDecorationType;
+    private traceOutlineConditionalTestPassDecoration: vscode.TextEditorDecorationType;
 
     // Maps uris with currently open TextDocuments to the current highlightings.
     private files: Map<string, Map<number, SemanticHighlightingLine>> = new Map();
@@ -210,6 +213,7 @@ export class Highlighter {
         // Create decoration types.
         const config = vscode.workspace.getConfiguration(CONFIGURATION_NAME);
         const clientOptsConfigObj = JSON.parse(JSON.stringify(config.get(CONFIGURATION_CLIENT_OPTIONS)));
+
         var sqlRangeColorLightObj = clientOptsConfigObj['sqlRangeColorLight'];
         var sqlRangeColorDarkObj = clientOptsConfigObj['sqlRangeColorDark'];
 
@@ -249,6 +253,7 @@ export class Highlighter {
 
         var groovyRangeColorLightObj = clientOptsConfigObj['groovyRangeColorLight'];
         var groovyRangeColorDarkObj = clientOptsConfigObj['groovyRangeColorDark'];
+
         this.groovyRangeDecoration = vscode.window.createTextEditorDecorationType(
             {
                 overviewRulerLane: vscode.OverviewRulerLane.Right,
@@ -294,6 +299,30 @@ export class Highlighter {
             }
         );
 
+        this.traceOutlineConditionalTestFailDecoration = vscode.window.createTextEditorDecorationType(
+            {
+                isWholeLine: false,
+                light: {
+                    backgroundColor: groovyRangeColorLightObj
+                },
+                dark: {
+                    backgroundColor: groovyRangeColorDarkObj
+                }
+            }
+        );
+
+        this.traceOutlineConditionalTestPassDecoration = vscode.window.createTextEditorDecorationType(
+            {
+                isWholeLine: false,
+                light: {
+                    backgroundColor: sqlRangeColorLightObj
+                },
+                dark: {
+                    backgroundColor: sqlRangeColorDarkObj
+                }
+            }
+        );
+
         this.decorationTypes = this.scopeLookupTable.map((scopes) => {
 
             switch (scopes[0]) {
@@ -307,6 +336,10 @@ export class Highlighter {
                     return this.groovyRangeDecoration;
                 case "moca.groovy.lastline":
                     return this.groovyRangeLastLineDecoration;
+                case "moca.traceoutline.conditionaltest.fail":
+                    return this.traceOutlineConditionalTestFailDecoration;
+                case "moca.traceoutline.conditionaltest.pass":
+                    return this.traceOutlineConditionalTestPassDecoration;
                 default: // Let theme matcher do it's thing.
                     const options: vscode.DecorationRenderOptions = {
                         // If there exists no rule for this scope the matcher returns an empty

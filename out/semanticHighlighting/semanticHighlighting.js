@@ -205,6 +205,24 @@ class Highlighter {
                 borderStyle: "solid"
             }
         });
+        this.traceOutlineConditionalTestFailDecoration = vscode.window.createTextEditorDecorationType({
+            isWholeLine: false,
+            light: {
+                backgroundColor: groovyRangeColorLightObj
+            },
+            dark: {
+                backgroundColor: groovyRangeColorDarkObj
+            }
+        });
+        this.traceOutlineConditionalTestPassDecoration = vscode.window.createTextEditorDecorationType({
+            isWholeLine: false,
+            light: {
+                backgroundColor: sqlRangeColorLightObj
+            },
+            dark: {
+                backgroundColor: sqlRangeColorDarkObj
+            }
+        });
         this.decorationTypes = this.scopeLookupTable.map((scopes) => {
             switch (scopes[0]) {
                 case "moca.commandstream.end":
@@ -217,6 +235,10 @@ class Highlighter {
                     return this.groovyRangeDecoration;
                 case "moca.groovy.lastline":
                     return this.groovyRangeLastLineDecoration;
+                case "moca.traceoutline.conditionaltest.fail":
+                    return this.traceOutlineConditionalTestFailDecoration;
+                case "moca.traceoutline.conditionaltest.pass":
+                    return this.traceOutlineConditionalTestPassDecoration;
                 default: // Let theme matcher do it's thing.
                     const options = {
                         // If there exists no rule for this scope the matcher returns an empty
