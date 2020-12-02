@@ -208,10 +208,15 @@ class Highlighter {
         this.traceOutlineConditionalTestFailDecoration = vscode.window.createTextEditorDecorationType({
             isWholeLine: false,
             light: {
-                backgroundColor: groovyRangeColorLightObj
+                color: groovyRangeColorDarkObj
             },
             dark: {
                 backgroundColor: groovyRangeColorDarkObj
+            },
+            fontWeight: 'bold',
+            after: {
+                contentText: '   (failed)',
+                color: "rgba(175,175,175,.75)"
             }
         });
         this.traceOutlineConditionalTestPassDecoration = vscode.window.createTextEditorDecorationType({
