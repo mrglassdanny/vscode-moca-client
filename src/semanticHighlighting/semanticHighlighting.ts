@@ -190,6 +190,7 @@ export class Highlighter {
     private traceOutlineConditionalTestPassDecoration: vscode.TextEditorDecorationType;
     private traceOutlineConditionalTestFailDecoration: vscode.TextEditorDecorationType;
     private traceOutlinePreparedStatementDecoration: vscode.TextEditorDecorationType;
+    private traceOutlineExecutionTimeDecoration: vscode.TextEditorDecorationType;
 
 
     // Maps uris with currently open TextDocuments to the current highlightings.
@@ -489,6 +490,30 @@ export class Highlighter {
             }
         );
 
+        this.traceOutlineExecutionTimeDecoration = vscode.window.createTextEditorDecorationType(
+            {
+                isWholeLine: false,
+                fontWeight: '900',
+                light: {
+                    after: {
+                        contentText: 'Execution time > 1 second',
+                        color: "rgba(66, 66, 66, 1)",
+                        backgroundColor: "rgba(222, 222, 222, .35)",
+                        margin: "0px 15px 0px",
+
+                    }
+                },
+                dark: {
+                    after: {
+                        contentText: 'Execution time > 1 second',
+                        color: "rgba(66, 66, 66, 1)",
+                        backgroundColor: "rgba(222, 222, 222, .35)",
+                        margin: "0px 15px 0px",
+                    }
+                }
+            }
+        );
+
 
 
         this.decorationTypes = this.scopeLookupTable.map((scopes) => {
@@ -522,6 +547,8 @@ export class Highlighter {
                     return this.traceOutlineConditionalTestFailDecoration;
                 case "moca.traceoutline.preparedstatement":
                     return this.traceOutlinePreparedStatementDecoration;
+                case "moca.traceoutline.executiontime":
+                    return this.traceOutlineExecutionTimeDecoration;
                 default: // Let theme matcher do it's thing.
                     const options: vscode.DecorationRenderOptions = {
                         // If there exists no rule for this scope the matcher returns an empty

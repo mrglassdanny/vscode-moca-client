@@ -345,6 +345,26 @@ class Highlighter {
             isWholeLine: false,
             opacity: ".50"
         });
+        this.traceOutlineExecutionTimeDecoration = vscode.window.createTextEditorDecorationType({
+            isWholeLine: false,
+            fontWeight: '900',
+            light: {
+                after: {
+                    contentText: 'Execution time > 1 second',
+                    color: "rgba(66, 66, 66, 1)",
+                    backgroundColor: "rgba(222, 222, 222, .35)",
+                    margin: "0px 15px 0px",
+                }
+            },
+            dark: {
+                after: {
+                    contentText: 'Execution time > 1 second',
+                    color: "rgba(66, 66, 66, 1)",
+                    backgroundColor: "rgba(222, 222, 222, .35)",
+                    margin: "0px 15px 0px",
+                }
+            }
+        });
         this.decorationTypes = this.scopeLookupTable.map((scopes) => {
             switch (scopes[0]) {
                 case "moca.commandstream.end":
@@ -375,6 +395,8 @@ class Highlighter {
                     return this.traceOutlineConditionalTestFailDecoration;
                 case "moca.traceoutline.preparedstatement":
                     return this.traceOutlinePreparedStatementDecoration;
+                case "moca.traceoutline.executiontime":
+                    return this.traceOutlineExecutionTimeDecoration;
                 default: // Let theme matcher do it's thing.
                     const options = {
                         // If there exists no rule for this scope the matcher returns an empty
