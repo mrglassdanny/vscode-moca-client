@@ -209,7 +209,7 @@ class Highlighter {
             isWholeLine: false,
             light: {
                 before: {
-                    contentText: 'Server got:',
+                    contentText: 'From Client:',
                     color: "rgba(66, 66, 66, 1)",
                     backgroundColor: "rgba(222, 222, 222, .35)",
                     margin: "0px 15px 0px 0px",
@@ -217,7 +217,26 @@ class Highlighter {
             },
             dark: {
                 before: {
-                    contentText: 'Server got:',
+                    contentText: 'From Client:',
+                    color: "rgba(66, 66, 66, 1)",
+                    backgroundColor: "rgba(222, 222, 222, .35)",
+                    margin: "0px 15px 0px 0px",
+                }
+            }
+        });
+        this.traceOutlineCommandInitiatedtDecoration = vscode.window.createTextEditorDecorationType({
+            isWholeLine: false,
+            light: {
+                before: {
+                    contentText: 'From Compiled Code:',
+                    color: "rgba(66, 66, 66, 1)",
+                    backgroundColor: "rgba(222, 222, 222, .35)",
+                    margin: "0px 15px 0px 0px",
+                }
+            },
+            dark: {
+                before: {
+                    contentText: 'From Compiled Code:',
                     color: "rgba(66, 66, 66, 1)",
                     backgroundColor: "rgba(222, 222, 222, .35)",
                     margin: "0px 15px 0px 0px",
@@ -269,19 +288,19 @@ class Highlighter {
         this.traceOutlineErrorDecoration = vscode.window.createTextEditorDecorationType({
             isWholeLine: false,
             light: {
-                backgroundColor: groovyRangeColorLightObj
+                backgroundColor: "rgba(225,100,0,0.15)"
             },
             dark: {
-                backgroundColor: groovyRangeColorDarkObj
+                backgroundColor: "rgba(175,45,0,0.25)"
             }
         });
         this.traceOutlineErrorCaughtDecoration = vscode.window.createTextEditorDecorationType({
             isWholeLine: false,
             light: {
-                backgroundColor: "rgba(238, 220, 139, .25)"
+                backgroundColor: "rgba(238, 220, 139, .40)"
             },
             dark: {
-                backgroundColor: "rgba(238, 220, 139, .25)"
+                backgroundColor: "rgba(238, 220, 139, .40)"
             }
         });
         this.traceOutlineConditionalTestPassDecoration = vscode.window.createTextEditorDecorationType({
@@ -340,6 +359,8 @@ class Highlighter {
                     return this.groovyRangeLastLineDecoration;
                 case "moca.traceoutline.servergot":
                     return this.traceOutlineServerGotDecoration;
+                case "moca.traceoutline.commandinitiated":
+                    return this.traceOutlineCommandInitiatedtDecoration;
                 case "moca.traceoutline.firingtriggers":
                     return this.traceOutlineFiringTriggersDecoration;
                 case "moca.traceoutline.trigger":
