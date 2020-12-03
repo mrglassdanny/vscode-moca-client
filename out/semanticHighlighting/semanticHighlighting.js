@@ -206,40 +206,36 @@ class Highlighter {
             }
         });
         this.traceOutlineServerGotDecoration = vscode.window.createTextEditorDecorationType({
-            isWholeLine: false,
+            isWholeLine: true,
             light: {
-                before: {
-                    contentText: 'From Client:',
-                    color: "rgba(66, 66, 66, 1)",
-                    backgroundColor: "rgba(222, 222, 222, .35)",
-                    margin: "0px 15px 0px 0px",
-                }
+                borderWidth: ".6px 0px 0px 0px",
+                borderColor: "rgba(25,25,25,.75)",
+                borderStyle: "dashed"
             },
             dark: {
-                before: {
-                    contentText: 'From Client:',
-                    color: "rgba(66, 66, 66, 1)",
-                    backgroundColor: "rgba(222, 222, 222, .35)",
-                    margin: "0px 15px 0px 0px",
-                }
+                borderWidth: ".6px 0px 0px 0px",
+                borderColor: "rgba(175,175,175,.75))",
+                borderStyle: "dashed"
             }
         });
         this.traceOutlineCommandInitiatedtDecoration = vscode.window.createTextEditorDecorationType({
             isWholeLine: false,
             light: {
-                before: {
-                    contentText: 'From Compiled Code:',
+                after: {
+                    contentText: 'Initiated from compiled code',
                     color: "rgba(66, 66, 66, 1)",
                     backgroundColor: "rgba(222, 222, 222, .35)",
-                    margin: "0px 15px 0px 0px",
+                    margin: "0px 25px 0px",
+                    fontStyle: 'italic'
                 }
             },
             dark: {
-                before: {
-                    contentText: 'From Compiled Code:',
-                    color: "rgba(66, 66, 66, 1)",
-                    backgroundColor: "rgba(222, 222, 222, .35)",
-                    margin: "0px 15px 0px 0px",
+                after: {
+                    contentText: 'Initiated from compiled code',
+                    color: "rgba(242, 242, 242, 1)",
+                    backgroundColor: "rgba(140, 140, 140, 0.3)",
+                    margin: "0px 25px 0px",
+                    fontStyle: 'italic'
                 }
             }
         });
@@ -248,22 +244,22 @@ class Highlighter {
             light: {
                 after: {
                     contentText: 'Firing Triggers',
-                    color: "rgba(68, 2, 116, 1)",
-                    backgroundColor: "rgba(214, 199, 230, .35)",
-                    margin: "0px 15px 0px",
+                    color: "rgba(83, 2, 141, 1)",
+                    backgroundColor: "rgba(213, 188, 240, 0.5)",
+                    margin: "0px 15px 0px"
                 },
-                color: "rgba(68, 2, 116, 1)",
-                backgroundColor: "rgba(214, 199, 230, .35)"
+                color: "rgba(83, 2, 141, 1)",
+                backgroundColor: "rgba(213, 188, 240, 0.5)"
             },
             dark: {
                 after: {
                     contentText: 'Firing Triggers',
-                    color: "rgba(68, 2, 116, 1)",
-                    backgroundColor: "rgba(214, 199, 230, .35)",
-                    margin: "0px 15px 0px",
+                    color: "rgba(226, 185, 254, 1)",
+                    backgroundColor: "rgba(219, 204, 234, 0.35)",
+                    margin: "0px 15px 0px"
                 },
-                color: "rgba(68, 2, 116, 1)",
-                backgroundColor: "rgba(214, 199, 230, .35)"
+                color: "rgba(226, 185, 254, 1)",
+                backgroundColor: "rgba(219, 204, 234, 0.35)"
             }
         });
         this.traceOutlineTriggerDecoration = vscode.window.createTextEditorDecorationType({
@@ -271,16 +267,16 @@ class Highlighter {
             light: {
                 after: {
                     contentText: 'Trigger',
-                    color: "rgba(68, 2, 116, 1)",
-                    backgroundColor: "rgba(214, 199, 230, .35)",
-                    margin: "0px 15px 0px",
+                    color: "rgba(83, 2, 141, 1)",
+                    backgroundColor: "rgba(213, 188, 240, 0.5)",
+                    margin: "0px 15px 0px"
                 }
             },
             dark: {
                 after: {
                     contentText: 'Trigger',
-                    color: "rgba(68, 2, 116, 1)",
-                    backgroundColor: "rgba(214, 199, 230, .35)",
+                    color: "rgba(226, 185, 254, 1)",
+                    backgroundColor: "rgba(219, 204, 234, 0.35)",
                     margin: "0px 15px 0px",
                 }
             }
@@ -288,19 +284,19 @@ class Highlighter {
         this.traceOutlineErrorDecoration = vscode.window.createTextEditorDecorationType({
             isWholeLine: false,
             light: {
-                backgroundColor: "rgba(225,100,0,0.15)"
+                backgroundColor: "rgba(240, 0, 0, 0.2)"
             },
             dark: {
-                backgroundColor: "rgba(175,45,0,0.25)"
+                backgroundColor: "rgba(255, 36, 36, 0.2)"
             }
         });
         this.traceOutlineErrorCaughtDecoration = vscode.window.createTextEditorDecorationType({
             isWholeLine: false,
             light: {
-                backgroundColor: "rgba(238, 220, 139, .40)"
+                backgroundColor: "rgba(255, 217, 46, 0.35)"
             },
             dark: {
-                backgroundColor: "rgba(238, 220, 139, .40)"
+                backgroundColor: "rgba(255, 238, 128, 0.25)"
             }
         });
         this.traceOutlineConditionalTestPassDecoration = vscode.window.createTextEditorDecorationType({
@@ -308,16 +304,16 @@ class Highlighter {
             light: {
                 after: {
                     contentText: 'Passed',
-                    color: "rgba(26, 183, 84, 1)",
-                    backgroundColor: "rgba(139, 238, 175, .15)",
-                    margin: "0px 15px 0px",
+                    color: "rgba(0, 117, 43, 1)",
+                    backgroundColor: "rgba(87, 255, 148, 0.30)",
+                    margin: "0px 15px 0px"
                 }
             },
             dark: {
                 after: {
                     contentText: 'Passed',
-                    color: "rgba(26, 183, 84, 1)",
-                    backgroundColor: "rgba(166, 242, 194, .25)",
+                    color: "rgba(174, 244, 200, 1)",
+                    backgroundColor: "rgba(61, 255, 132, 0.25)",
                     margin: "0px 15px 0px",
                 }
             }
@@ -327,16 +323,16 @@ class Highlighter {
             light: {
                 after: {
                     contentText: 'Failed',
-                    color: "rgba(196, 39, 44, 1)",
-                    backgroundColor: "rgba(225,100,0,0.15)",
+                    color: "rgba(153, 0, 5, 1)",
+                    backgroundColor: "rgba(240, 0, 0, 0.2)",
                     margin: "0px 15px 0px"
                 }
             },
             dark: {
                 after: {
                     contentText: 'Failed',
-                    color: "rgba(196, 39, 44, 1)",
-                    backgroundColor: "rgba(175,45,0,0.25)",
+                    color: "rgba(255, 173, 176, 1)",
+                    backgroundColor: "rgba(255, 77, 77, 0.2)",
                     margin: "0px 15px 0px"
                 }
             }
@@ -353,15 +349,17 @@ class Highlighter {
                     contentText: 'Execution time > 1 second',
                     color: "rgba(66, 66, 66, 1)",
                     backgroundColor: "rgba(222, 222, 222, .35)",
-                    margin: "0px 15px 0px",
+                    margin: "0px 25px 0px",
+                    fontStyle: 'italic'
                 }
             },
             dark: {
                 after: {
                     contentText: 'Execution time > 1 second',
-                    color: "rgba(66, 66, 66, 1)",
-                    backgroundColor: "rgba(222, 222, 222, .35)",
-                    margin: "0px 15px 0px",
+                    color: "rgba(242, 242, 242, 1)",
+                    backgroundColor: "rgba(140, 140, 140, 0.3)",
+                    margin: "0px 25px 0px",
+                    fontStyle: 'italic'
                 }
             }
         });
