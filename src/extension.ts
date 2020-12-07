@@ -200,7 +200,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			// If successful connection and we are not just re-connecting to current connection, load repo.
 			if (connectionSuccess) {
 				// TODO
-				//vscode.commands.executeCommand(LanguageClientCommands.LOAD_CACHE);
+				// vscode.commands.executeCommand(LanguageClientCommands.LOAD_CACHE);
 			}
 		});
 	}));
