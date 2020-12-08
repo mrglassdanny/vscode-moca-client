@@ -703,7 +703,7 @@ export async function activate(context: vscode.ExtensionContext) {
 				}, async (progress, token) => {
 					progress.report({
 						increment: Infinity,
-						message: "Loading Trace Outline for " + traceFileNameSelectedShortenedLocalStr.substring(0, traceFileNameSelectedShortenedLocalStr.lastIndexOf('.'))
+						message: "Loading Trace Outline for " + traceFileNameSelectedShortenedLocalStr
 					});
 
 

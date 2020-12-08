@@ -608,7 +608,7 @@ function activate(context) {
                     }, (progress, token) => __awaiter(this, void 0, void 0, function* () {
                         progress.report({
                             increment: Infinity,
-                            message: "Loading Trace Outline for " + traceFileNameSelectedShortenedLocalStr.substring(0, traceFileNameSelectedShortenedLocalStr.lastIndexOf('.'))
+                            message: "Loading Trace Outline for " + traceFileNameSelectedShortenedLocalStr
                         });
                         // Now that we have a local trace file name, we can request outline from lang server.
                         var traceResponseLocalRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedLocalStr, false);
