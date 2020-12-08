@@ -92,7 +92,7 @@
 					".moca",
 					".msql",
 					".moca.readonly",
-					".moca.trace"
+					".moca.traceoutline"
 				],
 				"configuration": "./language-configuration.json"
 			}
