@@ -191,6 +191,8 @@ export class Highlighter {
     private traceOutlineConditionalTestFailDecoration: vscode.TextEditorDecorationType;
     private traceOutlinePreparedStatementDecoration: vscode.TextEditorDecorationType;
     private traceOutlineExecutionTimeDecoration: vscode.TextEditorDecorationType;
+    private traceOutlineCFunctionDecoration: vscode.TextEditorDecorationType;
+    private traceOutlineJavaMethodDecoration: vscode.TextEditorDecorationType;
 
 
     // Maps uris with currently open TextDocuments to the current highlightings.
@@ -511,6 +513,56 @@ export class Highlighter {
             }
         );
 
+        this.traceOutlineCFunctionDecoration = vscode.window.createTextEditorDecorationType(
+            {
+                isWholeLine: false,
+                light: {
+                    after: {
+                        contentText: 'C Function',
+                        color: "rgba(66, 66, 66, 1)",
+                        backgroundColor: "rgba(222, 222, 222, .35)",
+                        margin: "0px 25px 0px",
+                        fontStyle: 'italic'
+
+                    }
+                },
+                dark: {
+                    after: {
+                        contentText: 'C Function',
+                        color: "rgba(242, 242, 242, 1)",
+                        backgroundColor: "rgba(140, 140, 140, 0.3)",
+                        margin: "0px 25px 0px",
+                        fontStyle: 'italic'
+                    }
+                }
+            }
+        );
+
+        this.traceOutlineJavaMethodDecoration = vscode.window.createTextEditorDecorationType(
+            {
+                isWholeLine: false,
+                light: {
+                    after: {
+                        contentText: 'Java Method',
+                        color: "rgba(66, 66, 66, 1)",
+                        backgroundColor: "rgba(222, 222, 222, .35)",
+                        margin: "0px 25px 0px",
+                        fontStyle: 'italic'
+
+                    }
+                },
+                dark: {
+                    after: {
+                        contentText: 'Java Method',
+                        color: "rgba(242, 242, 242, 1)",
+                        backgroundColor: "rgba(140, 140, 140, 0.3)",
+                        margin: "0px 25px 0px",
+                        fontStyle: 'italic'
+                    }
+                }
+            }
+        );
+
 
 
         this.decorationTypes = this.scopeLookupTable.map((scopes) => {
@@ -546,6 +598,10 @@ export class Highlighter {
                     return this.traceOutlinePreparedStatementDecoration;
                 case "moca.traceoutline.executiontime":
                     return this.traceOutlineExecutionTimeDecoration;
+                case "moca.traceoutline.cfunction":
+                    return this.traceOutlineCFunctionDecoration;
+                case "moca.traceoutline.javamethod":
+                    return this.traceOutlineJavaMethodDecoration;
                 default: // Let theme matcher do it's thing.
                     const options: vscode.DecorationRenderOptions = {
                         // If there exists no rule for this scope the matcher returns an empty
