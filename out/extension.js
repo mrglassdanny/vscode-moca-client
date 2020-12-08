@@ -546,38 +546,66 @@ function activate(context) {
             }
         })));
         context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.OPEN_TRACE, () => __awaiter(this, void 0, void 0, function* () {
-            // Below works similarly to COMMAND_LOOKUP. Basically we are going to request a list of trace file names from the language server.
-            // Once the user picks one via the quick pick, we will call OPEN_TRACE from the language server again but with a trace file name argument.
-            // The language server will then send us the resulting outline of the trace file requested.
-            var traceResponseRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE);
-            // We should have a string array of trace file names.
-            var traceResponseObj = JSON.parse(JSON.stringify(traceResponseRes));
-            if (traceResponseObj.traceFileNames) {
-                var traceFileNames = traceResponseObj.traceFileNames;
-                // Now sit tight while the user picks one.
-                var traceFileNameSelected = yield vscode.window.showQuickPick(traceFileNames, { ignoreFocusOut: true });
-                if (!traceFileNameSelected) {
-                    return;
-                }
-                vscode.window.withProgress({
-                    location: vscode.ProgressLocation.Notification,
-                    title: "MOCA"
-                }, (progress, token) => __awaiter(this, void 0, void 0, function* () {
-                    progress.report({
-                        increment: Infinity,
-                        message: "Loading trace " + traceFileNameSelected
-                    });
-                    // Now that we have a trace file name, we can request outline from lang server.
-                    traceResponseRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE, traceFileNameSelected);
-                    if (traceResponseRes) {
-                        // Now we need to open a web view to display the trace outline sent from lang server.
-                        traceResponseObj = JSON.parse(JSON.stringify(traceResponseRes));
-                        var uri = vscode.Uri.file(context.globalStoragePath + "\\trace\\" + traceFileNameSelected.replace('.log', '') + ".moca.trace");
-                        yield vscode.workspace.fs.writeFile(uri, Buffer.from(traceResponseObj.traceOutline));
-                        var doc = yield vscode.workspace.openTextDocument(uri);
-                        yield vscode.window.showTextDocument(doc, { preview: false });
+            var traceFileTypeRes = yield vscode.window.showQuickPick(["Remote", "Local"], { ignoreFocusOut: true });
+            if (!traceFileTypeRes) {
+                return;
+            }
+            if (traceFileTypeRes === "Remote") {
+                var traceResponseRemoteRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE);
+                // We should have a string array of trace file names.
+                var traceResponseRemoteObj = JSON.parse(JSON.stringify(traceResponseRemoteRes));
+                if (traceResponseRemoteObj.traceFileNames) {
+                    var traceFileNamesRemote = traceResponseRemoteObj.traceFileNames;
+                    // Now sit tight while the user picks one.
+                    var traceFileNameSelectedRemote = yield vscode.window.showQuickPick(traceFileNamesRemote, { ignoreFocusOut: true });
+                    if (!traceFileNameSelectedRemote) {
+                        return;
                     }
-                }));
+                    vscode.window.withProgress({
+                        location: vscode.ProgressLocation.Notification,
+                        title: "MOCA"
+                    }, (progress, token) => __awaiter(this, void 0, void 0, function* () {
+                        progress.report({
+                            increment: Infinity,
+                            message: "Loading trace " + traceFileNameSelectedRemote
+                        });
+                        // Now that we have a trace file name, we can request outline from lang server.
+                        traceResponseRemoteRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE, traceFileNameSelectedRemote, true);
+                        if (traceResponseRemoteRes) {
+                            traceResponseRemoteObj = JSON.parse(JSON.stringify(traceResponseRemoteRes));
+                            var uri = vscode.Uri.file(context.globalStoragePath + "\\trace\\" + traceFileNameSelectedRemote.replace('.log', '') + ".moca.trace");
+                            yield vscode.workspace.fs.writeFile(uri, Buffer.from(traceResponseRemoteObj.traceOutline));
+                            var doc = yield vscode.workspace.openTextDocument(uri);
+                            yield vscode.window.showTextDocument(doc, { preview: false });
+                        }
+                    }));
+                }
+            }
+            else if (traceFileTypeRes === "Local") {
+                var traceFileNameSelectedLocalRes = yield vscode.window.showOpenDialog({
+                    canSelectMany: false, canSelectFiles: true, canSelectFolders: false, title: "Trace .log file", filters: {
+                        "Log": ["log"]
+                    }
+                });
+                if (traceFileNameSelectedLocalRes) {
+                    vscode.window.withProgress({
+                        location: vscode.ProgressLocation.Notification,
+                        title: "MOCA"
+                    }, (progress, token) => __awaiter(this, void 0, void 0, function* () {
+                        progress.report({
+                            increment: Infinity,
+                            message: "Loading trace " + traceFileNameSelectedLocalRes[0]
+                        });
+                        var traceResponseLocalRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE, traceFileNameSelectedLocalRes[0], false);
+                        if (traceResponseLocalRes) {
+                            var traceResponseLocalObj = JSON.parse(JSON.stringify(traceResponseLocalRes));
+                            var uri = vscode.Uri.file(context.globalStoragePath + "\\trace\\" + traceFileNameSelectedLocalRes[0].path.replace('.log', '') + ".moca.trace");
+                            yield vscode.workspace.fs.writeFile(uri, Buffer.from(traceResponseLocalObj.traceOutline));
+                            var doc = yield vscode.workspace.openTextDocument(uri);
+                            yield vscode.window.showTextDocument(doc, { preview: false });
+                        }
+                    }));
+                }
             }
         })));
         // Events registration.
