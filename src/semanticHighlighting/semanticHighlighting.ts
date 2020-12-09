@@ -359,22 +359,10 @@ export class Highlighter {
                 isWholeLine: false,
 
                 light: {
-                    after: {
-                        contentText: 'Firing Triggers',
-                        color: "rgba(83, 2, 141, 1)",
-                        backgroundColor: "rgba(213, 188, 240, 0.5)",
-                        margin: "0px 15px 0px"
-                    },
                     color: "rgba(83, 2, 141, 1)",
                     backgroundColor: "rgba(213, 188, 240, 0.5)"
                 },
                 dark: {
-                    after: {
-                        contentText: 'Firing Triggers',
-                        color: "rgba(226, 185, 254, 1)",
-                        backgroundColor: "rgba(219, 204, 234, 0.35)",
-                        margin: "0px 15px 0px"
-                    },
                     color: "rgba(226, 185, 254, 1)",
                     backgroundColor: "rgba(219, 204, 234, 0.35)"
                 }
@@ -391,7 +379,7 @@ export class Highlighter {
                         contentText: 'Trigger',
                         color: "rgba(83, 2, 141, 1)",
                         backgroundColor: "rgba(213, 188, 240, 0.5)",
-                        margin: "0px 15px 0px"
+                        margin: "0px 5px 0px 0px"
                     }
                 },
                 dark: {
@@ -399,7 +387,7 @@ export class Highlighter {
                         contentText: 'Trigger',
                         color: "rgba(226, 185, 254, 1)",
                         backgroundColor: "rgba(219, 204, 234, 0.35)",
-                        margin: "0px 15px 0px",
+                        margin: "0px 5px 0px 0px",
                     }
                 }
 
@@ -523,7 +511,6 @@ export class Highlighter {
                         backgroundColor: "rgba(222, 222, 222, .35)",
                         margin: "0px 25px 0px",
                         fontStyle: 'italic'
-
                     }
                 },
                 dark: {

@@ -242,22 +242,10 @@ class Highlighter {
         this.traceOutlineFiringTriggersDecoration = vscode.window.createTextEditorDecorationType({
             isWholeLine: false,
             light: {
-                after: {
-                    contentText: 'Firing Triggers',
-                    color: "rgba(83, 2, 141, 1)",
-                    backgroundColor: "rgba(213, 188, 240, 0.5)",
-                    margin: "0px 15px 0px"
-                },
                 color: "rgba(83, 2, 141, 1)",
                 backgroundColor: "rgba(213, 188, 240, 0.5)"
             },
             dark: {
-                after: {
-                    contentText: 'Firing Triggers',
-                    color: "rgba(226, 185, 254, 1)",
-                    backgroundColor: "rgba(219, 204, 234, 0.35)",
-                    margin: "0px 15px 0px"
-                },
                 color: "rgba(226, 185, 254, 1)",
                 backgroundColor: "rgba(219, 204, 234, 0.35)"
             }
@@ -269,7 +257,7 @@ class Highlighter {
                     contentText: 'Trigger',
                     color: "rgba(83, 2, 141, 1)",
                     backgroundColor: "rgba(213, 188, 240, 0.5)",
-                    margin: "0px 15px 0px"
+                    margin: "0px 5px 0px 0px"
                 }
             },
             dark: {
@@ -277,7 +265,7 @@ class Highlighter {
                     contentText: 'Trigger',
                     color: "rgba(226, 185, 254, 1)",
                     backgroundColor: "rgba(219, 204, 234, 0.35)",
-                    margin: "0px 15px 0px",
+                    margin: "0px 5px 0px 0px",
                 }
             }
         });
