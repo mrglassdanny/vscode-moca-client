@@ -260,8 +260,6 @@ export class Highlighter {
             }
         );
 
-
-
         var groovyRangeColorLightObj = clientOptsConfigObj['groovyRangeColorLight'];
         var groovyRangeColorDarkObj = clientOptsConfigObj['groovyRangeColorDark'];
 
