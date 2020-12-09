@@ -140,8 +140,10 @@ class Highlighter {
         // Create decoration types.
         const config = vscode.workspace.getConfiguration(extension_1.CONFIGURATION_NAME);
         const clientOptsConfigObj = JSON.parse(JSON.stringify(config.get(extension_1.CONFIGURATION_CLIENT_OPTIONS)));
-        var sqlRangeColorLightObj = clientOptsConfigObj['sqlRangeColorLight'];
-        var sqlRangeColorDarkObj = clientOptsConfigObj['sqlRangeColorDark'];
+        const sqlRangeColorLightObj = clientOptsConfigObj['sqlRangeColorLight'];
+        const sqlRangeColorDarkObj = clientOptsConfigObj['sqlRangeColorDark'];
+        const groovyRangeColorLightObj = clientOptsConfigObj['groovyRangeColorLight'];
+        const groovyRangeColorDarkObj = clientOptsConfigObj['groovyRangeColorDark'];
         this.sqlRangeDecoration = vscode.window.createTextEditorDecorationType({
             overviewRulerLane: vscode.OverviewRulerLane.Right,
             isWholeLine: true,
@@ -166,8 +168,6 @@ class Highlighter {
                 backgroundColor: sqlRangeColorDarkObj
             }
         });
-        var groovyRangeColorLightObj = clientOptsConfigObj['groovyRangeColorLight'];
-        var groovyRangeColorDarkObj = clientOptsConfigObj['groovyRangeColorDark'];
         this.groovyRangeDecoration = vscode.window.createTextEditorDecorationType({
             overviewRulerLane: vscode.OverviewRulerLane.Right,
             isWholeLine: true,

@@ -225,8 +225,10 @@ export class Highlighter {
         const config = vscode.workspace.getConfiguration(CONFIGURATION_NAME);
         const clientOptsConfigObj = JSON.parse(JSON.stringify(config.get(CONFIGURATION_CLIENT_OPTIONS)));
 
-        var sqlRangeColorLightObj = clientOptsConfigObj['sqlRangeColorLight'];
-        var sqlRangeColorDarkObj = clientOptsConfigObj['sqlRangeColorDark'];
+        const sqlRangeColorLightObj = clientOptsConfigObj['sqlRangeColorLight'];
+        const sqlRangeColorDarkObj = clientOptsConfigObj['sqlRangeColorDark'];
+        const groovyRangeColorLightObj = clientOptsConfigObj['groovyRangeColorLight'];
+        const groovyRangeColorDarkObj = clientOptsConfigObj['groovyRangeColorDark'];
 
         this.sqlRangeDecoration = vscode.window.createTextEditorDecorationType(
             {
@@ -260,9 +262,6 @@ export class Highlighter {
             }
         );
 
-        var groovyRangeColorLightObj = clientOptsConfigObj['groovyRangeColorLight'];
-        var groovyRangeColorDarkObj = clientOptsConfigObj['groovyRangeColorDark'];
-
         this.groovyRangeDecoration = vscode.window.createTextEditorDecorationType(
             {
                 overviewRulerLane: vscode.OverviewRulerLane.Right,
@@ -277,6 +276,7 @@ export class Highlighter {
                 }
             }
         );
+
         this.groovyRangeLastLineDecoration = vscode.window.createTextEditorDecorationType(
             {
                 overviewRulerLane: vscode.OverviewRulerLane.Right,
