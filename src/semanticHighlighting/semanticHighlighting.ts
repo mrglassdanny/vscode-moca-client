@@ -181,6 +181,7 @@ export class Highlighter {
     private groovyRangeLastLineDecoration: vscode.TextEditorDecorationType;
     private mocaCommandStreamEndDecoration: vscode.TextEditorDecorationType;
     // Custom moca trace outline decorations.
+    private traceOutlineOutlineIdDecoration: vscode.TextEditorDecorationType;
     private traceOutlineServerGotDecoration: vscode.TextEditorDecorationType;
     private traceOutlineCommandInitiatedtDecoration: vscode.TextEditorDecorationType;
     private traceOutlineFiringTriggersDecoration: vscode.TextEditorDecorationType;
@@ -193,6 +194,7 @@ export class Highlighter {
     private traceOutlineExecutionTimeDecoration: vscode.TextEditorDecorationType;
     private traceOutlineCFunctionDecoration: vscode.TextEditorDecorationType;
     private traceOutlineJavaMethodDecoration: vscode.TextEditorDecorationType;
+    private traceOutlineRowXOfYDecoration: vscode.TextEditorDecorationType;
 
 
     // Maps uris with currently open TextDocuments to the current highlightings.
@@ -308,6 +310,28 @@ export class Highlighter {
             }
         );
 
+        this.traceOutlineOutlineIdDecoration = vscode.window.createTextEditorDecorationType(
+            {
+                isWholeLine: true,
+                fontWeight: '900',
+                light: {
+                    borderWidth: "1px 1px 1px 1px",
+                    borderColor: "rgba(25,25,25,.75)",
+                    borderStyle: "solid",
+                    color: "rgba(66, 66, 66, 1)",
+                    backgroundColor: "rgba(222, 222, 222, .35)",
+                },
+                dark: {
+                    borderWidth: "1px 1px 1px 1px",
+                    borderColor: "rgba(175,175,175,.75)",
+                    borderStyle: "solid",
+                    color: "rgba(242, 242, 242, 1)",
+                    backgroundColor: "rgba(140, 140, 140, 0.3)",
+                }
+
+            }
+        );
+
         this.traceOutlineServerGotDecoration = vscode.window.createTextEditorDecorationType(
             {
                 isWholeLine: true,
@@ -319,7 +343,7 @@ export class Highlighter {
                 },
                 dark: {
                     borderWidth: ".6px 0px 0px 0px",
-                    borderColor: "rgba(175,175,175,.75))",
+                    borderColor: "rgba(175,175,175,.75)",
                     borderStyle: "dashed"
                 }
             }
@@ -478,6 +502,10 @@ export class Highlighter {
                 isWholeLine: false,
                 fontWeight: '900',
                 light: {
+                    borderWidth: "2px 2px 2px 2px",
+                    borderColor: "rgba(96, 203, 246, 1)",
+                    borderStyle: "solid",
+                    backgroundColor: "rgba(96, 203, 246, .35)",
                     after: {
                         contentText: 'Execution time > 1 second',
                         color: "rgba(66, 66, 66, 1)",
@@ -488,6 +516,10 @@ export class Highlighter {
                     }
                 },
                 dark: {
+                    borderWidth: "2px 2px 2px 2px",
+                    borderColor: "rgba(96, 203, 246, 1)",
+                    borderStyle: "solid",
+                    backgroundColor: "rgba(96, 203, 246, .35)",
                     after: {
                         contentText: 'Execution time > 1 second',
                         color: "rgba(242, 242, 242, 1)",
@@ -496,6 +528,7 @@ export class Highlighter {
                         fontStyle: 'italic'
                     }
                 }
+
             }
         );
 
@@ -548,6 +581,21 @@ export class Highlighter {
             }
         );
 
+        this.traceOutlineRowXOfYDecoration = vscode.window.createTextEditorDecorationType(
+            {
+                isWholeLine: false,
+                light: {
+                    color: "rgba(66, 66, 66, 1)",
+                    backgroundColor: "rgba(222, 222, 222, .35)",
+                    fontStyle: 'italic'
+                },
+                dark: {
+                    color: "rgba(242, 242, 242, 1)",
+                    backgroundColor: "rgba(140, 140, 140, 0.3)",
+                    fontStyle: 'italic'
+                }
+            }
+        );
 
 
         this.decorationTypes = this.scopeLookupTable.map((scopes) => {
@@ -563,6 +611,8 @@ export class Highlighter {
                     return this.groovyRangeDecoration;
                 case "moca.groovy.lastline":
                     return this.groovyRangeLastLineDecoration;
+                case "moca.traceoutline.outlineid":
+                    return this.traceOutlineOutlineIdDecoration;
                 case "moca.traceoutline.servergot":
                     return this.traceOutlineServerGotDecoration;
                 case "moca.traceoutline.commandinitiated":
@@ -587,6 +637,8 @@ export class Highlighter {
                     return this.traceOutlineCFunctionDecoration;
                 case "moca.traceoutline.javamethod":
                     return this.traceOutlineJavaMethodDecoration;
+                case "moca.traceoutline.rowxofy":
+                    return this.traceOutlineRowXOfYDecoration;
                 default: // Let theme matcher do it's thing.
                     const options: vscode.DecorationRenderOptions = {
                         // If there exists no rule for this scope the matcher returns an empty
