@@ -347,34 +347,18 @@ class Highlighter {
             isWholeLine: false,
             opacity: ".50"
         });
-        this.traceOutlineExecutionTimeDecoration = vscode.window.createTextEditorDecorationType({
+        this.traceOutlineExceedsExecutionTimeDecoration = vscode.window.createTextEditorDecorationType({
             isWholeLine: false,
             fontWeight: '900',
             light: {
-                borderWidth: "2px 2px 2px 2px",
-                borderColor: "rgba(96, 203, 246, 1)",
-                borderStyle: "solid",
-                backgroundColor: "rgba(96, 203, 246, .35)",
-                after: {
-                    contentText: 'Execution time > 1 second',
-                    color: "rgba(66, 66, 66, 1)",
-                    backgroundColor: "rgba(222, 222, 222, .35)",
-                    margin: "0px 25px 0px",
-                    fontStyle: 'italic'
-                }
+                borderWidth: "2.5px 2.5px 2.5px 2.5px",
+                borderColor: "rgba(240, 148, 0, .75)",
+                borderStyle: "solid"
             },
             dark: {
-                borderWidth: "2px 2px 2px 2px",
-                borderColor: "rgba(96, 203, 246, 1)",
-                borderStyle: "solid",
-                backgroundColor: "rgba(96, 203, 246, .35)",
-                after: {
-                    contentText: 'Execution time > 1 second',
-                    color: "rgba(242, 242, 242, 1)",
-                    backgroundColor: "rgba(140, 140, 140, 0.3)",
-                    margin: "0px 25px 0px",
-                    fontStyle: 'italic'
-                }
+                borderWidth: "2.5px 2.5px 2.5px 2.5px",
+                borderColor: "rgba(198, 126, 12, .75)",
+                borderStyle: "solid"
             }
         });
         this.traceOutlineCFunctionDecoration = vscode.window.createTextEditorDecorationType({
@@ -464,8 +448,8 @@ class Highlighter {
                     return this.traceOutlineConditionalTestFailDecoration;
                 case "moca.traceoutline.preparedstatement":
                     return this.traceOutlinePreparedStatementDecoration;
-                case "moca.traceoutline.executiontime":
-                    return this.traceOutlineExecutionTimeDecoration;
+                case "moca.traceoutline.exceedsexecutiontime":
+                    return this.traceOutlineExceedsExecutionTimeDecoration;
                 case "moca.traceoutline.cfunction":
                     return this.traceOutlineCFunctionDecoration;
                 case "moca.traceoutline.javamethod":

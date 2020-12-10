@@ -573,7 +573,7 @@ function activate(context) {
                             message: "Loading Trace Outline for " + traceFileNameSelectedRemote
                         });
                         // Now that we have a remote trace file name, we can request outline from lang server.
-                        traceResponseRemoteRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedRemote, true);
+                        traceResponseRemoteRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedRemote, true, true, true, 1.0);
                         if (traceResponseRemoteRes) {
                             traceResponseRemoteObj = JSON.parse(JSON.stringify(traceResponseRemoteRes));
                             // Make sure to check for exception.
@@ -611,7 +611,7 @@ function activate(context) {
                             message: "Loading Trace Outline for " + traceFileNameSelectedShortenedLocalStr
                         });
                         // Now that we have a local trace file name, we can request outline from lang server.
-                        var traceResponseLocalRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedLocalStr, false);
+                        var traceResponseLocalRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedLocalStr, false, true, true, 1.0);
                         if (traceResponseLocalRes) {
                             var traceResponseLocalObj = JSON.parse(JSON.stringify(traceResponseLocalRes));
                             // Make sure to check for exception.
