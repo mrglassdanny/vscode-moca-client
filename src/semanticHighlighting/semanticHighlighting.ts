@@ -183,8 +183,7 @@ export class Highlighter {
     // Custom moca trace outline decorations.
     private traceOutlineOutlineIdDecoration: vscode.TextEditorDecorationType;
     private traceOutlineServerGotDecoration: vscode.TextEditorDecorationType;
-    private traceOutlineCommandInitiatedtDecoration: vscode.TextEditorDecorationType;
-    private traceOutlineFiringTriggersDecoration: vscode.TextEditorDecorationType;
+    private traceOutlineCommandInitiatedDecoration: vscode.TextEditorDecorationType;
     private traceOutlineTriggerDecoration: vscode.TextEditorDecorationType;
     private traceOutlineErrorDecoration: vscode.TextEditorDecorationType;
     private traceOutlineErrorCaughtDecoration: vscode.TextEditorDecorationType;
@@ -194,7 +193,8 @@ export class Highlighter {
     private traceOutlineExceedsExecutionTimeDecoration: vscode.TextEditorDecorationType;
     private traceOutlineCFunctionDecoration: vscode.TextEditorDecorationType;
     private traceOutlineJavaMethodDecoration: vscode.TextEditorDecorationType;
-    private traceOutlineRowXOfYDecoration: vscode.TextEditorDecorationType;
+    private traceOutlineInstructionPrefixDecoration: vscode.TextEditorDecorationType;
+    private traceOutlineInstructionSuffixDecoration: vscode.TextEditorDecorationType;
 
 
     // Maps uris with currently open TextDocuments to the current highlightings.
@@ -349,7 +349,7 @@ export class Highlighter {
             }
         );
 
-        this.traceOutlineCommandInitiatedtDecoration = vscode.window.createTextEditorDecorationType(
+        this.traceOutlineCommandInitiatedDecoration = vscode.window.createTextEditorDecorationType(
             {
                 isWholeLine: false,
 
@@ -371,22 +371,6 @@ export class Highlighter {
                         margin: "0px 25px 0px",
                         fontStyle: 'italic'
                     }
-                }
-
-            }
-        );
-
-        this.traceOutlineFiringTriggersDecoration = vscode.window.createTextEditorDecorationType(
-            {
-                isWholeLine: false,
-
-                light: {
-                    color: "rgba(83, 2, 141, 1)",
-                    backgroundColor: "rgba(213, 188, 240, 0.5)"
-                },
-                dark: {
-                    color: "rgba(226, 185, 254, 1)",
-                    backgroundColor: "rgba(219, 204, 234, 0.35)"
                 }
 
             }
@@ -564,17 +548,31 @@ export class Highlighter {
             }
         );
 
-        this.traceOutlineRowXOfYDecoration = vscode.window.createTextEditorDecorationType(
+        this.traceOutlineInstructionPrefixDecoration = vscode.window.createTextEditorDecorationType(
             {
                 isWholeLine: false,
+                opacity: '.5',
                 light: {
                     color: "rgba(66, 66, 66, 1)",
-                    backgroundColor: "rgba(222, 222, 222, .35)",
                     fontStyle: 'italic'
                 },
                 dark: {
                     color: "rgba(242, 242, 242, 1)",
-                    backgroundColor: "rgba(140, 140, 140, 0.3)",
+                    fontStyle: 'italic'
+                }
+            }
+        );
+
+        this.traceOutlineInstructionSuffixDecoration = vscode.window.createTextEditorDecorationType(
+            {
+                isWholeLine: false,
+                opacity: '.5',
+                light: {
+                    color: "rgba(66, 66, 66, 1)",
+                    fontStyle: 'italic'
+                },
+                dark: {
+                    color: "rgba(242, 242, 242, 1)",
                     fontStyle: 'italic'
                 }
             }
@@ -599,9 +597,7 @@ export class Highlighter {
                 case "moca.traceoutline.servergot":
                     return this.traceOutlineServerGotDecoration;
                 case "moca.traceoutline.commandinitiated":
-                    return this.traceOutlineCommandInitiatedtDecoration;
-                case "moca.traceoutline.firingtriggers":
-                    return this.traceOutlineFiringTriggersDecoration;
+                    return this.traceOutlineCommandInitiatedDecoration;
                 case "moca.traceoutline.trigger":
                     return this.traceOutlineTriggerDecoration;
                 case "moca.traceoutline.error":
@@ -620,8 +616,10 @@ export class Highlighter {
                     return this.traceOutlineCFunctionDecoration;
                 case "moca.traceoutline.javamethod":
                     return this.traceOutlineJavaMethodDecoration;
-                case "moca.traceoutline.rowxofy":
-                    return this.traceOutlineRowXOfYDecoration;
+                case "moca.traceoutline.instructionprefix":
+                    return this.traceOutlineInstructionPrefixDecoration;
+                case "moca.traceoutline.instructionsuffix":
+                    return this.traceOutlineInstructionSuffixDecoration;
                 default: // Let theme matcher do it's thing.
                     const options: vscode.DecorationRenderOptions = {
                         // If there exists no rule for this scope the matcher returns an empty
