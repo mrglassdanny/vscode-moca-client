@@ -665,7 +665,7 @@ export async function activate(context: vscode.ExtensionContext) {
 					});
 
 					// Now that we have a remote trace file name, we can request outline from lang server.
-					traceResponseRemoteRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedRemote, true, true, true, 1.0);
+					traceResponseRemoteRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedRemote, true, true, 1.0);
 					if (traceResponseRemoteRes) {
 						traceResponseRemoteObj = JSON.parse(JSON.stringify(traceResponseRemoteRes));
 
@@ -708,7 +708,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 
 					// Now that we have a local trace file name, we can request outline from lang server.
-					var traceResponseLocalRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedLocalStr, false, true, true, 1.0);
+					var traceResponseLocalRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedLocalStr, false, true, 1.0);
 
 					if (traceResponseLocalRes) {
 						var traceResponseLocalObj = JSON.parse(JSON.stringify(traceResponseLocalRes));
