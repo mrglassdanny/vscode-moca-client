@@ -392,7 +392,7 @@ export class Highlighter {
                     after: {
                         contentText: 'Trigger',
                         color: "rgba(226, 185, 254, 1)",
-                        backgroundColor: "rgba(219, 204, 234, 0.35)",
+                        backgroundColor: "rgba(156, 114, 197, 0.5)",
                         margin: "0px 5px 0px 0px",
                     }
                 }
@@ -422,7 +422,7 @@ export class Highlighter {
                     backgroundColor: "rgba(255, 217, 46, 0.35)"
                 },
                 dark: {
-                    backgroundColor: "rgba(255, 238, 128, 0.25)"
+                    backgroundColor: "rgba(255, 226, 41, 0.15)"
                 }
             }
         );
@@ -466,7 +466,7 @@ export class Highlighter {
                 dark: {
                     after: {
                         contentText: 'Failed',
-                        color: "rgba(255, 173, 176, 1)",
+                        color: "rgba(255, 204, 206, 1)",
                         backgroundColor: "rgba(255, 77, 77, 0.2)",
                         margin: "0px 15px 0px"
                     }
