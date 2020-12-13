@@ -686,7 +686,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 			// Give user list of local files to pick from.
 			var traceFileNameSelectedLocalRes = await vscode.window.showOpenDialog({
-				canSelectMany: false, canSelectFiles: true, canSelectFolders: false, title: "Trace .log file", filters: {
+				canSelectMany: false, canSelectFiles: true, canSelectFolders: false, title: "Open Trace Outline", filters: {
 					"Log": ["log"]
 				}
 			});

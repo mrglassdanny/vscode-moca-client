@@ -594,7 +594,7 @@ function activate(context) {
             else if (traceTypeRes === "Local") {
                 // Give user list of local files to pick from.
                 var traceFileNameSelectedLocalRes = yield vscode.window.showOpenDialog({
-                    canSelectMany: false, canSelectFiles: true, canSelectFolders: false, title: "Trace .log file", filters: {
+                    canSelectMany: false, canSelectFiles: true, canSelectFolders: false, title: "Open Trace Outline", filters: {
                         "Log": ["log"]
                     }
                 });
