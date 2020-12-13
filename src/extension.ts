@@ -85,9 +85,23 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	// Make sure global storage path exists.
 	vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath));
+
 	// Make sure other paths exist.
 	vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\command-lookup"));
 	vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\trace"));
+
+	// Directories are there -- let's purge existing files.
+	var commandLookupDirRes = await vscode.workspace.fs.readDirectory(vscode.Uri.file(context.globalStoragePath + "\\command-lookup"));
+	for (var i = 0; i < commandLookupDirRes.length; i++) {
+		vscode.workspace.fs.delete(vscode.Uri.file(context.globalStoragePath + "\\command-lookup\\" + commandLookupDirRes[i][0]));
+	}
+	var traceDirRes = await vscode.workspace.fs.readDirectory(vscode.Uri.file(context.globalStoragePath + "\\trace"));
+	for (var i = 0; i < traceDirRes.length; i++) {
+		vscode.workspace.fs.delete(vscode.Uri.file(context.globalStoragePath + "\\trace\\" + traceDirRes[i][0]));
+	}
+
+
+
 
 	// Start language server on extension activate.
 	await startMocaLanguageServer();

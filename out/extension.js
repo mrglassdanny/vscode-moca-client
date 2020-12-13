@@ -88,6 +88,15 @@ function activate(context) {
         // Make sure other paths exist.
         vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\command-lookup"));
         vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\trace"));
+        // Directories are there -- let's purge existing files.
+        var commandLookupDirRes = yield vscode.workspace.fs.readDirectory(vscode.Uri.file(context.globalStoragePath + "\\command-lookup"));
+        for (var i = 0; i < commandLookupDirRes.length; i++) {
+            vscode.workspace.fs.delete(vscode.Uri.file(context.globalStoragePath + "\\command-lookup\\" + commandLookupDirRes[i][0]));
+        }
+        var traceDirRes = yield vscode.workspace.fs.readDirectory(vscode.Uri.file(context.globalStoragePath + "\\trace"));
+        for (var i = 0; i < traceDirRes.length; i++) {
+            vscode.workspace.fs.delete(vscode.Uri.file(context.globalStoragePath + "\\trace\\" + traceDirRes[i][0]));
+        }
         // Start language server on extension activate.
         yield startMocaLanguageServer();
         var activateResponse = yield vscode.commands.executeCommand(LanguageServerCommands.ACTIVATE, context.globalStoragePath, vscode.workspace.getConfiguration(exports.CONFIGURATION_NAME).get(exports.CONFIGURATION_LANGUAGE_SERVER_OPTIONS), vscode.workspace.getConfiguration(exports.CONFIGURATION_NAME).get(exports.CONFIGURATION_DEFAULT_GROOVY_CLASSPATH));
