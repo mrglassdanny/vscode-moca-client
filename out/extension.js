@@ -707,7 +707,7 @@ function startMocaLanguageServer() {
             };
             mocaLanguageClient = new vscode_languageclient_1.LanguageClient("moca", "MOCA Language Server", executable, clientOptions);
             mocaLanguageClient.onReady().then(resolve, reason => {
-                resolve();
+                resolve(undefined);
                 vscode.window.showErrorMessage(MOCA_LANGUAGE_SERVER_ERR_STARTUP);
             });
             const semanticHighlightingFeature = new semanticHighlighting_1.SemanticHighlightingFeature(mocaLanguageClient, globalExtensionContext);

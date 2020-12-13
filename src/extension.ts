@@ -825,7 +825,7 @@ function startMocaLanguageServer() {
 
 				mocaLanguageClient.onReady().then(resolve, reason => {
 
-					resolve();
+					resolve(undefined);
 					vscode.window.showErrorMessage(MOCA_LANGUAGE_SERVER_ERR_STARTUP);
 
 				});
