@@ -14,6 +14,7 @@ Provides MOCA client and language support for Visual Studio Code via the [MOCA L
 
 3. Extension is activated after you either:
     - open MOCA file (.moca **OR** .msql)
+        - no difference between .moca and .msql -- just 2 extensions for the same thing
     - make MOCA connection
 
 
@@ -24,6 +25,7 @@ Provides MOCA client and language support for Visual Studio Code via the [MOCA L
 - Syntax highlighting
 - [Intellisense]
 - [Command Execution]
+- Trace Outliner
 
 
 ## Commands

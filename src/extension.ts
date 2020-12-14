@@ -9,7 +9,7 @@ import { MocaCommand, MocaTrigger } from './mocaCommandLookup/mocaCommandLookup'
 import { performance } from 'perf_hooks';
 
 // Language server constants.
-const MOCA_LANGUAGE_SERVER_VERSION = "1.6.10";
+const MOCA_LANGUAGE_SERVER_VERSION = "1.7.10";
 const MOCA_LANGUAGE_SERVER = "moca-language-server-" + MOCA_LANGUAGE_SERVER_VERSION + "-all.jar";
 const MOCA_LANGUAGE_SERVER_INITIALIZING_MESSAGE = "MOCA: Initializing language server";
 const MOCA_LANGUAGE_SERVER_ERR_STARTUP = "The MOCA extension failed to start";
@@ -24,9 +24,10 @@ export const CONFIGURATION_NAME = "moca";
 export const CONFIGURATION_CONNECTIONS_NAME = "connections";
 export const CONFIGURATION_TRACE_NAME = "trace";
 export const CONFIGURATION_AUTO_EXECUTION_NAME = "autoExecution";
-export const CONFIGURATION_CLIENT_OPTIONS = "clientOptions";
-export const CONFIGURATION_LANGUAGE_SERVER_OPTIONS = "languageServerOptions";
-export const CONFIGURATION_DEFAULT_GROOVY_CLASSPATH = "defaultGroovyclasspath";
+export const CONFIGURATION_CLIENT_OPTIONS_NAME = "clientOptions";
+export const CONFIGURATION_LANGUAGE_SERVER_OPTIONS_NAME = "languageServerOptions";
+export const CONFIGURATION_DEFAULT_GROOVY_CLASSPATH_NAME = "defaultGroovyclasspath";
+export const CONFIGURATION_TRACE_OUTLINER_NAME = "traceOutliner";
 
 
 // Client commands.
@@ -38,6 +39,7 @@ export namespace LanguageClientCommands {
 	export const TRACE = "moca.trace";
 	export const COMMAND_LOOKUP = "moca.commandLookup";
 	export const AUTO_EXECUTE = "moca.autoExecute";
+	export const OPEN_TRACE_OUTLINE = "moca.openTraceOutline";
 }
 
 // Language server commands.
@@ -49,6 +51,7 @@ export namespace LanguageServerCommands {
 	export const TRACE = "mocalanguageserver.trace";
 	export const COMMAND_LOOKUP = "mocalanguageserver.commandLookup";
 	export const SET_LANGUAGE_SERVER_OPTIONS = "mocalanguageserver.setLanguageServerOptions";
+	export const OPEN_TRACE_OUTLINE = "mocalanguageserver.openTraceOutline";
 }
 
 // Status bar items.
@@ -59,6 +62,7 @@ var executeStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAli
 var executeSelectionStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 2 + STATUS_BAR_PRIORITY_OFFSET);
 var commandLookupStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 3 + STATUS_BAR_PRIORITY_OFFSET);
 var traceStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 4 + STATUS_BAR_PRIORITY_OFFSET);
+var openTraceStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 5 + STATUS_BAR_PRIORITY_OFFSET);
 
 // Status bar constants.
 const NOT_CONNECTED_STR = "MOCA: $(database) Not Connected";
@@ -71,8 +75,16 @@ const UNSAFE_CODE_APPROVAL_PROMPT = "You are attempting to run unsafe code. Do y
 const UNSAFE_CODE_APPROVAL_OPTION_YES = "Yes";
 const UNSAFE_CODE_APPROVAL_OPTION_NO = "No";
 
+// Constants for opening trace outline immediately after trace stop.
+const OPEN_TRACE_OUTLINE_PROMPT = "Would you like to open trace outline?";
+const OPEN_TRACE_OUTLINE_OPTION_YES = "Yes";
+const OPEN_TRACE_OUTLINE_OPTION_NO = "No";
+
 // Need to keep track of trace status.
 let traceStarted: boolean = false;
+
+// Need to save off user ID for default trace file naming.
+let curConnectionUserId: string = "";
 
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -82,13 +94,28 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	// Make sure global storage path exists.
 	vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath));
+
 	// Make sure other paths exist.
 	vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\command-lookup"));
+	vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\trace"));
+
+	// Directories are there -- let's purge existing files.
+	var commandLookupDirRes = await vscode.workspace.fs.readDirectory(vscode.Uri.file(context.globalStoragePath + "\\command-lookup"));
+	for (var i = 0; i < commandLookupDirRes.length; i++) {
+		vscode.workspace.fs.delete(vscode.Uri.file(context.globalStoragePath + "\\command-lookup\\" + commandLookupDirRes[i][0]));
+	}
+	var traceDirRes = await vscode.workspace.fs.readDirectory(vscode.Uri.file(context.globalStoragePath + "\\trace"));
+	for (var i = 0; i < traceDirRes.length; i++) {
+		vscode.workspace.fs.delete(vscode.Uri.file(context.globalStoragePath + "\\trace\\" + traceDirRes[i][0]));
+	}
+
+
+
 
 	// Start language server on extension activate.
 	await startMocaLanguageServer();
 
-	var activateResponse = await vscode.commands.executeCommand(LanguageServerCommands.ACTIVATE, context.globalStoragePath, vscode.workspace.getConfiguration(CONFIGURATION_NAME).get(CONFIGURATION_LANGUAGE_SERVER_OPTIONS), vscode.workspace.getConfiguration(CONFIGURATION_NAME).get(CONFIGURATION_DEFAULT_GROOVY_CLASSPATH));
+	var activateResponse = await vscode.commands.executeCommand(LanguageServerCommands.ACTIVATE, context.globalStoragePath, vscode.workspace.getConfiguration(CONFIGURATION_NAME).get(CONFIGURATION_LANGUAGE_SERVER_OPTIONS_NAME), vscode.workspace.getConfiguration(CONFIGURATION_NAME).get(CONFIGURATION_DEFAULT_GROOVY_CLASSPATH_NAME));
 	var activateResponseJsonObj = JSON.parse(JSON.stringify(activateResponse));
 	if (activateResponseJsonObj["exception"]) {
 		vscode.window.showErrorMessage("Error occuring during MOCA Language Server activation: " + activateResponseJsonObj["exception"]["message"]);
@@ -101,6 +128,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		var connectionNames = new Array();
 		var connections = new Map<String, any>();
 
+		// Read in config.
 		const config = vscode.workspace.getConfiguration(CONFIGURATION_NAME);
 		const connectionConfig = config.get(CONFIGURATION_CONNECTIONS_NAME);
 
@@ -114,6 +142,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			}
 		}
 
+		// Let user pick connection.
 		let connectionNameQuickPickRes = await vscode.window.showQuickPick(connectionNames, { ignoreFocusOut: true });
 		const selectedConnectionObj = connections.get(connectionNameQuickPickRes);
 		if (!selectedConnectionObj) {
@@ -145,9 +174,12 @@ export async function activate(context: vscode.ExtensionContext) {
 			}
 		}
 
+		// This should be a safe place to set this.
+		curConnectionUserId = selectedConnectionObj.user;
+
 		// If no entries in groovy classpath for selected connection, set to default groovy classpath.
 		if (!selectedConnectionObj.groovyclasspath || selectedConnectionObj.groovyclasspath.length === 0) {
-			selectedConnectionObj.groovyclasspath = vscode.workspace.getConfiguration(CONFIGURATION_NAME).get(CONFIGURATION_DEFAULT_GROOVY_CLASSPATH);
+			selectedConnectionObj.groovyclasspath = vscode.workspace.getConfiguration(CONFIGURATION_NAME).get(CONFIGURATION_DEFAULT_GROOVY_CLASSPATH_NAME);
 		}
 
 		// If no entry for unsafe approval config, just default to false.
@@ -344,19 +376,19 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.TRACE, async () => {
 
-		// Read in configuration and execute.
+		// Read in configuration.
 		const config = vscode.workspace.getConfiguration(CONFIGURATION_NAME);
 		var traceConfigObj = config.get(CONFIGURATION_TRACE_NAME);
+
 		if (traceConfigObj) {
 
-			// Prepare values.
 			var traceConfigJsonObj = JSON.parse(JSON.stringify(traceConfigObj));
 
 			var fileName = traceConfigJsonObj.fileName;
 			var mode = traceConfigJsonObj.mode;
 
 			if (!fileName) {
-				fileName = "";
+				fileName = curConnectionUserId;
 			}
 			if (!mode || (mode !== "w" && mode !== "a")) {
 				mode = "w";
@@ -391,16 +423,70 @@ export async function activate(context: vscode.ExtensionContext) {
 						traceStarted = false;
 						traceStatusBarItem.text = START_TRACE_STR;
 					}
+				} else {
+
+					// Allow user to open trace.
+					if (!traceStarted) {
+						var openTraceOutlineOptionRes = await vscode.window.showInformationMessage(OPEN_TRACE_OUTLINE_PROMPT, OPEN_TRACE_OUTLINE_OPTION_YES, OPEN_TRACE_OUTLINE_OPTION_NO);
+						if (openTraceOutlineOptionRes === OPEN_TRACE_OUTLINE_OPTION_YES) {
+
+							vscode.window.withProgress({
+								location: vscode.ProgressLocation.Notification,
+								title: "MOCA"
+							}, async (progress, token) => {
+								progress.report({
+									increment: Infinity,
+									message: "Loading Trace Outline for " + fileName
+								});
+
+								// Read in configuration.
+								const config = vscode.workspace.getConfiguration(CONFIGURATION_NAME);
+								var traceOutlinerConfigObj = config.get(CONFIGURATION_TRACE_OUTLINER_NAME);
+
+								// Prepare values.
+								var traceOutlinerConfigJsonObj = JSON.parse(JSON.stringify(traceOutlinerConfigObj));
+
+								var useLogicalIndentStrategy = traceOutlinerConfigJsonObj.useLogicalIndentStrategy;
+								if (useLogicalIndentStrategy === undefined) {
+									useLogicalIndentStrategy = true;
+								}
+
+								var minimumExecutionTime = traceOutlinerConfigJsonObj.minimumExecutionTime;
+								if (!minimumExecutionTime) {
+									minimumExecutionTime = 1.0;
+								}
+
+								var traceResponseRemoteRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, fileName + ".log", true, useLogicalIndentStrategy, minimumExecutionTime);
+								if (traceResponseRemoteRes) {
+									var traceResponseRemoteObj = JSON.parse(JSON.stringify(traceResponseRemoteRes));
+
+									// Make sure to check for exception.
+									if (traceResponseRemoteObj.exception) {
+										vscode.window.showErrorMessage("Trace Outline error: " + traceResponseRemoteObj.exception["message"]);
+									} else {
+										// No exceptions -- now load outline.
+										var uri = vscode.Uri.file(context.globalStoragePath + "\\trace\\" + fileName.replace('.log', '') + ".moca.traceoutline");
+										await vscode.workspace.fs.writeFile(uri, Buffer.from(traceResponseRemoteObj.traceOutlineStr));
+										var doc = await vscode.workspace.openTextDocument(uri);
+										await vscode.window.showTextDocument(doc, { preview: false });
+									}
+								}
+							});
+						}
+					}
+
+
 				}
 			});
-
-
 		}
-
-
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.COMMAND_LOOKUP, async () => {
+
+		// We will call COMMAND_LOOKUP lang server command with no args. The lang server will take this as us wanting a list of all commands.
+		// We will pick a command via a quick pick, and call COMMAND_LOOKUP lang server command once more but with a command name arg. This will
+		// let the lang server know which command/triggers to send us. We will then prompt the user to pick what they want to see via another
+		// quick pick. After they have selected what they want to see, we will write to a file, open and display it.
 
 		var commandLookupRes = await vscode.commands.executeCommand(LanguageServerCommands.COMMAND_LOOKUP);
 		// We should have a string array of distinct moca command names.
@@ -409,38 +495,44 @@ export async function activate(context: vscode.ExtensionContext) {
 			var distinctCommands = commandLookupObj.distinctMocaCommands as string[];
 			// Now sit tight while the user picks one.
 			var distinctCommandSelected = await vscode.window.showQuickPick(distinctCommands, { ignoreFocusOut: true });
+			if (!distinctCommandSelected) {
+				return;
+			}
 			// Now that we have a command, we can request command data from server.
 			var commandDataRes = await vscode.commands.executeCommand(LanguageServerCommands.COMMAND_LOOKUP, distinctCommandSelected);
-			// Make sure we have a command to work with.
-			if (distinctCommandSelected != null && distinctCommandSelected !== "") {
-				// We have our object. Now we need to let the user pick a command at a certain level or pick a trigger to look at.
-				var commandDataJsonObj = JSON.parse(JSON.stringify(commandDataRes));
+			if (commandDataRes) {
+				// Now we need to let the user pick a command at a certain level or pick a trigger to look at.
+				var commandDataObj = JSON.parse(JSON.stringify(commandDataRes));
 				var commandData = new Array();
-				if (commandDataJsonObj.commandsAtLevels) {
-					var commandsAtLevels = commandDataJsonObj.commandsAtLevels as MocaCommand[];
+				if (commandDataObj.commandsAtLevels) {
+					var commandsAtLevels = commandDataObj.commandsAtLevels as MocaCommand[];
 					for (var i = 0; i < commandsAtLevels.length; i++) {
 						commandData.push(commandsAtLevels[i].cmplvl + ": " + commandsAtLevels[i].command + " (" + commandsAtLevels[i].type + ")");
 					}
 				}
-				if (commandDataJsonObj.triggers) {
-					var triggers = commandDataJsonObj.triggers as MocaTrigger[];
+				if (commandDataObj.triggers) {
+					var triggers = commandDataObj.triggers as MocaTrigger[];
 					for (var i = 0; i < triggers.length; i++) {
 						commandData.push("Trigger: " + triggers[i].trgseq + " - " + triggers[i].name);
 					}
 				}
 
 				var commandDataSelectedRes = await vscode.window.showQuickPick(commandData, { ignoreFocusOut: true, canPickMany: true });
+				if (!commandDataSelectedRes) {
+					return;
+				}
+
 				// Now that the user has selected something specific from the command looked up, we can load the file(s).
 				var commandDataSelectedArr = commandDataSelectedRes as string[];
 
 				// Put commands & triggers in arrays here if we have them.
 				var commandsAtLevels: MocaCommand[] = [];
-				if (commandDataJsonObj.commandsAtLevels) {
-					var commandsAtLevels = commandDataJsonObj.commandsAtLevels as MocaCommand[];
+				if (commandDataObj.commandsAtLevels) {
+					var commandsAtLevels = commandDataObj.commandsAtLevels as MocaCommand[];
 				}
 				var triggers: MocaTrigger[] = [];
-				if (commandDataJsonObj.triggers) {
-					triggers = commandDataJsonObj.triggers as MocaTrigger[];
+				if (commandDataObj.triggers) {
+					triggers = commandDataObj.triggers as MocaTrigger[];
 				}
 
 				for (var i = 0; i < commandDataSelectedArr.length; i++) {
@@ -477,6 +569,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.AUTO_EXECUTE, async () => {
+
+		// Basically this just executes the same script over and over until a stop condition is met.
 
 		// Read in configuration and execute.
 		const config = vscode.workspace.getConfiguration(CONFIGURATION_NAME);
@@ -612,8 +706,123 @@ export async function activate(context: vscode.ExtensionContext) {
 		}
 	}));
 
+	context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.OPEN_TRACE_OUTLINE, async () => {
+
+		// Let user decide between Remote and Local.
+		var traceTypeRes = await vscode.window.showQuickPick(["Remote", "Local"], { ignoreFocusOut: true });
+		if (!traceTypeRes) {
+			return;
+		}
+
+		// Read in configuration.
+		const config = vscode.workspace.getConfiguration(CONFIGURATION_NAME);
+		var traceOutlinerConfigObj = config.get(CONFIGURATION_TRACE_OUTLINER_NAME);
+
+		// Prepare values.
+		var traceOutlinerConfigJsonObj = JSON.parse(JSON.stringify(traceOutlinerConfigObj));
+
+		var useLogicalIndentStrategy = traceOutlinerConfigJsonObj.useLogicalIndentStrategy;
+		if (useLogicalIndentStrategy === undefined) {
+			useLogicalIndentStrategy = true;
+		}
+
+		var minimumExecutionTime = traceOutlinerConfigJsonObj.minimumExecutionTime;
+		if (!minimumExecutionTime) {
+			minimumExecutionTime = 1.0;
+		}
+
+		if (traceTypeRes === "Remote") {
+
+			// Sending empty args so that lang server knows to send us back a list of remote trace files.
+			var traceResponseRemoteRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE);
+
+			// We should have a string array of trace file names now.
+			var traceResponseRemoteObj = JSON.parse(JSON.stringify(traceResponseRemoteRes));
+
+			if (traceResponseRemoteObj.traceFileNames) {
+				// Convert to string array and give user the list.
+				var traceFileNamesRemote = traceResponseRemoteObj.traceFileNames as string[];
+				// Now sit tight while the user picks one.
+				var traceFileNameSelectedRemote = await vscode.window.showQuickPick(traceFileNamesRemote, { ignoreFocusOut: true });
+				if (!traceFileNameSelectedRemote) {
+					return;
+				}
+
+				vscode.window.withProgress({
+					location: vscode.ProgressLocation.Notification,
+					title: "MOCA"
+				}, async (progress, token) => {
+					progress.report({
+						increment: Infinity,
+						message: "Loading Trace Outline for " + traceFileNameSelectedRemote
+					});
+
+					// Now that we have a remote trace file name, we can request outline from lang server.
+					traceResponseRemoteRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedRemote, true, useLogicalIndentStrategy, minimumExecutionTime);
+					if (traceResponseRemoteRes) {
+						traceResponseRemoteObj = JSON.parse(JSON.stringify(traceResponseRemoteRes));
+
+						// Make sure to check for exception.
+						if (traceResponseRemoteObj.exception) {
+							vscode.window.showErrorMessage("Trace Outline error: " + traceResponseRemoteObj.exception["message"]);
+						} else {
+							// No exceptions -- now load outline.
+							var uri = vscode.Uri.file(context.globalStoragePath + "\\trace\\" + traceFileNameSelectedRemote.replace('.log', '') + ".moca.traceoutline");
+							await vscode.workspace.fs.writeFile(uri, Buffer.from(traceResponseRemoteObj.traceOutlineStr));
+							var doc = await vscode.workspace.openTextDocument(uri);
+							await vscode.window.showTextDocument(doc, { preview: false });
+						}
+					}
+				});
+			} else if (traceResponseRemoteObj.exception) {
+				vscode.window.showErrorMessage("Trace Outline error: " + traceResponseRemoteObj.exception["message"]);
+			}
+		} else if (traceTypeRes === "Local") {
+
+			// Give user list of local files to pick from.
+			var traceFileNameSelectedLocalRes = await vscode.window.showOpenDialog({
+				canSelectMany: false, canSelectFiles: true, canSelectFolders: false, title: "Open Trace Outline", filters: {
+					"Log": ["log"]
+				}
+			});
+
+			if (traceFileNameSelectedLocalRes) {
+
+				// traceFileNameSelectedLocalRes should be array object with just 1 element. Let's create a couple vars to simplify our interactions with it.
+				var traceFileNameSelectedLocalStr = traceFileNameSelectedLocalRes[0].toString();
+				var traceFileNameSelectedShortenedLocalStr = traceFileNameSelectedLocalStr.substring(traceFileNameSelectedLocalStr.lastIndexOf('/') + 1, traceFileNameSelectedLocalStr.length);
+
+				vscode.window.withProgress({
+					location: vscode.ProgressLocation.Notification,
+					title: "MOCA"
+				}, async (progress, token) => {
+					progress.report({
+						increment: Infinity,
+						message: "Loading Trace Outline for " + traceFileNameSelectedShortenedLocalStr
+					});
 
 
+					// Now that we have a local trace file name, we can request outline from lang server.
+					var traceResponseLocalRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedLocalStr, false, useLogicalIndentStrategy, minimumExecutionTime);
+
+					if (traceResponseLocalRes) {
+						var traceResponseLocalObj = JSON.parse(JSON.stringify(traceResponseLocalRes));
+
+						// Make sure to check for exception.
+						if (traceResponseLocalObj.exception) {
+							vscode.window.showErrorMessage("Trace Outline error: " + traceResponseLocalObj.exception["message"]);
+						} else {
+							// No exceptions -- now load outline.
+							var uri = vscode.Uri.file(context.globalStoragePath + "\\trace\\" + traceFileNameSelectedShortenedLocalStr.replace('.log', '') + ".moca.traceoutline");
+							await vscode.workspace.fs.writeFile(uri, Buffer.from(traceResponseLocalObj.traceOutlineStr));
+							var doc = await vscode.workspace.openTextDocument(uri);
+							await vscode.window.showTextDocument(doc, { preview: false });
+						}
+					}
+				});
+			}
+		}
+	}));
 
 
 	// Events registration.
@@ -621,15 +830,14 @@ export async function activate(context: vscode.ExtensionContext) {
 	// Configuration listener.
 	context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {
 
-		// Checking if user changed client options config (object has sql & groovy range color config).
-		// If so, we potentially need to re-color things!
-		if (e.affectsConfiguration((CONFIGURATION_NAME + "." + CONFIGURATION_CLIENT_OPTIONS))) {
+		// Client options.
+		if (e.affectsConfiguration((CONFIGURATION_NAME + "." + CONFIGURATION_CLIENT_OPTIONS_NAME))) {
 			GlobalSemanticHighlightingVars.semanticHighlightingFeature.loadCurrentTheme();
 		}
 
-		// Checking if user changed lang server options. If so, we need to let the lang server know!
-		if (e.affectsConfiguration((CONFIGURATION_NAME + "." + CONFIGURATION_LANGUAGE_SERVER_OPTIONS))) {
-			vscode.commands.executeCommand(LanguageServerCommands.SET_LANGUAGE_SERVER_OPTIONS, vscode.workspace.getConfiguration(CONFIGURATION_NAME).get(CONFIGURATION_LANGUAGE_SERVER_OPTIONS));
+		// Language server options.
+		if (e.affectsConfiguration((CONFIGURATION_NAME + "." + CONFIGURATION_LANGUAGE_SERVER_OPTIONS_NAME))) {
+			vscode.commands.executeCommand(LanguageServerCommands.SET_LANGUAGE_SERVER_OPTIONS, vscode.workspace.getConfiguration(CONFIGURATION_NAME).get(CONFIGURATION_LANGUAGE_SERVER_OPTIONS_NAME));
 		}
 
 	}));
@@ -655,6 +863,10 @@ export async function activate(context: vscode.ExtensionContext) {
 	traceStatusBarItem.text = START_TRACE_STR;
 	traceStatusBarItem.command = LanguageClientCommands.TRACE;
 	traceStatusBarItem.show();
+	openTraceStatusBarItem.text = "$(outline-view-icon)";
+	openTraceStatusBarItem.command = LanguageClientCommands.OPEN_TRACE_OUTLINE;
+	openTraceStatusBarItem.tooltip = "Open Trace Outline";
+	openTraceStatusBarItem.show();
 
 	context.subscriptions.push(connectionStatusBarItem);
 	context.subscriptions.push(executeStatusBarItem);
@@ -707,7 +919,7 @@ function startMocaLanguageServer() {
 
 				mocaLanguageClient.onReady().then(resolve, reason => {
 
-					resolve();
+					resolve(undefined);
 					vscode.window.showErrorMessage(MOCA_LANGUAGE_SERVER_ERR_STARTUP);
 
 				});

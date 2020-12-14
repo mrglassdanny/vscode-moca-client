@@ -88,7 +88,7 @@ class ResultViewPanel {
         const jsuitesCssUri = webview.asWebviewUri(jsuitesCssPathOnDisk);
         // Get data table page size from client options configuration.
         const config = vscode.workspace.getConfiguration(extension_1.CONFIGURATION_NAME);
-        var clientOptsConfigObj = JSON.parse(JSON.stringify(config.get(extension_1.CONFIGURATION_CLIENT_OPTIONS)));
+        var clientOptsConfigObj = JSON.parse(JSON.stringify(config.get(extension_1.CONFIGURATION_CLIENT_OPTIONS_NAME)));
         var dataTablePageSize = clientOptsConfigObj['dataTablePageSize'];
         // If less than 1, set to default.
         if (dataTablePageSize < 1)

@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { MocaResults } from './mocaResults';
-import { CONFIGURATION_NAME, CONFIGURATION_CLIENT_OPTIONS } from '../extension';
+import { CONFIGURATION_NAME, CONFIGURATION_CLIENT_OPTIONS_NAME } from '../extension';
 
 export class ResultViewPanel {
     public static resultViewPanels: Map<string, ResultViewPanel> = new Map<string, ResultViewPanel>();
@@ -138,7 +138,7 @@ export class ResultViewPanel {
 
         // Get data table page size from client options configuration.
         const config = vscode.workspace.getConfiguration(CONFIGURATION_NAME);
-        var clientOptsConfigObj = JSON.parse(JSON.stringify(config.get(CONFIGURATION_CLIENT_OPTIONS)));
+        var clientOptsConfigObj = JSON.parse(JSON.stringify(config.get(CONFIGURATION_CLIENT_OPTIONS_NAME)));
         var dataTablePageSize = clientOptsConfigObj['dataTablePageSize'];
         // If less than 1, set to default.
         if (dataTablePageSize < 1)

@@ -4,7 +4,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import * as vscodelc from 'vscode-languageclient';
 import * as vscodelct from 'vscode-languageserver-types';
-import { CONFIGURATION_NAME, CONFIGURATION_CLIENT_OPTIONS } from '../extension';
+import { CONFIGURATION_NAME, CONFIGURATION_CLIENT_OPTIONS_NAME } from '../extension';
 
 
 
@@ -180,6 +180,23 @@ export class Highlighter {
     private sqlRangeLastLineDecoration: vscode.TextEditorDecorationType;
     private groovyRangeLastLineDecoration: vscode.TextEditorDecorationType;
     private mocaCommandStreamEndDecoration: vscode.TextEditorDecorationType;
+    // Custom moca trace outline decorations.
+    private traceOutlineOutlineIdDecoration: vscode.TextEditorDecorationType;
+    private traceOutlineServerGotDecoration: vscode.TextEditorDecorationType;
+    private traceOutlineCommandInitiatedDecoration: vscode.TextEditorDecorationType;
+    private traceOutlineFiringTriggersDecoration: vscode.TextEditorDecorationType;
+    private traceOutlineTriggerDecoration: vscode.TextEditorDecorationType;
+    private traceOutlineErrorDecoration: vscode.TextEditorDecorationType;
+    private traceOutlineErrorCaughtDecoration: vscode.TextEditorDecorationType;
+    private traceOutlineConditionalTestPassDecoration: vscode.TextEditorDecorationType;
+    private traceOutlineConditionalTestFailDecoration: vscode.TextEditorDecorationType;
+    private traceOutlinePreparedStatementDecoration: vscode.TextEditorDecorationType;
+    private traceOutlineExceedsExecutionTimeDecoration: vscode.TextEditorDecorationType;
+    private traceOutlineCFunctionDecoration: vscode.TextEditorDecorationType;
+    private traceOutlineJavaMethodDecoration: vscode.TextEditorDecorationType;
+    private traceOutlineInstructionPrefixDecoration: vscode.TextEditorDecorationType;
+    private traceOutlineInstructionSuffixDecoration: vscode.TextEditorDecorationType;
+
 
     // Maps uris with currently open TextDocuments to the current highlightings.
     private files: Map<string, Map<number, SemanticHighlightingLine>> = new Map();
@@ -209,9 +226,12 @@ export class Highlighter {
 
         // Create decoration types.
         const config = vscode.workspace.getConfiguration(CONFIGURATION_NAME);
-        const clientOptsConfigObj = JSON.parse(JSON.stringify(config.get(CONFIGURATION_CLIENT_OPTIONS)));
-        var sqlRangeColorLightObj = clientOptsConfigObj['sqlRangeColorLight'];
-        var sqlRangeColorDarkObj = clientOptsConfigObj['sqlRangeColorDark'];
+        const clientOptsConfigObj = JSON.parse(JSON.stringify(config.get(CONFIGURATION_CLIENT_OPTIONS_NAME)));
+
+        const sqlRangeColorLightObj = clientOptsConfigObj['sqlRangeColorLight'];
+        const sqlRangeColorDarkObj = clientOptsConfigObj['sqlRangeColorDark'];
+        const groovyRangeColorLightObj = clientOptsConfigObj['groovyRangeColorLight'];
+        const groovyRangeColorDarkObj = clientOptsConfigObj['groovyRangeColorDark'];
 
         this.sqlRangeDecoration = vscode.window.createTextEditorDecorationType(
             {
@@ -245,10 +265,6 @@ export class Highlighter {
             }
         );
 
-
-
-        var groovyRangeColorLightObj = clientOptsConfigObj['groovyRangeColorLight'];
-        var groovyRangeColorDarkObj = clientOptsConfigObj['groovyRangeColorDark'];
         this.groovyRangeDecoration = vscode.window.createTextEditorDecorationType(
             {
                 overviewRulerLane: vscode.OverviewRulerLane.Right,
@@ -263,6 +279,7 @@ export class Highlighter {
                 }
             }
         );
+
         this.groovyRangeLastLineDecoration = vscode.window.createTextEditorDecorationType(
             {
                 overviewRulerLane: vscode.OverviewRulerLane.Right,
@@ -294,6 +311,290 @@ export class Highlighter {
             }
         );
 
+        this.traceOutlineOutlineIdDecoration = vscode.window.createTextEditorDecorationType(
+            {
+                isWholeLine: true,
+                fontWeight: '900',
+                light: {
+                    borderWidth: "1px 1px 1px 1px",
+                    borderColor: "rgba(25,25,25,.75)",
+                    borderStyle: "solid",
+                    color: "rgba(66, 66, 66, 1)",
+                    backgroundColor: "rgba(222, 222, 222, .35)",
+                },
+                dark: {
+                    borderWidth: "1px 1px 1px 1px",
+                    borderColor: "rgba(175,175,175,.75)",
+                    borderStyle: "solid",
+                    color: "rgba(242, 242, 242, 1)",
+                    backgroundColor: "rgba(140, 140, 140, 0.3)",
+                }
+
+            }
+        );
+
+        this.traceOutlineServerGotDecoration = vscode.window.createTextEditorDecorationType(
+            {
+                isWholeLine: true,
+
+                light: {
+                    borderWidth: ".6px 0px 0px 0px",
+                    borderColor: "rgba(25,25,25,.75)",
+                    borderStyle: "dashed"
+                },
+                dark: {
+                    borderWidth: ".6px 0px 0px 0px",
+                    borderColor: "rgba(175,175,175,.75)",
+                    borderStyle: "dashed"
+                }
+            }
+        );
+
+        this.traceOutlineCommandInitiatedDecoration = vscode.window.createTextEditorDecorationType(
+            {
+                isWholeLine: false,
+
+                light: {
+                    after: {
+                        contentText: 'Initiated from compiled code',
+                        color: "rgba(66, 66, 66, 1)",
+                        backgroundColor: "rgba(222, 222, 222, .35)",
+                        margin: "0px 25px 0px",
+                        fontStyle: 'italic'
+
+                    }
+                },
+                dark: {
+                    after: {
+                        contentText: 'Initiated from compiled code',
+                        color: "rgba(242, 242, 242, 1)",
+                        backgroundColor: "rgba(140, 140, 140, 0.3)",
+                        margin: "0px 25px 0px",
+                        fontStyle: 'italic'
+                    }
+                }
+
+            }
+        );
+
+        this.traceOutlineFiringTriggersDecoration = vscode.window.createTextEditorDecorationType(
+            {
+                isWholeLine: false,
+
+                light: {
+                    color: "rgba(83, 2, 141, 1)",
+                    backgroundColor: "rgba(213, 188, 240, 0.5)",
+                },
+                dark: {
+                    color: "rgba(226, 185, 254, 1)",
+                    backgroundColor: "rgba(156, 114, 197, 0.5)",
+                }
+            }
+        );
+
+        this.traceOutlineTriggerDecoration = vscode.window.createTextEditorDecorationType(
+            {
+                isWholeLine: false,
+
+                light: {
+                    after: {
+                        contentText: 'Trigger',
+                        color: "rgba(83, 2, 141, 1)",
+                        backgroundColor: "rgba(213, 188, 240, 0.5)",
+                        margin: "0px 5px 0px 0px"
+                    }
+                },
+                dark: {
+                    after: {
+                        contentText: 'Trigger',
+                        color: "rgba(226, 185, 254, 1)",
+                        backgroundColor: "rgba(156, 114, 197, 0.5)",
+                        margin: "0px 5px 0px 0px",
+                    }
+                }
+
+            }
+        );
+
+        this.traceOutlineErrorDecoration = vscode.window.createTextEditorDecorationType(
+            {
+                isWholeLine: false,
+
+                light: {
+                    backgroundColor: "rgba(240, 0, 0, 0.2)"
+                },
+                dark: {
+                    backgroundColor: "rgba(255, 36, 36, 0.2)"
+                }
+
+            }
+        );
+
+        this.traceOutlineErrorCaughtDecoration = vscode.window.createTextEditorDecorationType(
+            {
+                isWholeLine: false,
+
+                light: {
+                    backgroundColor: "rgba(255, 217, 46, 0.35)"
+                },
+                dark: {
+                    backgroundColor: "rgba(255, 226, 41, 0.15)"
+                }
+            }
+        );
+
+        this.traceOutlineConditionalTestPassDecoration = vscode.window.createTextEditorDecorationType(
+            {
+                isWholeLine: false,
+
+                light: {
+                    after: {
+                        contentText: 'Passed',
+                        color: "rgba(0, 117, 43, 1)",
+                        backgroundColor: "rgba(87, 255, 148, 0.30)",
+                        margin: "0px 15px 0px"
+                    }
+                },
+                dark: {
+                    after: {
+                        contentText: 'Passed',
+                        color: "rgba(174, 244, 200, 1)",
+                        backgroundColor: "rgba(61, 255, 132, 0.25)",
+                        margin: "0px 15px 0px",
+                    }
+                }
+
+            }
+        );
+
+        this.traceOutlineConditionalTestFailDecoration = vscode.window.createTextEditorDecorationType(
+            {
+                isWholeLine: false,
+
+                light: {
+                    after: {
+                        contentText: 'Failed',
+                        color: "rgba(153, 0, 5, 1)",
+                        backgroundColor: "rgba(240, 0, 0, 0.2)",
+                        margin: "0px 15px 0px"
+                    }
+                },
+                dark: {
+                    after: {
+                        contentText: 'Failed',
+                        color: "rgba(255, 204, 206, 1)",
+                        backgroundColor: "rgba(255, 77, 77, 0.2)",
+                        margin: "0px 15px 0px"
+                    }
+                }
+            }
+        );
+
+        this.traceOutlinePreparedStatementDecoration = vscode.window.createTextEditorDecorationType(
+            {
+                isWholeLine: false,
+                opacity: ".50"
+            }
+        );
+
+        this.traceOutlineExceedsExecutionTimeDecoration = vscode.window.createTextEditorDecorationType(
+            {
+                isWholeLine: false,
+                fontWeight: '900',
+                light: {
+                    borderWidth: "2.5px 2.5px 2.5px 2.5px",
+                    borderColor: "rgba(240, 148, 0, .75)",
+                    borderStyle: "solid"
+                },
+                dark: {
+                    borderWidth: "2.5px 2.5px 2.5px 2.5px",
+                    borderColor: "rgba(198, 126, 12, .75)",
+                    borderStyle: "solid"
+                }
+
+            }
+        );
+
+        this.traceOutlineCFunctionDecoration = vscode.window.createTextEditorDecorationType(
+            {
+                isWholeLine: false,
+                light: {
+                    after: {
+                        contentText: 'C Function',
+                        color: "rgba(66, 66, 66, 1)",
+                        backgroundColor: "rgba(222, 222, 222, .35)",
+                        margin: "0px 25px 0px",
+                        fontStyle: 'italic'
+                    }
+                },
+                dark: {
+                    after: {
+                        contentText: 'C Function',
+                        color: "rgba(242, 242, 242, 1)",
+                        backgroundColor: "rgba(140, 140, 140, 0.3)",
+                        margin: "0px 25px 0px",
+                        fontStyle: 'italic'
+                    }
+                }
+            }
+        );
+
+        this.traceOutlineJavaMethodDecoration = vscode.window.createTextEditorDecorationType(
+            {
+                isWholeLine: false,
+                light: {
+                    after: {
+                        contentText: 'Java Method',
+                        color: "rgba(66, 66, 66, 1)",
+                        backgroundColor: "rgba(222, 222, 222, .35)",
+                        margin: "0px 25px 0px",
+                        fontStyle: 'italic'
+
+                    }
+                },
+                dark: {
+                    after: {
+                        contentText: 'Java Method',
+                        color: "rgba(242, 242, 242, 1)",
+                        backgroundColor: "rgba(140, 140, 140, 0.3)",
+                        margin: "0px 25px 0px",
+                        fontStyle: 'italic'
+                    }
+                }
+            }
+        );
+
+        this.traceOutlineInstructionPrefixDecoration = vscode.window.createTextEditorDecorationType(
+            {
+                isWholeLine: false,
+                opacity: '.5',
+                light: {
+                    color: "rgba(66, 66, 66, 1)",
+                    fontStyle: 'italic'
+                },
+                dark: {
+                    color: "rgba(242, 242, 242, 1)",
+                    fontStyle: 'italic'
+                }
+            }
+        );
+
+        this.traceOutlineInstructionSuffixDecoration = vscode.window.createTextEditorDecorationType(
+            {
+                isWholeLine: false,
+                opacity: '.5',
+                light: {
+                    color: "rgba(66, 66, 66, 1)",
+                    fontStyle: 'italic'
+                },
+                dark: {
+                    color: "rgba(242, 242, 242, 1)",
+                    fontStyle: 'italic'
+                }
+            }
+        );
+
+
         this.decorationTypes = this.scopeLookupTable.map((scopes) => {
 
             switch (scopes[0]) {
@@ -307,6 +608,36 @@ export class Highlighter {
                     return this.groovyRangeDecoration;
                 case "moca.groovy.lastline":
                     return this.groovyRangeLastLineDecoration;
+                case "moca.traceoutline.outlineid":
+                    return this.traceOutlineOutlineIdDecoration;
+                case "moca.traceoutline.servergot":
+                    return this.traceOutlineServerGotDecoration;
+                case "moca.traceoutline.commandinitiated":
+                    return this.traceOutlineCommandInitiatedDecoration;
+                case "moca.traceoutline.firingtriggers":
+                    return this.traceOutlineFiringTriggersDecoration;
+                case "moca.traceoutline.trigger":
+                    return this.traceOutlineTriggerDecoration;
+                case "moca.traceoutline.error":
+                    return this.traceOutlineErrorDecoration;
+                case "moca.traceoutline.error.caught":
+                    return this.traceOutlineErrorCaughtDecoration;
+                case "moca.traceoutline.conditionaltest.pass":
+                    return this.traceOutlineConditionalTestPassDecoration;
+                case "moca.traceoutline.conditionaltest.fail":
+                    return this.traceOutlineConditionalTestFailDecoration;
+                case "moca.traceoutline.preparedstatement":
+                    return this.traceOutlinePreparedStatementDecoration;
+                case "moca.traceoutline.exceedsexecutiontime":
+                    return this.traceOutlineExceedsExecutionTimeDecoration;
+                case "moca.traceoutline.cfunction":
+                    return this.traceOutlineCFunctionDecoration;
+                case "moca.traceoutline.javamethod":
+                    return this.traceOutlineJavaMethodDecoration;
+                case "moca.traceoutline.instructionprefix":
+                    return this.traceOutlineInstructionPrefixDecoration;
+                case "moca.traceoutline.instructionsuffix":
+                    return this.traceOutlineInstructionSuffixDecoration;
                 default: // Let theme matcher do it's thing.
                     const options: vscode.DecorationRenderOptions = {
                         // If there exists no rule for this scope the matcher returns an empty
