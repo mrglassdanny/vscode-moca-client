@@ -84,6 +84,8 @@ const OPEN_TRACE_OUTLINE_OPTION_YES = "Yes";
 const OPEN_TRACE_OUTLINE_OPTION_NO = "No";
 // Need to keep track of trace status.
 let traceStarted = false;
+// Need to save off user ID for default trace file naming.
+let curConnectionUserId = "";
 function activate(context) {
     return __awaiter(this, void 0, void 0, function* () {
         // Set some vars.
@@ -153,6 +155,8 @@ function activate(context) {
                     selectedConnectionObj.password = passwordInputRes;
                 }
             }
+            // This should be a safe place to set this.
+            curConnectionUserId = selectedConnectionObj.user;
             // If no entries in groovy classpath for selected connection, set to default groovy classpath.
             if (!selectedConnectionObj.groovyclasspath || selectedConnectionObj.groovyclasspath.length === 0) {
                 selectedConnectionObj.groovyclasspath = vscode.workspace.getConfiguration(exports.CONFIGURATION_NAME).get(exports.CONFIGURATION_DEFAULT_GROOVY_CLASSPATH_NAME);
@@ -333,7 +337,7 @@ function activate(context) {
                 var fileName = traceConfigJsonObj.fileName;
                 var mode = traceConfigJsonObj.mode;
                 if (!fileName) {
-                    fileName = "";
+                    fileName = curConnectionUserId;
                 }
                 if (!mode || (mode !== "w" && mode !== "a")) {
                     mode = "w";
@@ -662,6 +666,9 @@ function activate(context) {
                             }
                         }
                     }));
+                }
+                else if (traceResponseRemoteObj.exception) {
+                    vscode.window.showErrorMessage("Trace Outline error: " + traceResponseRemoteObj.exception["message"]);
                 }
             }
             else if (traceTypeRes === "Local") {
