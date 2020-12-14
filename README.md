@@ -25,7 +25,7 @@ Provides MOCA client and language support for Visual Studio Code via the [MOCA L
 - Syntax highlighting
 - [Intellisense]
 - [Command Execution]
-- Trace Outliner
+- [Trace Outliner]
 ![Demo](resources/trace-outliner-demo.gif)
 
 
@@ -140,4 +140,5 @@ Please refer to [FAQ] to see if questions have already been asked/answered!
 [JRE_HOME]: https://confluence.atlassian.com/doc/setting-the-java_home-variable-in-windows-8895.html
 [Intellisense]: https://github.com/mrglassdanny/moca-language-server
 [Command Execution]: https://github.com/mrglassdanny/moca-language-server
+[Trace Outliner]: https://github.com/mrglassdanny/moca-language-server
 [contribution guide]: https://github.com/mrglassdanny/vscode-moca-client/blob/master/CONTRIBUTE.md
