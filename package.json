@@ -334,7 +334,7 @@
 					"type": "object",
 					"default": {
 						"useLogicalIndentStrategy": true,
-						"minimumExecutionTime": 1.0
+						"minimumExecutionTime": 1
 					},
 					"description": "MOCA Trace Outliner Configuration",
 					"properties": {
@@ -345,7 +345,7 @@
 						},
 						"minimumExecutionTime": {
 							"type": "number",
-							"default": 1.0,
+							"default": 1,
 							"description": "Any instruction whose execution time is greater than or equal to this number will be decorated(bold text & orange border) to show it."
 						}
 					}

@@ -741,9 +741,9 @@ function activate(context) {
         traceStatusBarItem.text = START_TRACE_STR;
         traceStatusBarItem.command = LanguageClientCommands.TRACE;
         traceStatusBarItem.show();
-        openTraceStatusBarItem.text = "$(file-text)";
+        openTraceStatusBarItem.text = "$(outline-view-icon)";
         openTraceStatusBarItem.command = LanguageClientCommands.OPEN_TRACE_OUTLINE;
-        openTraceStatusBarItem.tooltip = "Open Trace";
+        openTraceStatusBarItem.tooltip = "Open Trace Outline";
         openTraceStatusBarItem.show();
         context.subscriptions.push(connectionStatusBarItem);
         context.subscriptions.push(executeStatusBarItem);
@@ -778,8 +778,7 @@ function startMocaLanguageServer() {
                     protocol2Code: value => vscode.Uri.parse(value)
                 }
             };
-            //let args = ["-jar", path.resolve(globalExtensionContext.extensionPath, "bin", MOCA_LANGUAGE_SERVER)];
-            let args = ["-jar", path.resolve("C:\\dev\\moca-language-server\\build", "libs", MOCA_LANGUAGE_SERVER)];
+            let args = ["-jar", path.resolve(globalExtensionContext.extensionPath, "bin", MOCA_LANGUAGE_SERVER)];
             let executable = {
                 command: javaPath,
                 args: args

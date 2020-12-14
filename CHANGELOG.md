@@ -1,7 +1,7 @@
 # Changelog
 https://semver.org/
 
-## 1.4.17 (November ??, 2020)
+## 1.4.17 (December 13, 2020)
 * Trace outline feature -- https://github.com/mrglassdanny/vscode-moca-client/issues/10
 
 ## 1.3.17 (October 29, 2020)
