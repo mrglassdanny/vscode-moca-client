@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deactivate = exports.activate = exports.LanguageServerCommands = exports.LanguageClientCommands = exports.CONFIGURATION_DEFAULT_GROOVY_CLASSPATH = exports.CONFIGURATION_LANGUAGE_SERVER_OPTIONS = exports.CONFIGURATION_CLIENT_OPTIONS = exports.CONFIGURATION_AUTO_EXECUTION_NAME = exports.CONFIGURATION_TRACE_NAME = exports.CONFIGURATION_CONNECTIONS_NAME = exports.CONFIGURATION_NAME = void 0;
+exports.deactivate = exports.activate = exports.LanguageServerCommands = exports.LanguageClientCommands = exports.CONFIGURATION_TRACE_OUTLINER_NAME = exports.CONFIGURATION_DEFAULT_GROOVY_CLASSPATH_NAME = exports.CONFIGURATION_LANGUAGE_SERVER_OPTIONS_NAME = exports.CONFIGURATION_CLIENT_OPTIONS_NAME = exports.CONFIGURATION_AUTO_EXECUTION_NAME = exports.CONFIGURATION_TRACE_NAME = exports.CONFIGURATION_CONNECTIONS_NAME = exports.CONFIGURATION_NAME = void 0;
 const vscode = require("vscode");
 const vscode_languageclient_1 = require("vscode-languageclient");
 const path = require("path");
@@ -32,9 +32,10 @@ exports.CONFIGURATION_NAME = "moca";
 exports.CONFIGURATION_CONNECTIONS_NAME = "connections";
 exports.CONFIGURATION_TRACE_NAME = "trace";
 exports.CONFIGURATION_AUTO_EXECUTION_NAME = "autoExecution";
-exports.CONFIGURATION_CLIENT_OPTIONS = "clientOptions";
-exports.CONFIGURATION_LANGUAGE_SERVER_OPTIONS = "languageServerOptions";
-exports.CONFIGURATION_DEFAULT_GROOVY_CLASSPATH = "defaultGroovyclasspath";
+exports.CONFIGURATION_CLIENT_OPTIONS_NAME = "clientOptions";
+exports.CONFIGURATION_LANGUAGE_SERVER_OPTIONS_NAME = "languageServerOptions";
+exports.CONFIGURATION_DEFAULT_GROOVY_CLASSPATH_NAME = "defaultGroovyclasspath";
+exports.CONFIGURATION_TRACE_OUTLINER_NAME = "traceOutliner";
 // Client commands.
 var LanguageClientCommands;
 (function (LanguageClientCommands) {
@@ -99,7 +100,7 @@ function activate(context) {
         }
         // Start language server on extension activate.
         yield startMocaLanguageServer();
-        var activateResponse = yield vscode.commands.executeCommand(LanguageServerCommands.ACTIVATE, context.globalStoragePath, vscode.workspace.getConfiguration(exports.CONFIGURATION_NAME).get(exports.CONFIGURATION_LANGUAGE_SERVER_OPTIONS), vscode.workspace.getConfiguration(exports.CONFIGURATION_NAME).get(exports.CONFIGURATION_DEFAULT_GROOVY_CLASSPATH));
+        var activateResponse = yield vscode.commands.executeCommand(LanguageServerCommands.ACTIVATE, context.globalStoragePath, vscode.workspace.getConfiguration(exports.CONFIGURATION_NAME).get(exports.CONFIGURATION_LANGUAGE_SERVER_OPTIONS_NAME), vscode.workspace.getConfiguration(exports.CONFIGURATION_NAME).get(exports.CONFIGURATION_DEFAULT_GROOVY_CLASSPATH_NAME));
         var activateResponseJsonObj = JSON.parse(JSON.stringify(activateResponse));
         if (activateResponseJsonObj["exception"]) {
             vscode.window.showErrorMessage("Error occuring during MOCA Language Server activation: " + activateResponseJsonObj["exception"]["message"]);
@@ -108,6 +109,7 @@ function activate(context) {
         context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.CONNECT, () => __awaiter(this, void 0, void 0, function* () {
             var connectionNames = new Array();
             var connections = new Map();
+            // Read in config.
             const config = vscode.workspace.getConfiguration(exports.CONFIGURATION_NAME);
             const connectionConfig = config.get(exports.CONFIGURATION_CONNECTIONS_NAME);
             if (connectionConfig) {
@@ -118,6 +120,7 @@ function activate(context) {
                     connections.set(connectionObj.name, connectionObj);
                 }
             }
+            // Let user pick connection.
             let connectionNameQuickPickRes = yield vscode.window.showQuickPick(connectionNames, { ignoreFocusOut: true });
             const selectedConnectionObj = connections.get(connectionNameQuickPickRes);
             if (!selectedConnectionObj) {
@@ -148,7 +151,7 @@ function activate(context) {
             }
             // If no entries in groovy classpath for selected connection, set to default groovy classpath.
             if (!selectedConnectionObj.groovyclasspath || selectedConnectionObj.groovyclasspath.length === 0) {
-                selectedConnectionObj.groovyclasspath = vscode.workspace.getConfiguration(exports.CONFIGURATION_NAME).get(exports.CONFIGURATION_DEFAULT_GROOVY_CLASSPATH);
+                selectedConnectionObj.groovyclasspath = vscode.workspace.getConfiguration(exports.CONFIGURATION_NAME).get(exports.CONFIGURATION_DEFAULT_GROOVY_CLASSPATH_NAME);
             }
             // If no entry for unsafe approval config, just default to false.
             if (!selectedConnectionObj.approveUnsafeScripts) {
@@ -318,11 +321,10 @@ function activate(context) {
             }
         })));
         context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.TRACE, () => __awaiter(this, void 0, void 0, function* () {
-            // Read in configuration and execute.
+            // Read in configuration.
             const config = vscode.workspace.getConfiguration(exports.CONFIGURATION_NAME);
             var traceConfigObj = config.get(exports.CONFIGURATION_TRACE_NAME);
             if (traceConfigObj) {
-                // Prepare values.
                 var traceConfigJsonObj = JSON.parse(JSON.stringify(traceConfigObj));
                 var fileName = traceConfigJsonObj.fileName;
                 var mode = traceConfigJsonObj.mode;
@@ -560,6 +562,19 @@ function activate(context) {
             if (!traceTypeRes) {
                 return;
             }
+            // Read in configuration.
+            const config = vscode.workspace.getConfiguration(exports.CONFIGURATION_NAME);
+            var traceOutlinerConfigObj = config.get(exports.CONFIGURATION_TRACE_OUTLINER_NAME);
+            // Prepare values.
+            var traceOutlinerConfigJsonObj = JSON.parse(JSON.stringify(traceOutlinerConfigObj));
+            var useLogicalIndentStrategy = traceOutlinerConfigJsonObj.useLogicalIndentStrategy;
+            if (useLogicalIndentStrategy === undefined) {
+                useLogicalIndentStrategy = true;
+            }
+            var minimumExecutionTime = traceOutlinerConfigJsonObj.minimumExecutionTime;
+            if (!minimumExecutionTime) {
+                minimumExecutionTime = 1.0;
+            }
             if (traceTypeRes === "Remote") {
                 // Sending empty args so that lang server knows to send us back a list of remote trace files.
                 var traceResponseRemoteRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE);
@@ -582,7 +597,7 @@ function activate(context) {
                             message: "Loading Trace Outline for " + traceFileNameSelectedRemote
                         });
                         // Now that we have a remote trace file name, we can request outline from lang server.
-                        traceResponseRemoteRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedRemote, true, true, 1.0);
+                        traceResponseRemoteRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedRemote, true, useLogicalIndentStrategy, minimumExecutionTime);
                         if (traceResponseRemoteRes) {
                             traceResponseRemoteObj = JSON.parse(JSON.stringify(traceResponseRemoteRes));
                             // Make sure to check for exception.
@@ -620,7 +635,7 @@ function activate(context) {
                             message: "Loading Trace Outline for " + traceFileNameSelectedShortenedLocalStr
                         });
                         // Now that we have a local trace file name, we can request outline from lang server.
-                        var traceResponseLocalRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedLocalStr, false, true, 1.0);
+                        var traceResponseLocalRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedLocalStr, false, useLogicalIndentStrategy, minimumExecutionTime);
                         if (traceResponseLocalRes) {
                             var traceResponseLocalObj = JSON.parse(JSON.stringify(traceResponseLocalRes));
                             // Make sure to check for exception.
@@ -643,12 +658,12 @@ function activate(context) {
         // Configuration listener.
         context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {
             // Client options.
-            if (e.affectsConfiguration((exports.CONFIGURATION_NAME + "." + exports.CONFIGURATION_CLIENT_OPTIONS))) {
+            if (e.affectsConfiguration((exports.CONFIGURATION_NAME + "." + exports.CONFIGURATION_CLIENT_OPTIONS_NAME))) {
                 semanticHighlighting_1.GlobalSemanticHighlightingVars.semanticHighlightingFeature.loadCurrentTheme();
             }
             // Language server options.
-            if (e.affectsConfiguration((exports.CONFIGURATION_NAME + "." + exports.CONFIGURATION_LANGUAGE_SERVER_OPTIONS))) {
-                vscode.commands.executeCommand(LanguageServerCommands.SET_LANGUAGE_SERVER_OPTIONS, vscode.workspace.getConfiguration(exports.CONFIGURATION_NAME).get(exports.CONFIGURATION_LANGUAGE_SERVER_OPTIONS));
+            if (e.affectsConfiguration((exports.CONFIGURATION_NAME + "." + exports.CONFIGURATION_LANGUAGE_SERVER_OPTIONS_NAME))) {
+                vscode.commands.executeCommand(LanguageServerCommands.SET_LANGUAGE_SERVER_OPTIONS, vscode.workspace.getConfiguration(exports.CONFIGURATION_NAME).get(exports.CONFIGURATION_LANGUAGE_SERVER_OPTIONS_NAME));
             }
         }));
         // Get status bar items up and running now.

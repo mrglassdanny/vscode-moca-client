@@ -329,6 +329,26 @@
 					"items": {
 						"type": "string"
 					}
+				},
+				"moca.traceOutliner": {
+					"type": "object",
+					"default": {
+						"useLogicalIndentStrategy": true,
+						"minimumExecutionTime": 1.0
+					},
+					"description": "MOCA Trace Outliner Configuration",
+					"properties": {
+						"useLogicalIndentStrategy": {
+							"type": "boolean",
+							"default": true,
+							"description": "Logical indent strategy will indent when visiting command statements(if/else/finally/etc.) and MOCA commands/triggers. Non-logical strategy will indent solely based on stack level."
+						},
+						"minimumExecutionTime": {
+							"type": "number",
+							"default": 1.0,
+							"description": "Any instruction whose execution time is greater than this number will be decorated(orange border) to show it."
+						}
+					}
 				}
 			}
 		}

@@ -139,7 +139,7 @@ class Highlighter {
         this.decorationTypes.forEach((t) => t.dispose());
         // Create decoration types.
         const config = vscode.workspace.getConfiguration(extension_1.CONFIGURATION_NAME);
-        const clientOptsConfigObj = JSON.parse(JSON.stringify(config.get(extension_1.CONFIGURATION_CLIENT_OPTIONS)));
+        const clientOptsConfigObj = JSON.parse(JSON.stringify(config.get(extension_1.CONFIGURATION_CLIENT_OPTIONS_NAME)));
         const sqlRangeColorLightObj = clientOptsConfigObj['sqlRangeColorLight'];
         const sqlRangeColorDarkObj = clientOptsConfigObj['sqlRangeColorDark'];
         const groovyRangeColorLightObj = clientOptsConfigObj['groovyRangeColorLight'];

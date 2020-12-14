@@ -4,7 +4,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import * as vscodelc from 'vscode-languageclient';
 import * as vscodelct from 'vscode-languageserver-types';
-import { CONFIGURATION_NAME, CONFIGURATION_CLIENT_OPTIONS } from '../extension';
+import { CONFIGURATION_NAME, CONFIGURATION_CLIENT_OPTIONS_NAME } from '../extension';
 
 
 
@@ -226,7 +226,7 @@ export class Highlighter {
 
         // Create decoration types.
         const config = vscode.workspace.getConfiguration(CONFIGURATION_NAME);
-        const clientOptsConfigObj = JSON.parse(JSON.stringify(config.get(CONFIGURATION_CLIENT_OPTIONS)));
+        const clientOptsConfigObj = JSON.parse(JSON.stringify(config.get(CONFIGURATION_CLIENT_OPTIONS_NAME)));
 
         const sqlRangeColorLightObj = clientOptsConfigObj['sqlRangeColorLight'];
         const sqlRangeColorDarkObj = clientOptsConfigObj['sqlRangeColorDark'];
