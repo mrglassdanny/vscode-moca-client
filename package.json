@@ -346,7 +346,7 @@
 						"minimumExecutionTime": {
 							"type": "number",
 							"default": 1.0,
-							"description": "Any instruction whose execution time is greater than this number will be decorated(orange border) to show it."
+							"description": "Any instruction whose execution time is greater than or equal to this number will be decorated(bold text & orange border) to show it."
 						}
 					}
 				}

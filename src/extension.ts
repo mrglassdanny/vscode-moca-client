@@ -75,6 +75,11 @@ const UNSAFE_CODE_APPROVAL_PROMPT = "You are attempting to run unsafe code. Do y
 const UNSAFE_CODE_APPROVAL_OPTION_YES = "Yes";
 const UNSAFE_CODE_APPROVAL_OPTION_NO = "No";
 
+// Constants for opening trace outline immediately after trace stop.
+const OPEN_TRACE_OUTLINE_PROMPT = "Would you like to open trace outline?";
+const OPEN_TRACE_OUTLINE_OPTION_YES = "Yes";
+const OPEN_TRACE_OUTLINE_OPTION_NO = "No";
+
 // Need to keep track of trace status.
 let traceStarted: boolean = false;
 
@@ -413,6 +418,59 @@ export async function activate(context: vscode.ExtensionContext) {
 						traceStarted = false;
 						traceStatusBarItem.text = START_TRACE_STR;
 					}
+				} else {
+
+					// Allow user to open trace.
+					if (!traceStarted) {
+						var openTraceOutlineOptionRes = await vscode.window.showInformationMessage(OPEN_TRACE_OUTLINE_PROMPT, OPEN_TRACE_OUTLINE_OPTION_YES, OPEN_TRACE_OUTLINE_OPTION_NO);
+						if (openTraceOutlineOptionRes === OPEN_TRACE_OUTLINE_OPTION_YES) {
+
+							vscode.window.withProgress({
+								location: vscode.ProgressLocation.Notification,
+								title: "MOCA"
+							}, async (progress, token) => {
+								progress.report({
+									increment: Infinity,
+									message: "Loading Trace Outline for " + fileName
+								});
+
+								// Read in configuration.
+								const config = vscode.workspace.getConfiguration(CONFIGURATION_NAME);
+								var traceOutlinerConfigObj = config.get(CONFIGURATION_TRACE_OUTLINER_NAME);
+
+								// Prepare values.
+								var traceOutlinerConfigJsonObj = JSON.parse(JSON.stringify(traceOutlinerConfigObj));
+
+								var useLogicalIndentStrategy = traceOutlinerConfigJsonObj.useLogicalIndentStrategy;
+								if (useLogicalIndentStrategy === undefined) {
+									useLogicalIndentStrategy = true;
+								}
+
+								var minimumExecutionTime = traceOutlinerConfigJsonObj.minimumExecutionTime;
+								if (!minimumExecutionTime) {
+									minimumExecutionTime = 1.0;
+								}
+
+								var traceResponseRemoteRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, fileName + ".log", true, useLogicalIndentStrategy, minimumExecutionTime);
+								if (traceResponseRemoteRes) {
+									var traceResponseRemoteObj = JSON.parse(JSON.stringify(traceResponseRemoteRes));
+
+									// Make sure to check for exception.
+									if (traceResponseRemoteObj.exception) {
+										vscode.window.showErrorMessage("Trace Outline error: " + traceResponseRemoteObj.exception["message"]);
+									} else {
+										// No exceptions -- now load outline.
+										var uri = vscode.Uri.file(context.globalStoragePath + "\\trace\\" + fileName.replace('.log', '') + ".moca.traceoutline");
+										await vscode.workspace.fs.writeFile(uri, Buffer.from(traceResponseRemoteObj.traceOutlineStr));
+										var doc = await vscode.workspace.openTextDocument(uri);
+										await vscode.window.showTextDocument(doc, { preview: false });
+									}
+								}
+							});
+						}
+					}
+
+
 				}
 			});
 		}
