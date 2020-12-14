@@ -109,6 +109,13 @@ Provides MOCA client and language support for Visual Studio Code via the [MOCA L
     "path\\to\\jar\\folder\\file.jar"
 ]
 ```
+- `moca.traceOutliner`: MOCA Trace Outliner Configuration
+```json
+"moca.traceOutliner": {
+	"useLogicalIndentStrategy": true,
+	"minimumExecutionTime": 1.000
+}
+```
 
 ## Contribute
 
