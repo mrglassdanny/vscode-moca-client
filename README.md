@@ -26,6 +26,7 @@ Provides MOCA client and language support for Visual Studio Code via the [MOCA L
 - [Intellisense]
 - [Command Execution]
 - Trace Outliner
+![Demo](resources/trace-outliner-demo.gif)
 
 
 ## Commands
