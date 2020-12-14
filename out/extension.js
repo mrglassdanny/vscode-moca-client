@@ -19,7 +19,7 @@ const mocaResults_1 = require("./results/mocaResults");
 const ResultViewPanel_1 = require("./results/ResultViewPanel");
 const perf_hooks_1 = require("perf_hooks");
 // Language server constants.
-const MOCA_LANGUAGE_SERVER_VERSION = "1.7.12";
+const MOCA_LANGUAGE_SERVER_VERSION = "1.7.13";
 const MOCA_LANGUAGE_SERVER = "moca-language-server-" + MOCA_LANGUAGE_SERVER_VERSION + "-all.jar";
 const MOCA_LANGUAGE_SERVER_INITIALIZING_MESSAGE = "MOCA: Initializing language server";
 const MOCA_LANGUAGE_SERVER_ERR_STARTUP = "The MOCA extension failed to start";
@@ -68,7 +68,7 @@ var executeStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAli
 var executeSelectionStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 2 + STATUS_BAR_PRIORITY_OFFSET);
 var commandLookupStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 3 + STATUS_BAR_PRIORITY_OFFSET);
 var traceStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 4 + STATUS_BAR_PRIORITY_OFFSET);
-var openTraceStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 5 + STATUS_BAR_PRIORITY_OFFSET);
+var openTraceOutlineStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 5 + STATUS_BAR_PRIORITY_OFFSET);
 // Status bar constants.
 const NOT_CONNECTED_STR = "MOCA: $(database) Not Connected";
 const CONNECTED_PREFIX_STR = "MOCA: $(database) ";
@@ -741,15 +741,16 @@ function activate(context) {
         traceStatusBarItem.text = START_TRACE_STR;
         traceStatusBarItem.command = LanguageClientCommands.TRACE;
         traceStatusBarItem.show();
-        openTraceStatusBarItem.text = "$(outline-view-icon)";
-        openTraceStatusBarItem.command = LanguageClientCommands.OPEN_TRACE_OUTLINE;
-        openTraceStatusBarItem.tooltip = "Open Trace Outline";
-        openTraceStatusBarItem.show();
+        openTraceOutlineStatusBarItem.text = "$(outline-view-icon)";
+        openTraceOutlineStatusBarItem.command = LanguageClientCommands.OPEN_TRACE_OUTLINE;
+        openTraceOutlineStatusBarItem.tooltip = "Open Trace Outline";
+        openTraceOutlineStatusBarItem.show();
         context.subscriptions.push(connectionStatusBarItem);
         context.subscriptions.push(executeStatusBarItem);
         context.subscriptions.push(executeSelectionStatusBarItem);
         context.subscriptions.push(commandLookupStatusBarItem);
         context.subscriptions.push(traceStatusBarItem);
+        context.subscriptions.push(openTraceOutlineStatusBarItem);
     });
 }
 exports.activate = activate;

@@ -1,11 +1,14 @@
 # Changelog
 https://semver.org/
 
+## 1.4.20 (December 14, 2020)
+* MOCA language server update -- https://github.com/mrglassdanny/moca-language-server/blob/master/CHANGELOG.md
+
 ## 1.4.19 (December 14, 2020)
-* Trace outline bug fix
+* MOCA language server update -- https://github.com/mrglassdanny/moca-language-server/blob/master/CHANGELOG.md
 
 ## 1.4.18 (December 14, 2020)
-* Trace outline bug fix
+* MOCA language server update -- https://github.com/mrglassdanny/moca-language-server/blob/master/CHANGELOG.md
 
 ## 1.4.17 (December 13, 2020)
 * Trace outline feature -- https://github.com/mrglassdanny/vscode-moca-client/issues/10

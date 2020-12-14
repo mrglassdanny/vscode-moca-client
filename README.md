@@ -37,6 +37,7 @@ Provides MOCA client and language support for Visual Studio Code via the [MOCA L
 - `MOCA:MOCA Trace`: Starts/stops trace.
 - `MOCA:Lookup MOCA Command`: Dialog appears for searching commands/triggers.
 - `MOCA:Auto Execute MOCA Script`: Auto MOCA script execution.
+- `MOCA:Open MOCA Trace Outline`: Open MOCA trace outline(remote or local).
 
 ## Settings
 
