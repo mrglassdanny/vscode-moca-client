@@ -19,7 +19,7 @@ const mocaResults_1 = require("./results/mocaResults");
 const ResultViewPanel_1 = require("./results/ResultViewPanel");
 const perf_hooks_1 = require("perf_hooks");
 // Language server constants.
-const MOCA_LANGUAGE_SERVER_VERSION = "1.7.13";
+const MOCA_LANGUAGE_SERVER_VERSION = "1.7.14";
 const MOCA_LANGUAGE_SERVER = "moca-language-server-" + MOCA_LANGUAGE_SERVER_VERSION + "-all.jar";
 const MOCA_LANGUAGE_SERVER_INITIALIZING_MESSAGE = "MOCA: Initializing language server";
 const MOCA_LANGUAGE_SERVER_ERR_STARTUP = "The MOCA extension failed to start";
@@ -648,8 +648,11 @@ function activate(context) {
                             increment: Infinity,
                             message: "Loading Trace Outline for " + traceFileNameSelectedRemote
                         });
+                        // Create uri now so we can give it to lang server.
+                        var uri = vscode.Uri.file(context.globalStoragePath + "\\trace\\" + traceFileNameSelectedRemote.replace('.log', '') + ".moca.traceoutline");
                         // Now that we have a remote trace file name, we can request outline from lang server.
-                        traceResponseRemoteRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedRemote, true, useLogicalIndentStrategy, minimumExecutionTime);
+                        // NOTE: get rid of uri string encoding to match lang server format.
+                        traceResponseRemoteRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedRemote, uri.toString(true), true, useLogicalIndentStrategy, minimumExecutionTime);
                         if (traceResponseRemoteRes) {
                             traceResponseRemoteObj = JSON.parse(JSON.stringify(traceResponseRemoteRes));
                             // Make sure to check for exception.
@@ -658,7 +661,6 @@ function activate(context) {
                             }
                             else {
                                 // No exceptions -- now load outline.
-                                var uri = vscode.Uri.file(context.globalStoragePath + "\\trace\\" + traceFileNameSelectedRemote.replace('.log', '') + ".moca.traceoutline");
                                 yield vscode.workspace.fs.writeFile(uri, Buffer.from(traceResponseRemoteObj.traceOutlineStr));
                                 var doc = yield vscode.workspace.openTextDocument(uri);
                                 yield vscode.window.showTextDocument(doc, { preview: false });
@@ -689,8 +691,11 @@ function activate(context) {
                             increment: Infinity,
                             message: "Loading Trace Outline for " + traceFileNameSelectedShortenedLocalStr
                         });
+                        // Create uri now so we can give it to lang server.
+                        var uri = vscode.Uri.file(context.globalStoragePath + "\\trace\\" + traceFileNameSelectedShortenedLocalStr.replace('.log', '') + ".moca.traceoutline");
                         // Now that we have a local trace file name, we can request outline from lang server.
-                        var traceResponseLocalRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedLocalStr, false, useLogicalIndentStrategy, minimumExecutionTime);
+                        // NOTE: get rid of uri string encoding to match lang server format.
+                        var traceResponseLocalRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedLocalStr, uri.toString(true), false, useLogicalIndentStrategy, minimumExecutionTime);
                         if (traceResponseLocalRes) {
                             var traceResponseLocalObj = JSON.parse(JSON.stringify(traceResponseLocalRes));
                             // Make sure to check for exception.
@@ -699,7 +704,6 @@ function activate(context) {
                             }
                             else {
                                 // No exceptions -- now load outline.
-                                var uri = vscode.Uri.file(context.globalStoragePath + "\\trace\\" + traceFileNameSelectedShortenedLocalStr.replace('.log', '') + ".moca.traceoutline");
                                 yield vscode.workspace.fs.writeFile(uri, Buffer.from(traceResponseLocalObj.traceOutlineStr));
                                 var doc = yield vscode.workspace.openTextDocument(uri);
                                 yield vscode.window.showTextDocument(doc, { preview: false });
