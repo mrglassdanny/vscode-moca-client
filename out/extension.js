@@ -70,10 +70,10 @@ var commandLookupStatusBarItem = vscode.window.createStatusBarItem(vscode.Status
 var traceStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 4 + STATUS_BAR_PRIORITY_OFFSET);
 var openTraceOutlineStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 5 + STATUS_BAR_PRIORITY_OFFSET);
 // Status bar constants.
-const NOT_CONNECTED_STR = "MOCA: $(database) Not Connected";
-const CONNECTED_PREFIX_STR = "MOCA: $(database) ";
-const START_TRACE_STR = "$(debug-start) Start Trace";
-const STOP_TRACE_STR = "$(debug-stop) Stop Trace";
+const STATUS_BAR_NOT_CONNECTED_STR = "MOCA: $(vm-connect)";
+const STATUS_BAR_CONNECTED_PREFIX_STR = "MOCA: $(vm-active) ";
+const STATUS_BAR_START_TRACE_STR = "$(debug-start) Start Trace";
+const STATUS_BAR_STOP_TRACE_STR = "$(debug-stop) Stop Trace";
 // Constants for unsafe script executions configuration.
 const UNSAFE_CODE_APPROVAL_PROMPT = "You are attempting to run unsafe code. Do you want to continue?";
 const UNSAFE_CODE_APPROVAL_OPTION_YES = "Yes";
@@ -189,12 +189,12 @@ function activate(context) {
                     const eOk = connResponseJsonObj["eOk"];
                     if (eOk === true) {
                         connectionSuccess = true;
-                        connectionStatusBarItem.text = CONNECTED_PREFIX_STR + selectedConnectionObj.name;
+                        connectionStatusBarItem.text = STATUS_BAR_CONNECTED_PREFIX_STR + selectedConnectionObj.name;
                     }
                     else {
                         var exceptionJsonObj = JSON.parse(JSON.stringify(connResponseJsonObj["exception"]));
                         vscode.window.showErrorMessage(selectedConnectionObj.name + ": " + exceptionJsonObj["message"]);
-                        connectionStatusBarItem.text = NOT_CONNECTED_STR;
+                        connectionStatusBarItem.text = STATUS_BAR_NOT_CONNECTED_STR;
                     }
                 }
             })).then(() => {
@@ -350,10 +350,10 @@ function activate(context) {
                     // Start/stop trace.
                     traceStarted = !traceStarted;
                     if (traceStarted) {
-                        traceStatusBarItem.text = STOP_TRACE_STR;
+                        traceStatusBarItem.text = STATUS_BAR_STOP_TRACE_STR;
                     }
                     else {
-                        traceStatusBarItem.text = START_TRACE_STR;
+                        traceStatusBarItem.text = STATUS_BAR_START_TRACE_STR;
                     }
                     var traceRes = yield vscode.commands.executeCommand(LanguageServerCommands.TRACE, traceStarted, fileName, mode);
                     const traceResponseJsonObj = JSON.parse(JSON.stringify(traceRes));
@@ -364,7 +364,7 @@ function activate(context) {
                         // Reset trace status if currently running.
                         if (traceStarted) {
                             traceStarted = false;
-                            traceStatusBarItem.text = START_TRACE_STR;
+                            traceStatusBarItem.text = STATUS_BAR_START_TRACE_STR;
                         }
                     }
                     else {
@@ -393,7 +393,11 @@ function activate(context) {
                                     if (!minimumExecutionTime) {
                                         minimumExecutionTime = 1.0;
                                     }
-                                    var traceResponseRemoteRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, fileName + ".log", true, useLogicalIndentStrategy, minimumExecutionTime);
+                                    // Create uri now so we can give it to lang server.
+                                    var uri = vscode.Uri.file(context.globalStoragePath + "\\trace\\" + fileName.replace('.log', '') + ".moca.traceoutline");
+                                    // Now that we have a remote trace file name, we can request outline from lang server.
+                                    // NOTE: get rid of uri string encoding to match lang server format.
+                                    var traceResponseRemoteRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, fileName + ".log", uri.toString(true), true, useLogicalIndentStrategy, minimumExecutionTime);
                                     if (traceResponseRemoteRes) {
                                         var traceResponseRemoteObj = JSON.parse(JSON.stringify(traceResponseRemoteRes));
                                         // Make sure to check for exception.
@@ -402,7 +406,6 @@ function activate(context) {
                                         }
                                         else {
                                             // No exceptions -- now load outline.
-                                            var uri = vscode.Uri.file(context.globalStoragePath + "\\trace\\" + fileName.replace('.log', '') + ".moca.traceoutline");
                                             yield vscode.workspace.fs.writeFile(uri, Buffer.from(traceResponseRemoteObj.traceOutlineStr));
                                             var doc = yield vscode.workspace.openTextDocument(uri);
                                             yield vscode.window.showTextDocument(doc, { preview: false });
@@ -719,6 +722,26 @@ function activate(context) {
             // Client options.
             if (e.affectsConfiguration((exports.CONFIGURATION_NAME + "." + exports.CONFIGURATION_CLIENT_OPTIONS_NAME))) {
                 semanticHighlighting_1.GlobalSemanticHighlightingVars.semanticHighlightingFeature.loadCurrentTheme();
+                // Show status bar items based on client options config.
+                {
+                    const config = vscode.workspace.getConfiguration(exports.CONFIGURATION_NAME);
+                    const clientOptionsConfig = config.get(exports.CONFIGURATION_CLIENT_OPTIONS_NAME);
+                    const clientOptionsConfigObj = JSON.parse(JSON.stringify(clientOptionsConfig));
+                    if (clientOptionsConfigObj["showAllIconsInStatusBar"] === true) {
+                        executeStatusBarItem.show();
+                        executeSelectionStatusBarItem.show();
+                        commandLookupStatusBarItem.show();
+                        traceStatusBarItem.show();
+                        openTraceOutlineStatusBarItem.show();
+                    }
+                    else {
+                        executeStatusBarItem.hide();
+                        executeSelectionStatusBarItem.hide();
+                        commandLookupStatusBarItem.hide();
+                        traceStatusBarItem.hide();
+                        openTraceOutlineStatusBarItem.hide();
+                    }
+                }
             }
             // Language server options.
             if (e.affectsConfiguration((exports.CONFIGURATION_NAME + "." + exports.CONFIGURATION_LANGUAGE_SERVER_OPTIONS_NAME))) {
@@ -726,29 +749,45 @@ function activate(context) {
             }
         }));
         // Get status bar items up and running now.
-        connectionStatusBarItem.text = NOT_CONNECTED_STR;
+        connectionStatusBarItem.text = STATUS_BAR_NOT_CONNECTED_STR;
         connectionStatusBarItem.command = LanguageClientCommands.CONNECT;
         connectionStatusBarItem.tooltip = "Connect To MOCA Server";
-        connectionStatusBarItem.show();
         executeStatusBarItem.text = "$(play)";
         executeStatusBarItem.command = LanguageClientCommands.EXECUTE;
         executeStatusBarItem.tooltip = "Execute (Ctrl+Enter)";
-        executeStatusBarItem.show();
         executeSelectionStatusBarItem.text = "$(selection)";
         executeSelectionStatusBarItem.command = LanguageClientCommands.EXECUTE_SELECTION;
         executeSelectionStatusBarItem.tooltip = "Execute Selection (Ctrl+Shift+Enter)";
-        executeSelectionStatusBarItem.show();
         commandLookupStatusBarItem.text = "$(file-code)";
         commandLookupStatusBarItem.command = LanguageClientCommands.COMMAND_LOOKUP;
         commandLookupStatusBarItem.tooltip = "Command Lookup";
-        commandLookupStatusBarItem.show();
-        traceStatusBarItem.text = START_TRACE_STR;
+        traceStatusBarItem.text = STATUS_BAR_START_TRACE_STR;
         traceStatusBarItem.command = LanguageClientCommands.TRACE;
-        traceStatusBarItem.show();
-        openTraceOutlineStatusBarItem.text = "$(outline-view-icon)";
+        openTraceOutlineStatusBarItem.text = "$(list-tree)";
         openTraceOutlineStatusBarItem.command = LanguageClientCommands.OPEN_TRACE_OUTLINE;
         openTraceOutlineStatusBarItem.tooltip = "Open Trace Outline";
-        openTraceOutlineStatusBarItem.show();
+        // Show status bar items based on client options config.
+        // MOCA connection will always be shown.
+        connectionStatusBarItem.show();
+        {
+            const config = vscode.workspace.getConfiguration(exports.CONFIGURATION_NAME);
+            const clientOptionsConfig = config.get(exports.CONFIGURATION_CLIENT_OPTIONS_NAME);
+            const clientOptionsConfigObj = JSON.parse(JSON.stringify(clientOptionsConfig));
+            if (clientOptionsConfigObj["showAllIconsInStatusBar"] === true) {
+                executeStatusBarItem.show();
+                executeSelectionStatusBarItem.show();
+                commandLookupStatusBarItem.show();
+                traceStatusBarItem.show();
+                openTraceOutlineStatusBarItem.show();
+            }
+            else {
+                executeStatusBarItem.hide();
+                executeSelectionStatusBarItem.hide();
+                commandLookupStatusBarItem.hide();
+                traceStatusBarItem.hide();
+                openTraceOutlineStatusBarItem.hide();
+            }
+        }
         context.subscriptions.push(connectionStatusBarItem);
         context.subscriptions.push(executeStatusBarItem);
         context.subscriptions.push(executeSelectionStatusBarItem);

@@ -3,7 +3,7 @@
 	"icon": "resources/local-syntax-logo.png",
 	"displayName": "MOCA Client",
 	"description": "MOCA Client and Local Syntax programming support for Visual Studio Code",
-	"version": "1.4.20",
+	"version": "2.4.20",
 	"author": {
 		"name": "Danny Glass",
 		"email": "mrglassdanny@gmail.com",
@@ -229,7 +229,8 @@
 						"sqlRangeColorDark": "rgba(0,80,180,0.25)",
 						"groovyRangeColorLight": "rgba(225,100,0,0.15)",
 						"groovyRangeColorDark": "rgba(175,45,0,0.25)",
-						"dataTablePageSize": 100
+						"dataTablePageSize": 100,
+						"showAllIconsInStatusBar": true
 					},
 					"description": "vscode Language Client Options",
 					"properties": {
@@ -257,6 +258,11 @@
 							"type": "integer",
 							"default": 100,
 							"description": "Data Table Page Size"
+						},
+						"showAllIconsInStatusBar": {
+							"type": "boolean",
+							"default": true,
+							"description": "If false, only MOCA connection icon will show in status bar.\nThis can be useful if user does not want MOCA to be the focus of the vscode window."
 						}
 					}
 				},
