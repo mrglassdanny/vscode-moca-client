@@ -40,6 +40,7 @@ Provides MOCA client and language support for Visual Studio Code via the [MOCA L
 - `MOCA:Open MOCA Trace Outline`: Open MOCA trace outline(remote or local).
 
 ![Status-Bar-Demo](resources/status-bar.png)
+
 *MOCA Connection | Execute | Execute Selection | Command Lookup | Start/Stop Trace | Open Trace Outline*
 
 ## Settings
