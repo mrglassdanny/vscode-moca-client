@@ -26,7 +26,7 @@ Provides MOCA client and language support for Visual Studio Code via the [MOCA L
 - [Intellisense]
 - [Command Execution]
 - [Trace Outliner]
-![Demo](resources/trace-outliner-demo.gif)
+![Trace-Outliner-Demo](resources/trace-outliner-demo.gif)
 
 
 ## Commands
@@ -38,6 +38,9 @@ Provides MOCA client and language support for Visual Studio Code via the [MOCA L
 - `MOCA:Lookup MOCA Command`: Dialog appears for searching commands/triggers.
 - `MOCA:Auto Execute MOCA Script`: Auto MOCA script execution.
 - `MOCA:Open MOCA Trace Outline`: Open MOCA trace outline(remote or local).
+
+![Status-Bar-Demo](resources/status-bar.png)
+*MOCA Connection | Execute | Execute Selection | Command Lookup | Start/Stop Trace | Open Trace Outline*
 
 ## Settings
 
@@ -86,7 +89,8 @@ Provides MOCA client and language support for Visual Studio Code via the [MOCA L
         "sqlRangeColorDark": "rgba(0,80,180,0.25)",
         "groovyRangeColorLight": "rgba(225,100,0,0.15)",
         "groovyRangeColorDark": "rgba(175,45,0,0.25)",
-        "dataTablePageSize": 100
+        "dataTablePageSize": 100,
+        "showAllIconsInStatusBar": true
     }
 ```
 - `moca.languageServerOptions`: [MOCA Language Server] configuration options.

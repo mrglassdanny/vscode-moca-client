@@ -1,6 +1,13 @@
 # Changelog
 https://semver.org/
 
+## 1.5.20 (December 15, 2020)
+* Status bar icon changes:
+    * MOCA connection connected/not connected
+    * Trace start/stop
+* New status bar client options configuration: showAllIconsInStatusBar (boolean)
+* MOCA language server update -- https://github.com/mrglassdanny/moca-language-server/blob/master/CHANGELOG.md
+
 ## 1.4.20 (December 14, 2020)
 * MOCA language server update -- https://github.com/mrglassdanny/moca-language-server/blob/master/CHANGELOG.md
 

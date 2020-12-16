@@ -70,10 +70,10 @@ var commandLookupStatusBarItem = vscode.window.createStatusBarItem(vscode.Status
 var traceStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 4 + STATUS_BAR_PRIORITY_OFFSET);
 var openTraceOutlineStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 5 + STATUS_BAR_PRIORITY_OFFSET);
 // Status bar constants.
-const STATUS_BAR_NOT_CONNECTED_STR = "MOCA: $(vm-connect)";
-const STATUS_BAR_CONNECTED_PREFIX_STR = "MOCA: $(vm-active) ";
-const STATUS_BAR_START_TRACE_STR = "$(debug-start) Start Trace";
-const STATUS_BAR_STOP_TRACE_STR = "$(debug-stop) Stop Trace";
+const STATUS_BAR_NOT_CONNECTED_STR = "MOCA: $(circle-slash)";
+const STATUS_BAR_CONNECTED_PREFIX_STR = "MOCA: $(pass) ";
+const STATUS_BAR_START_TRACE_STR = "$(debug-alt) Start Trace";
+const STATUS_BAR_STOP_TRACE_STR = "$(debug-disconnect) Stop Trace";
 // Constants for unsafe script executions configuration.
 const UNSAFE_CODE_APPROVAL_PROMPT = "You are attempting to run unsafe code. Do you want to continue?";
 const UNSAFE_CODE_APPROVAL_OPTION_YES = "Yes";
