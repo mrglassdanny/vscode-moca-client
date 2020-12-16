@@ -86,6 +86,8 @@ const OPEN_TRACE_OUTLINE_OPTION_NO = "No";
 let traceStarted = false;
 // Need to save off user ID for default trace file naming.
 let curConnectionUserId = "";
+// Tells us if trace status bar item is hidden via showAllIconsInStatusBar client options config.
+let hidingTraceStatusBarItem = false;
 function activate(context) {
     return __awaiter(this, void 0, void 0, function* () {
         // Set some vars.
@@ -351,9 +353,17 @@ function activate(context) {
                     traceStarted = !traceStarted;
                     if (traceStarted) {
                         traceStatusBarItem.text = STATUS_BAR_STOP_TRACE_STR;
+                        // Regardless of showAllIconsInStatusBar client options config, we want to show the stop trace icon so that the user knows that a trace is running.
+                        if (hidingTraceStatusBarItem) {
+                            traceStatusBarItem.show();
+                        }
                     }
                     else {
                         traceStatusBarItem.text = STATUS_BAR_START_TRACE_STR;
+                        // If hiding trace status bar icon via showAllIconsInStatusBar client options config, make sure we hide now.
+                        if (hidingTraceStatusBarItem) {
+                            traceStatusBarItem.hide();
+                        }
                     }
                     var traceRes = yield vscode.commands.executeCommand(LanguageServerCommands.TRACE, traceStarted, fileName, mode);
                     const traceResponseJsonObj = JSON.parse(JSON.stringify(traceRes));
@@ -365,6 +375,10 @@ function activate(context) {
                         if (traceStarted) {
                             traceStarted = false;
                             traceStatusBarItem.text = STATUS_BAR_START_TRACE_STR;
+                            // If hiding trace status bar icon via showAllIconsInStatusBar client options config, make sure we hide now.
+                            if (hidingTraceStatusBarItem) {
+                                traceStatusBarItem.hide();
+                            }
                         }
                     }
                     else {
@@ -733,6 +747,7 @@ function activate(context) {
                         commandLookupStatusBarItem.show();
                         traceStatusBarItem.show();
                         openTraceOutlineStatusBarItem.show();
+                        hidingTraceStatusBarItem = false;
                     }
                     else {
                         executeStatusBarItem.hide();
@@ -740,6 +755,7 @@ function activate(context) {
                         commandLookupStatusBarItem.hide();
                         traceStatusBarItem.hide();
                         openTraceOutlineStatusBarItem.hide();
+                        hidingTraceStatusBarItem = true;
                     }
                 }
             }
@@ -779,6 +795,7 @@ function activate(context) {
                 commandLookupStatusBarItem.show();
                 traceStatusBarItem.show();
                 openTraceOutlineStatusBarItem.show();
+                hidingTraceStatusBarItem = false;
             }
             else {
                 executeStatusBarItem.hide();
@@ -786,6 +803,7 @@ function activate(context) {
                 commandLookupStatusBarItem.hide();
                 traceStatusBarItem.hide();
                 openTraceOutlineStatusBarItem.hide();
+                hidingTraceStatusBarItem = true;
             }
         }
         context.subscriptions.push(connectionStatusBarItem);

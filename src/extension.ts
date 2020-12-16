@@ -86,6 +86,9 @@ let traceStarted: boolean = false;
 // Need to save off user ID for default trace file naming.
 let curConnectionUserId: string = "";
 
+// Tells us if trace status bar item is hidden via showAllIconsInStatusBar client options config.
+let hidingTraceStatusBarItem: boolean = false;
+
 
 export async function activate(context: vscode.ExtensionContext) {
 
@@ -405,9 +408,22 @@ export async function activate(context: vscode.ExtensionContext) {
 				// Start/stop trace.
 				traceStarted = !traceStarted;
 				if (traceStarted) {
+
 					traceStatusBarItem.text = STATUS_BAR_STOP_TRACE_STR;
+
+					// Regardless of showAllIconsInStatusBar client options config, we want to show the stop trace icon so that the user knows that a trace is running.
+					if (hidingTraceStatusBarItem) {
+						traceStatusBarItem.show();
+					}
+
+
 				} else {
 					traceStatusBarItem.text = STATUS_BAR_START_TRACE_STR;
+
+					// If hiding trace status bar icon via showAllIconsInStatusBar client options config, make sure we hide now.
+					if (hidingTraceStatusBarItem) {
+						traceStatusBarItem.hide();
+					}
 				}
 
 				var traceRes = await vscode.commands.executeCommand(LanguageServerCommands.TRACE, traceStarted, fileName, mode);
@@ -422,6 +438,11 @@ export async function activate(context: vscode.ExtensionContext) {
 					if (traceStarted) {
 						traceStarted = false;
 						traceStatusBarItem.text = STATUS_BAR_START_TRACE_STR;
+
+						// If hiding trace status bar icon via showAllIconsInStatusBar client options config, make sure we hide now.
+						if (hidingTraceStatusBarItem) {
+							traceStatusBarItem.hide();
+						}
 					}
 				} else {
 
@@ -854,12 +875,16 @@ export async function activate(context: vscode.ExtensionContext) {
 					commandLookupStatusBarItem.show();
 					traceStatusBarItem.show();
 					openTraceOutlineStatusBarItem.show();
+
+					hidingTraceStatusBarItem = false;
 				} else {
 					executeStatusBarItem.hide();
 					executeSelectionStatusBarItem.hide();
 					commandLookupStatusBarItem.hide();
 					traceStatusBarItem.hide();
 					openTraceOutlineStatusBarItem.hide();
+
+					hidingTraceStatusBarItem = true;
 				}
 			}
 		}
@@ -911,12 +936,16 @@ export async function activate(context: vscode.ExtensionContext) {
 			commandLookupStatusBarItem.show();
 			traceStatusBarItem.show();
 			openTraceOutlineStatusBarItem.show();
+
+			hidingTraceStatusBarItem = false;
 		} else {
 			executeStatusBarItem.hide();
 			executeSelectionStatusBarItem.hide();
 			commandLookupStatusBarItem.hide();
 			traceStatusBarItem.hide();
 			openTraceOutlineStatusBarItem.hide();
+
+			hidingTraceStatusBarItem = true;
 		}
 	}
 
