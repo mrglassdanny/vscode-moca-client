@@ -262,7 +262,7 @@
 						"showAllIconsInStatusBar": {
 							"type": "boolean",
 							"default": true,
-							"description": "If false, only MOCA connection icon will show in status bar.\nThis can be useful if user does not want MOCA to be the focus of the vscode window."
+							"description": "If false, only MOCA connection icon will show in status bar.\nThis can be useful if user does not want MOCA client to be the focus of the vscode window."
 						}
 					}
 				},
