@@ -1,6 +1,9 @@
 # Changelog
 https://semver.org/
 
+## 1.5.26 (December ??, 2020)
+* MOCA language server update -- https://github.com/mrglassdanny/moca-language-server/blob/master/CHANGELOG.md
+
 ## 1.5.25 (December 21, 2020)
 * MOCA language server update -- https://github.com/mrglassdanny/moca-language-server/blob/master/CHANGELOG.md
 

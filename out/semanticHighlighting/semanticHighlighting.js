@@ -427,6 +427,10 @@ class Highlighter {
                 fontStyle: 'italic'
             }
         });
+        this.traceOutlineUnimportantInstructionDecoration = vscode.window.createTextEditorDecorationType({
+            isWholeLine: false,
+            opacity: ".50"
+        });
         this.decorationTypes = this.scopeLookupTable.map((scopes) => {
             switch (scopes[0]) {
                 case "moca.commandstream.end":
@@ -469,6 +473,8 @@ class Highlighter {
                     return this.traceOutlineInstructionPrefixDecoration;
                 case "moca.traceoutline.instructionsuffix":
                     return this.traceOutlineInstructionSuffixDecoration;
+                case "moca.traceoutline.unimportantinstruction":
+                    return this.traceOutlineUnimportantInstructionDecoration;
                 default: // Let theme matcher do it's thing.
                     const options = {
                         // If there exists no rule for this scope the matcher returns an empty

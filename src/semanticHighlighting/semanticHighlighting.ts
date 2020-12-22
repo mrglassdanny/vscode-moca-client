@@ -196,6 +196,7 @@ export class Highlighter {
     private traceOutlineJavaMethodDecoration: vscode.TextEditorDecorationType;
     private traceOutlineInstructionPrefixDecoration: vscode.TextEditorDecorationType;
     private traceOutlineInstructionSuffixDecoration: vscode.TextEditorDecorationType;
+    private traceOutlineUnimportantInstructionDecoration: vscode.TextEditorDecorationType;
 
 
     // Maps uris with currently open TextDocuments to the current highlightings.
@@ -594,6 +595,13 @@ export class Highlighter {
             }
         );
 
+        this.traceOutlineUnimportantInstructionDecoration = vscode.window.createTextEditorDecorationType(
+            {
+                isWholeLine: false,
+                opacity: ".50"
+            }
+        );
+
 
         this.decorationTypes = this.scopeLookupTable.map((scopes) => {
 
@@ -638,6 +646,8 @@ export class Highlighter {
                     return this.traceOutlineInstructionPrefixDecoration;
                 case "moca.traceoutline.instructionsuffix":
                     return this.traceOutlineInstructionSuffixDecoration;
+                case "moca.traceoutline.unimportantinstruction":
+                    return this.traceOutlineUnimportantInstructionDecoration;
                 default: // Let theme matcher do it's thing.
                     const options: vscode.DecorationRenderOptions = {
                         // If there exists no rule for this scope the matcher returns an empty
