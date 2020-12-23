@@ -745,14 +745,8 @@ export async function activate(context: vscode.ExtensionContext) {
 		var traceOutlinerConfigJsonObj = JSON.parse(JSON.stringify(traceOutlinerConfigObj));
 
 		var useLogicalIndentStrategy = traceOutlinerConfigJsonObj.useLogicalIndentStrategy;
-		if (useLogicalIndentStrategy === undefined) {
-			useLogicalIndentStrategy = true;
-		}
-
 		var minimumExecutionTime = traceOutlinerConfigJsonObj.minimumExecutionTime;
-		if (!minimumExecutionTime) {
-			minimumExecutionTime = 1.0;
-		}
+		var viewRelativeLog = traceOutlinerConfigJsonObj.viewRelativeLog;
 
 		if (traceTypeRes === "Remote") {
 
@@ -785,7 +779,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 					// Now that we have a remote trace file name, we can request outline from lang server.
 					// NOTE: get rid of uri string encoding to match lang server format.
-					traceResponseRemoteRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedRemote, uri.toString(true), true, useLogicalIndentStrategy, minimumExecutionTime);
+					traceResponseRemoteRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedRemote, uri.toString(true), true, useLogicalIndentStrategy, minimumExecutionTime, viewRelativeLog);
 					if (traceResponseRemoteRes) {
 						traceResponseRemoteObj = JSON.parse(JSON.stringify(traceResponseRemoteRes));
 
@@ -833,7 +827,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 					// Now that we have a local trace file name, we can request outline from lang server.
 					// NOTE: get rid of uri string encoding to match lang server format.
-					var traceResponseLocalRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedLocalStr, uri.toString(true), false, useLogicalIndentStrategy, minimumExecutionTime);
+					var traceResponseLocalRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedLocalStr, uri.toString(true), false, useLogicalIndentStrategy, minimumExecutionTime, viewRelativeLog);
 
 					if (traceResponseLocalRes) {
 						var traceResponseLocalObj = JSON.parse(JSON.stringify(traceResponseLocalRes));
