@@ -746,7 +746,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
 		var useLogicalIndentStrategy = traceOutlinerConfigJsonObj.useLogicalIndentStrategy;
 		var minimumExecutionTime = traceOutlinerConfigJsonObj.minimumExecutionTime;
-		var viewRelativeLog = traceOutlinerConfigJsonObj.viewRelativeLog;
 
 		if (traceTypeRes === "Remote") {
 
@@ -779,7 +778,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 					// Now that we have a remote trace file name, we can request outline from lang server.
 					// NOTE: get rid of uri string encoding to match lang server format.
-					traceResponseRemoteRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedRemote, uri.toString(true), true, useLogicalIndentStrategy, minimumExecutionTime, viewRelativeLog);
+					traceResponseRemoteRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedRemote, uri.toString(true), true, useLogicalIndentStrategy, minimumExecutionTime);
 					if (traceResponseRemoteRes) {
 						traceResponseRemoteObj = JSON.parse(JSON.stringify(traceResponseRemoteRes));
 
@@ -827,7 +826,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 					// Now that we have a local trace file name, we can request outline from lang server.
 					// NOTE: get rid of uri string encoding to match lang server format.
-					var traceResponseLocalRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedLocalStr, uri.toString(true), false, useLogicalIndentStrategy, minimumExecutionTime, viewRelativeLog);
+					var traceResponseLocalRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedLocalStr, uri.toString(true), false, useLogicalIndentStrategy, minimumExecutionTime);
 
 					if (traceResponseLocalRes) {
 						var traceResponseLocalObj = JSON.parse(JSON.stringify(traceResponseLocalRes));

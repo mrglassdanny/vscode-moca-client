@@ -340,8 +340,7 @@
 					"type": "object",
 					"default": {
 						"useLogicalIndentStrategy": true,
-						"minimumExecutionTime": 1,
-						"viewRelativeLog": true
+						"minimumExecutionTime": 1
 					},
 					"description": "MOCA Trace Outliner Configuration",
 					"properties": {
@@ -354,11 +353,6 @@
 							"type": "number",
 							"default": 1,
 							"description": "Any instruction whose execution time is greater than or equal to this number will be decorated(bold text & orange border) to show it."
-						},
-						"viewRelativeLog": {
-							"type": "boolean",
-							"default": true,
-							"description": "View log file relative to current thread/session(1 thread/session) or as absolute(all threads/sessions)."
 						}
 					}
 				}

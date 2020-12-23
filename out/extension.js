@@ -638,7 +638,6 @@ function activate(context) {
             var traceOutlinerConfigJsonObj = JSON.parse(JSON.stringify(traceOutlinerConfigObj));
             var useLogicalIndentStrategy = traceOutlinerConfigJsonObj.useLogicalIndentStrategy;
             var minimumExecutionTime = traceOutlinerConfigJsonObj.minimumExecutionTime;
-            var viewRelativeLog = traceOutlinerConfigJsonObj.viewRelativeLog;
             if (traceTypeRes === "Remote") {
                 // Sending empty args so that lang server knows to send us back a list of remote trace files.
                 var traceResponseRemoteRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE);
@@ -664,7 +663,7 @@ function activate(context) {
                         var uri = vscode.Uri.file(context.globalStoragePath + "\\trace\\" + traceFileNameSelectedRemote.replace('.log', '') + ".moca.traceoutline");
                         // Now that we have a remote trace file name, we can request outline from lang server.
                         // NOTE: get rid of uri string encoding to match lang server format.
-                        traceResponseRemoteRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedRemote, uri.toString(true), true, useLogicalIndentStrategy, minimumExecutionTime, viewRelativeLog);
+                        traceResponseRemoteRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedRemote, uri.toString(true), true, useLogicalIndentStrategy, minimumExecutionTime);
                         if (traceResponseRemoteRes) {
                             traceResponseRemoteObj = JSON.parse(JSON.stringify(traceResponseRemoteRes));
                             // Make sure to check for exception.
@@ -707,7 +706,7 @@ function activate(context) {
                         var uri = vscode.Uri.file(context.globalStoragePath + "\\trace\\" + traceFileNameSelectedShortenedLocalStr.replace('.log', '') + ".moca.traceoutline");
                         // Now that we have a local trace file name, we can request outline from lang server.
                         // NOTE: get rid of uri string encoding to match lang server format.
-                        var traceResponseLocalRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedLocalStr, uri.toString(true), false, useLogicalIndentStrategy, minimumExecutionTime, viewRelativeLog);
+                        var traceResponseLocalRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedLocalStr, uri.toString(true), false, useLogicalIndentStrategy, minimumExecutionTime);
                         if (traceResponseLocalRes) {
                             var traceResponseLocalObj = JSON.parse(JSON.stringify(traceResponseLocalRes));
                             // Make sure to check for exception.
