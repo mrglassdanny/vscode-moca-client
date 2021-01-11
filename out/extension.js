@@ -97,6 +97,7 @@ function activate(context) {
         // Make sure other paths exist.
         vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\command-lookup"));
         vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\trace"));
+        vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\references"));
         // Directories are there -- let's purge existing files.
         var commandLookupDirRes = yield vscode.workspace.fs.readDirectory(vscode.Uri.file(context.globalStoragePath + "\\command-lookup"));
         for (var i = 0; i < commandLookupDirRes.length; i++) {
@@ -105,6 +106,10 @@ function activate(context) {
         var traceDirRes = yield vscode.workspace.fs.readDirectory(vscode.Uri.file(context.globalStoragePath + "\\trace"));
         for (var i = 0; i < traceDirRes.length; i++) {
             vscode.workspace.fs.delete(vscode.Uri.file(context.globalStoragePath + "\\trace\\" + traceDirRes[i][0]));
+        }
+        var referencesDirRes = yield vscode.workspace.fs.readDirectory(vscode.Uri.file(context.globalStoragePath + "\\references"));
+        for (var i = 0; i < referencesDirRes.length; i++) {
+            vscode.workspace.fs.delete(vscode.Uri.file(context.globalStoragePath + "\\references\\" + referencesDirRes[i][0]));
         }
         // Start language server on extension activate.
         yield startMocaLanguageServer();
@@ -834,7 +839,8 @@ function startMocaLanguageServer() {
                     protocol2Code: value => vscode.Uri.parse(value)
                 }
             };
-            let args = ["-jar", path.resolve(globalExtensionContext.extensionPath, "bin", MOCA_LANGUAGE_SERVER)];
+            //let args = ["-jar", path.resolve(globalExtensionContext.extensionPath, "bin", MOCA_LANGUAGE_SERVER)];
+            let args = ["-jar", path.resolve("C:\\dev\\moca-language-server\\build", "libs", MOCA_LANGUAGE_SERVER)];
             let executable = {
                 command: javaPath,
                 args: args
