@@ -43,7 +43,7 @@ var LanguageClientCommands;
     LanguageClientCommands.LOAD_CACHE = "moca.loadCache";
     LanguageClientCommands.EXECUTE = "moca.execute";
     LanguageClientCommands.EXECUTE_SELECTION = "moca.executeSelection";
-    LanguageClientCommands.EXECUTE_TO_EXCEL = "moca.executeToExcel";
+    LanguageClientCommands.EXECUTE_TO_CSV = "moca.executeToCSV";
     LanguageClientCommands.TRACE = "moca.trace";
     LanguageClientCommands.COMMAND_LOOKUP = "moca.commandLookup";
     LanguageClientCommands.AUTO_EXECUTE = "moca.autoExecute";
@@ -56,7 +56,7 @@ var LanguageServerCommands;
     LanguageServerCommands.CONNECT = "mocalanguageserver.connect";
     LanguageServerCommands.LOAD_CACHE = "mocalanguageserver.loadCache";
     LanguageServerCommands.EXECUTE = "mocalanguageserver.execute";
-    LanguageServerCommands.EXECUTE_TO_EXCEL = "mocalanguageserver.executeToExcel";
+    LanguageServerCommands.EXECUTE_TO_CSV = "mocalanguageserver.executeToCSV";
     LanguageServerCommands.TRACE = "mocalanguageserver.trace";
     LanguageServerCommands.COMMAND_LOOKUP = "mocalanguageserver.commandLookup";
     LanguageServerCommands.SET_LANGUAGE_SERVER_OPTIONS = "mocalanguageserver.setLanguageServerOptions";
@@ -68,7 +68,7 @@ const STATUS_BAR_PRIORITY_OFFSET = 562;
 var connectionStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE + STATUS_BAR_PRIORITY_OFFSET);
 var executeStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 1 + STATUS_BAR_PRIORITY_OFFSET);
 var executeSelectionStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 2 + STATUS_BAR_PRIORITY_OFFSET);
-var executeToExcelStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 3 + STATUS_BAR_PRIORITY_OFFSET);
+var executeToCSVStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 3 + STATUS_BAR_PRIORITY_OFFSET);
 var commandLookupStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 4 + STATUS_BAR_PRIORITY_OFFSET);
 var traceStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 5 + STATUS_BAR_PRIORITY_OFFSET);
 var openTraceOutlineStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 6 + STATUS_BAR_PRIORITY_OFFSET);
@@ -337,7 +337,7 @@ function activate(context) {
                 }
             }
         })));
-        context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.EXECUTE_TO_EXCEL, () => __awaiter(this, void 0, void 0, function* () {
+        context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.EXECUTE_TO_CSV, () => __awaiter(this, void 0, void 0, function* () {
             let editor = vscode.window.activeTextEditor;
             if (editor) {
                 var curFileName = editor.document.fileName;
@@ -350,14 +350,14 @@ function activate(context) {
                 }, (progress, token) => __awaiter(this, void 0, void 0, function* () {
                     progress.report({
                         increment: Infinity,
-                        message: "Executing To Excel " + curFileNameShortened
+                        message: "Executing To CSV " + curFileNameShortened
                     });
                     // Purpose of this is to indicate that cancellation was requested down below.
                     var cancellationRequested = false;
                     token.onCancellationRequested(() => {
                         cancellationRequested = true;
                     });
-                    var res = yield vscode.commands.executeCommand(LanguageServerCommands.EXECUTE_TO_EXCEL, script, curFileNameShortened, false);
+                    var res = yield vscode.commands.executeCommand(LanguageServerCommands.EXECUTE_TO_CSV, script, curFileNameShortened, curFileName, false);
                     // If cancellation requested, skip this part.
                     if (!cancellationRequested) {
                         var mocaResults = new mocaResults_1.MocaResults(res);
@@ -370,12 +370,17 @@ function activate(context) {
                             if (!cancellationRequested) {
                                 if (approvalOptionRes === UNSAFE_CODE_APPROVAL_OPTION_YES) {
                                     // User says yes; run script!
-                                    yield vscode.commands.executeCommand(LanguageServerCommands.EXECUTE_TO_EXCEL, script, curFileNameShortened, true);
+                                    var approvedRes = yield vscode.commands.executeCommand(LanguageServerCommands.EXECUTE_TO_CSV, script, curFileNameShortened, curFileName, true);
+                                    var approvedMocaResults = new mocaResults_1.MocaResults(approvedRes);
                                     // Lang server is taking care of loading results.
+                                    if (approvedMocaResults.msg && approvedMocaResults.msg.length > 0) {
+                                        vscode.window.showErrorMessage(curFileNameShortened + ": " + approvedMocaResults.msg);
+                                    }
                                 }
                             }
                         }
                         else {
+                            // Lang server is taking care of loading results.
                             if (mocaResults.msg && mocaResults.msg.length > 0) {
                                 vscode.window.showErrorMessage(curFileNameShortened + ": " + mocaResults.msg);
                             }
@@ -793,7 +798,7 @@ function activate(context) {
                     if (clientOptionsConfigObj["showAllIconsInStatusBar"] === true) {
                         executeStatusBarItem.show();
                         executeSelectionStatusBarItem.show();
-                        executeToExcelStatusBarItem.show();
+                        executeToCSVStatusBarItem.show();
                         commandLookupStatusBarItem.show();
                         traceStatusBarItem.show();
                         openTraceOutlineStatusBarItem.show();
@@ -802,7 +807,7 @@ function activate(context) {
                     else {
                         executeStatusBarItem.hide();
                         executeSelectionStatusBarItem.hide();
-                        executeToExcelStatusBarItem.hide();
+                        executeToCSVStatusBarItem.hide();
                         commandLookupStatusBarItem.hide();
                         traceStatusBarItem.hide();
                         openTraceOutlineStatusBarItem.hide();
@@ -822,12 +827,12 @@ function activate(context) {
         executeStatusBarItem.text = "$(play)";
         executeStatusBarItem.command = LanguageClientCommands.EXECUTE;
         executeStatusBarItem.tooltip = "Execute (Ctrl+Enter)";
-        executeSelectionStatusBarItem.text = "$(selection)";
+        executeSelectionStatusBarItem.text = "$(play)$(selection)";
         executeSelectionStatusBarItem.command = LanguageClientCommands.EXECUTE_SELECTION;
         executeSelectionStatusBarItem.tooltip = "Execute Selection (Ctrl+Shift+Enter)";
-        executeToExcelStatusBarItem.text = "$(export)";
-        executeToExcelStatusBarItem.command = LanguageClientCommands.EXECUTE_TO_EXCEL;
-        executeToExcelStatusBarItem.tooltip = "Execute To Excel";
+        executeToCSVStatusBarItem.text = "$(play)CSV";
+        executeToCSVStatusBarItem.command = LanguageClientCommands.EXECUTE_TO_CSV;
+        executeToCSVStatusBarItem.tooltip = "Execute To CSV";
         commandLookupStatusBarItem.text = "$(file-code)";
         commandLookupStatusBarItem.command = LanguageClientCommands.COMMAND_LOOKUP;
         commandLookupStatusBarItem.tooltip = "Command Lookup";
@@ -846,7 +851,7 @@ function activate(context) {
             if (clientOptionsConfigObj["showAllIconsInStatusBar"] === true) {
                 executeStatusBarItem.show();
                 executeSelectionStatusBarItem.show();
-                executeToExcelStatusBarItem.show();
+                executeToCSVStatusBarItem.show();
                 commandLookupStatusBarItem.show();
                 traceStatusBarItem.show();
                 openTraceOutlineStatusBarItem.show();
@@ -855,7 +860,7 @@ function activate(context) {
             else {
                 executeStatusBarItem.hide();
                 executeSelectionStatusBarItem.hide();
-                executeToExcelStatusBarItem.hide();
+                executeToCSVStatusBarItem.hide();
                 commandLookupStatusBarItem.hide();
                 traceStatusBarItem.hide();
                 openTraceOutlineStatusBarItem.hide();
@@ -865,7 +870,7 @@ function activate(context) {
         context.subscriptions.push(connectionStatusBarItem);
         context.subscriptions.push(executeStatusBarItem);
         context.subscriptions.push(executeSelectionStatusBarItem);
-        context.subscriptions.push(executeToExcelStatusBarItem);
+        context.subscriptions.push(executeToCSVStatusBarItem);
         context.subscriptions.push(commandLookupStatusBarItem);
         context.subscriptions.push(traceStatusBarItem);
         context.subscriptions.push(openTraceOutlineStatusBarItem);
