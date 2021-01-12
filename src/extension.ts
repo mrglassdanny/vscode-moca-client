@@ -9,7 +9,7 @@ import { MocaCommand, MocaTrigger } from './mocaCommandLookup/mocaCommandLookup'
 import { performance } from 'perf_hooks';
 
 // Language server constants.
-const MOCA_LANGUAGE_SERVER_VERSION = "1.7.19";
+const MOCA_LANGUAGE_SERVER_VERSION = "1.8.19";
 const MOCA_LANGUAGE_SERVER = "moca-language-server-" + MOCA_LANGUAGE_SERVER_VERSION + "-all.jar";
 const MOCA_LANGUAGE_SERVER_INITIALIZING_MESSAGE = "MOCA: Initializing language server";
 const MOCA_LANGUAGE_SERVER_ERR_STARTUP = "The MOCA extension failed to start";
@@ -36,6 +36,7 @@ export namespace LanguageClientCommands {
 	export const LOAD_CACHE = "moca.loadCache";
 	export const EXECUTE = "moca.execute";
 	export const EXECUTE_SELECTION = "moca.executeSelection";
+	export const EXECUTE_TO_EXCEL = "moca.executeToExcel";
 	export const TRACE = "moca.trace";
 	export const COMMAND_LOOKUP = "moca.commandLookup";
 	export const AUTO_EXECUTE = "moca.autoExecute";
@@ -48,6 +49,7 @@ export namespace LanguageServerCommands {
 	export const CONNECT = "mocalanguageserver.connect";
 	export const LOAD_CACHE = "mocalanguageserver.loadCache";
 	export const EXECUTE = "mocalanguageserver.execute";
+	export const EXECUTE_TO_EXCEL = "mocalanguageserver.executeToExcel";
 	export const TRACE = "mocalanguageserver.trace";
 	export const COMMAND_LOOKUP = "mocalanguageserver.commandLookup";
 	export const SET_LANGUAGE_SERVER_OPTIONS = "mocalanguageserver.setLanguageServerOptions";
@@ -60,9 +62,10 @@ const STATUS_BAR_PRIORITY_OFFSET = 562;
 var connectionStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE + STATUS_BAR_PRIORITY_OFFSET);
 var executeStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 1 + STATUS_BAR_PRIORITY_OFFSET);
 var executeSelectionStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 2 + STATUS_BAR_PRIORITY_OFFSET);
-var commandLookupStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 3 + STATUS_BAR_PRIORITY_OFFSET);
-var traceStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 4 + STATUS_BAR_PRIORITY_OFFSET);
-var openTraceOutlineStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 5 + STATUS_BAR_PRIORITY_OFFSET);
+var executeToExcelStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 3 + STATUS_BAR_PRIORITY_OFFSET);
+var commandLookupStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 4 + STATUS_BAR_PRIORITY_OFFSET);
+var traceStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 5 + STATUS_BAR_PRIORITY_OFFSET);
+var openTraceOutlineStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 6 + STATUS_BAR_PRIORITY_OFFSET);
 
 // Status bar constants.
 const STATUS_BAR_NOT_CONNECTED_STR = "MOCA: $(circle-slash)";
@@ -379,6 +382,63 @@ export async function activate(context: vscode.ExtensionContext) {
 					}
 				});
 			}
+		}
+	}));
+
+	context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.EXECUTE_TO_EXCEL, async () => {
+
+		let editor = vscode.window.activeTextEditor;
+
+		if (editor) {
+
+			var curFileName = editor.document.fileName;
+			var curFileNameShortened = curFileName.substring(curFileName.lastIndexOf('\\') + 1, curFileName.length);
+			let script = editor.document.getText();
+
+			vscode.window.withProgress({
+				location: vscode.ProgressLocation.Notification,
+				title: "MOCA",
+				cancellable: true
+			}, async (progress, token) => {
+				progress.report({
+					increment: Infinity,
+					message: "Executing To Excel " + curFileNameShortened
+				});
+
+				// Purpose of this is to indicate that cancellation was requested down below.
+				var cancellationRequested = false;
+
+				token.onCancellationRequested(() => {
+					cancellationRequested = true;
+				});
+
+
+				var res = await vscode.commands.executeCommand(LanguageServerCommands.EXECUTE_TO_EXCEL, script, curFileNameShortened, false);
+				// If cancellation requested, skip this part.
+				if (!cancellationRequested) {
+					var mocaResults = new MocaResults(res);
+
+					// If lang server says we need approval before executing(due to unsafe code config on connection), we need to ask the user if they truly want to run script.
+					// NOTE: if cancellation is requested before we get here, lang server does not run unsafe scripts in configured envs by default -- assuming that approval is required.
+					if (mocaResults.needsApprovalToExecute) {
+						var approvalOptionRes = await vscode.window.showWarningMessage(UNSAFE_CODE_APPROVAL_PROMPT, UNSAFE_CODE_APPROVAL_OPTION_YES, UNSAFE_CODE_APPROVAL_OPTION_NO);
+						// Check again if cancellation is requested.
+						// If so, just exit and do not worry about approval option result.
+						if (!cancellationRequested) {
+							if (approvalOptionRes === UNSAFE_CODE_APPROVAL_OPTION_YES) {
+								// User says yes; run script!
+								await vscode.commands.executeCommand(LanguageServerCommands.EXECUTE_TO_EXCEL, script, curFileNameShortened, true);
+
+								// Lang server is taking care of loading results.
+							}
+						}
+					} else {
+						if (mocaResults.msg && mocaResults.msg.length > 0) {
+							vscode.window.showErrorMessage(curFileNameShortened + ": " + mocaResults.msg);
+						}
+					}
+				}
+			});
 		}
 	}));
 
@@ -870,6 +930,7 @@ export async function activate(context: vscode.ExtensionContext) {
 				if (clientOptionsConfigObj["showAllIconsInStatusBar"] === true) {
 					executeStatusBarItem.show();
 					executeSelectionStatusBarItem.show();
+					executeToExcelStatusBarItem.show();
 					commandLookupStatusBarItem.show();
 					traceStatusBarItem.show();
 					openTraceOutlineStatusBarItem.show();
@@ -878,6 +939,7 @@ export async function activate(context: vscode.ExtensionContext) {
 				} else {
 					executeStatusBarItem.hide();
 					executeSelectionStatusBarItem.hide();
+					executeToExcelStatusBarItem.hide();
 					commandLookupStatusBarItem.hide();
 					traceStatusBarItem.hide();
 					openTraceOutlineStatusBarItem.hide();
@@ -909,6 +971,10 @@ export async function activate(context: vscode.ExtensionContext) {
 	executeSelectionStatusBarItem.command = LanguageClientCommands.EXECUTE_SELECTION;
 	executeSelectionStatusBarItem.tooltip = "Execute Selection (Ctrl+Shift+Enter)";
 
+	executeToExcelStatusBarItem.text = "$(export)";
+	executeToExcelStatusBarItem.command = LanguageClientCommands.EXECUTE_TO_EXCEL;
+	executeToExcelStatusBarItem.tooltip = "Execute To Excel";
+
 	commandLookupStatusBarItem.text = "$(file-code)";
 	commandLookupStatusBarItem.command = LanguageClientCommands.COMMAND_LOOKUP;
 	commandLookupStatusBarItem.tooltip = "Command Lookup";
@@ -931,6 +997,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		if (clientOptionsConfigObj["showAllIconsInStatusBar"] === true) {
 			executeStatusBarItem.show();
 			executeSelectionStatusBarItem.show();
+			executeToExcelStatusBarItem.show();
 			commandLookupStatusBarItem.show();
 			traceStatusBarItem.show();
 			openTraceOutlineStatusBarItem.show();
@@ -939,6 +1006,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		} else {
 			executeStatusBarItem.hide();
 			executeSelectionStatusBarItem.hide();
+			executeToExcelStatusBarItem.hide();
 			commandLookupStatusBarItem.hide();
 			traceStatusBarItem.hide();
 			openTraceOutlineStatusBarItem.hide();
@@ -953,6 +1021,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(connectionStatusBarItem);
 	context.subscriptions.push(executeStatusBarItem);
 	context.subscriptions.push(executeSelectionStatusBarItem);
+	context.subscriptions.push(executeToExcelStatusBarItem);
 	context.subscriptions.push(commandLookupStatusBarItem);
 	context.subscriptions.push(traceStatusBarItem);
 	context.subscriptions.push(openTraceOutlineStatusBarItem);

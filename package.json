@@ -50,6 +50,11 @@
 				"category": "MOCA"
 			},
 			{
+				"command": "moca.executeToExcel",
+				"title": "Execute MOCA To Excel",
+				"category": "MOCA"
+			},
+			{
 				"command": "moca.trace",
 				"title": "MOCA Trace",
 				"category": "MOCA"
