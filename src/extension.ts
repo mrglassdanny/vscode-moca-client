@@ -69,7 +69,7 @@ var openTraceOutlineStatusBarItem = vscode.window.createStatusBarItem(vscode.Sta
 
 // Status bar constants.
 const STATUS_BAR_NOT_CONNECTED_STR = "MOCA: $(circle-slash)";
-const STATUS_BAR_CONNECTED_PREFIX_STR = "MOCA: $(pass) ";
+const STATUS_BAR_CONNECTED_PREFIX_STR = "MOCA: $(verified) ";
 const STATUS_BAR_START_TRACE_STR = "$(debug-alt) Start Trace";
 const STATUS_BAR_STOP_TRACE_STR = "$(debug-disconnect) Stop Trace";
 
