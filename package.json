@@ -56,7 +56,7 @@
 			},
 			{
 				"command": "moca.executeSelectionToCSV",
-				"title": "Execute Selection MOCA Script To CSV",
+				"title": "Execute MOCA Selection To CSV",
 				"category": "MOCA"
 			},
 			{
