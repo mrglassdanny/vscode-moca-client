@@ -255,6 +255,8 @@ export class ResultViewPanel {
 
                 // '\' not showing up correctly. Go ahead and fix here.
                 value = value.replace(/\\/g, "\\\\");
+                // '${val}' will mess things up. Go ahead and fix here.
+                value = value.replace(/\${/g, "\\${");
 
                 var len = value.length;
                 if (rowIdx === 0) {
@@ -264,7 +266,6 @@ export class ResultViewPanel {
                         this.curColWidths[colIdx] = len;
                     }
                 }
-
 
                 if (colIdx == 0 && colIdx == colCount - 1) {
                     strArr.push("[`" + value + "`]");

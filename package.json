@@ -3,7 +3,7 @@
 	"icon": "resources/local-syntax-logo.png",
 	"displayName": "MOCA Client",
 	"description": "MOCA Client and Local Syntax programming support for Visual Studio Code",
-	"version": "1.5.26",
+	"version": "1.6.26",
 	"author": {
 		"name": "Danny Glass",
 		"email": "mrglassdanny@gmail.com",
@@ -50,6 +50,16 @@
 				"category": "MOCA"
 			},
 			{
+				"command": "moca.executeToCSV",
+				"title": "Execute MOCA Script To CSV",
+				"category": "MOCA"
+			},
+			{
+				"command": "moca.executeSelectionToCSV",
+				"title": "Execute Selection MOCA Script To CSV",
+				"category": "MOCA"
+			},
+			{
 				"command": "moca.trace",
 				"title": "MOCA Trace",
 				"category": "MOCA"
@@ -79,6 +89,16 @@
 			{
 				"command": "moca.executeSelection",
 				"key": "ctrl+shift+enter",
+				"when": "editorTextFocus && editorLangId == moca && editorHasSelection"
+			},
+			{
+				"command": "moca.executeToCSV",
+				"key": "ctrl+alt+enter",
+				"when": "editorTextFocus && editorLangId == moca"
+			},
+			{
+				"command": "moca.executeSelectionToCSV",
+				"key": "ctrl+shift+alt+enter",
 				"when": "editorTextFocus && editorLangId == moca && editorHasSelection"
 			}
 		],

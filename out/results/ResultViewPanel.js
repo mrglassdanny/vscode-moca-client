@@ -186,6 +186,8 @@ class ResultViewPanel {
                 }
                 // '\' not showing up correctly. Go ahead and fix here.
                 value = value.replace(/\\/g, "\\\\");
+                // '${val}' will mess things up. Go ahead and fix here.
+                value = value.replace(/\${/g, "\\${");
                 var len = value.length;
                 if (rowIdx === 0) {
                     this.curColWidths.push(len);

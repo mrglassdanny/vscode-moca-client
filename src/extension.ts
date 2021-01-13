@@ -9,7 +9,7 @@ import { MocaCommand, MocaTrigger } from './mocaCommandLookup/mocaCommandLookup'
 import { performance } from 'perf_hooks';
 
 // Language server constants.
-const MOCA_LANGUAGE_SERVER_VERSION = "1.7.19";
+const MOCA_LANGUAGE_SERVER_VERSION = "1.8.19";
 const MOCA_LANGUAGE_SERVER = "moca-language-server-" + MOCA_LANGUAGE_SERVER_VERSION + "-all.jar";
 const MOCA_LANGUAGE_SERVER_INITIALIZING_MESSAGE = "MOCA: Initializing language server";
 const MOCA_LANGUAGE_SERVER_ERR_STARTUP = "The MOCA extension failed to start";
@@ -36,6 +36,8 @@ export namespace LanguageClientCommands {
 	export const LOAD_CACHE = "moca.loadCache";
 	export const EXECUTE = "moca.execute";
 	export const EXECUTE_SELECTION = "moca.executeSelection";
+	export const EXECUTE_TO_CSV = "moca.executeToCSV";
+	export const EXECUTE_SELECTION_TO_CSV = "moca.executeSelectionToCSV";
 	export const TRACE = "moca.trace";
 	export const COMMAND_LOOKUP = "moca.commandLookup";
 	export const AUTO_EXECUTE = "moca.autoExecute";
@@ -48,6 +50,7 @@ export namespace LanguageServerCommands {
 	export const CONNECT = "mocalanguageserver.connect";
 	export const LOAD_CACHE = "mocalanguageserver.loadCache";
 	export const EXECUTE = "mocalanguageserver.execute";
+	export const EXECUTE_TO_CSV = "mocalanguageserver.executeToCSV";
 	export const TRACE = "mocalanguageserver.trace";
 	export const COMMAND_LOOKUP = "mocalanguageserver.commandLookup";
 	export const SET_LANGUAGE_SERVER_OPTIONS = "mocalanguageserver.setLanguageServerOptions";
@@ -60,9 +63,11 @@ const STATUS_BAR_PRIORITY_OFFSET = 562;
 var connectionStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE + STATUS_BAR_PRIORITY_OFFSET);
 var executeStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 1 + STATUS_BAR_PRIORITY_OFFSET);
 var executeSelectionStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 2 + STATUS_BAR_PRIORITY_OFFSET);
-var commandLookupStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 3 + STATUS_BAR_PRIORITY_OFFSET);
-var traceStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 4 + STATUS_BAR_PRIORITY_OFFSET);
-var openTraceOutlineStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 5 + STATUS_BAR_PRIORITY_OFFSET);
+var executeToCSVStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 3 + STATUS_BAR_PRIORITY_OFFSET);
+var executeSelectionToCSVStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 4 + STATUS_BAR_PRIORITY_OFFSET);
+var commandLookupStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 5 + STATUS_BAR_PRIORITY_OFFSET);
+var traceStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 6 + STATUS_BAR_PRIORITY_OFFSET);
+var openTraceOutlineStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 7 + STATUS_BAR_PRIORITY_OFFSET);
 
 // Status bar constants.
 const STATUS_BAR_NOT_CONNECTED_STR = "MOCA: $(circle-slash)";
@@ -101,6 +106,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	// Make sure other paths exist.
 	vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\command-lookup"));
 	vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\trace"));
+	vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath + "\\references"));
 
 	// Directories are there -- let's purge existing files.
 	var commandLookupDirRes = await vscode.workspace.fs.readDirectory(vscode.Uri.file(context.globalStoragePath + "\\command-lookup"));
@@ -110,6 +116,10 @@ export async function activate(context: vscode.ExtensionContext) {
 	var traceDirRes = await vscode.workspace.fs.readDirectory(vscode.Uri.file(context.globalStoragePath + "\\trace"));
 	for (var i = 0; i < traceDirRes.length; i++) {
 		vscode.workspace.fs.delete(vscode.Uri.file(context.globalStoragePath + "\\trace\\" + traceDirRes[i][0]));
+	}
+	var referencesDirRes = await vscode.workspace.fs.readDirectory(vscode.Uri.file(context.globalStoragePath + "\\references"));
+	for (var i = 0; i < referencesDirRes.length; i++) {
+		vscode.workspace.fs.delete(vscode.Uri.file(context.globalStoragePath + "\\references\\" + referencesDirRes[i][0]));
 	}
 
 
@@ -374,6 +384,147 @@ export async function activate(context: vscode.ExtensionContext) {
 					}
 				});
 			}
+		}
+	}));
+
+	context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.EXECUTE_TO_CSV, async () => {
+
+		let editor = vscode.window.activeTextEditor;
+
+		if (editor) {
+
+			var curFileName = editor.document.fileName;
+			var curFileNameShortened = curFileName.substring(curFileName.lastIndexOf('\\') + 1, curFileName.length);
+			let script = editor.document.getText();
+
+			vscode.window.withProgress({
+				location: vscode.ProgressLocation.Notification,
+				title: "MOCA",
+				cancellable: true
+			}, async (progress, token) => {
+				progress.report({
+					increment: Infinity,
+					message: "Executing To CSV " + curFileNameShortened
+				});
+
+				// Purpose of this is to indicate that cancellation was requested down below.
+				var cancellationRequested = false;
+
+				token.onCancellationRequested(() => {
+					cancellationRequested = true;
+				});
+
+
+				var res = await vscode.commands.executeCommand(LanguageServerCommands.EXECUTE_TO_CSV, script, curFileNameShortened, curFileName, false);
+				// If cancellation requested, skip this part.
+				if (!cancellationRequested) {
+					var mocaResults = new MocaResults(res);
+
+					// If lang server says we need approval before executing(due to unsafe code config on connection), we need to ask the user if they truly want to run script.
+					// NOTE: if cancellation is requested before we get here, lang server does not run unsafe scripts in configured envs by default -- assuming that approval is required.
+					if (mocaResults.needsApprovalToExecute) {
+						var approvalOptionRes = await vscode.window.showWarningMessage(UNSAFE_CODE_APPROVAL_PROMPT, UNSAFE_CODE_APPROVAL_OPTION_YES, UNSAFE_CODE_APPROVAL_OPTION_NO);
+						// Check again if cancellation is requested.
+						// If so, just exit and do not worry about approval option result.
+						if (!cancellationRequested) {
+							if (approvalOptionRes === UNSAFE_CODE_APPROVAL_OPTION_YES) {
+								// User says yes; run script!
+								var approvedRes = await vscode.commands.executeCommand(LanguageServerCommands.EXECUTE_TO_CSV, script, curFileNameShortened, curFileName, true);
+								var approvedMocaResults = new MocaResults(approvedRes);
+
+								// Lang server is taking care of loading results.
+
+								if (approvedMocaResults.msg && approvedMocaResults.msg.length > 0) {
+									vscode.window.showErrorMessage(curFileNameShortened + ": " + approvedMocaResults.msg);
+								}
+
+
+							}
+						}
+					} else {
+
+						// Lang server is taking care of loading results.
+
+						if (mocaResults.msg && mocaResults.msg.length > 0) {
+							vscode.window.showErrorMessage(curFileNameShortened + ": " + mocaResults.msg);
+						}
+					}
+				}
+			});
+		}
+	}));
+
+	context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.EXECUTE_SELECTION_TO_CSV, async () => {
+
+		let editor = vscode.window.activeTextEditor;
+
+		if (editor) {
+
+			var curFileName = editor.document.fileName;
+			var curFileNameShortened = curFileName.substring(curFileName.lastIndexOf('\\') + 1, curFileName.length);
+
+
+			var selection = editor.selection;
+			if (selection) {
+				var selectedScript = editor.document.getText(selection);
+
+				vscode.window.withProgress({
+					location: vscode.ProgressLocation.Notification,
+					title: "MOCA",
+					cancellable: true
+				}, async (progress, token) => {
+					progress.report({
+						increment: Infinity,
+						message: "Executing Selection To CSV " + curFileNameShortened
+					});
+
+					// Purpose of this is to indicate that cancellation was requested down below.
+					var cancellationRequested = false;
+
+					token.onCancellationRequested(() => {
+						cancellationRequested = true;
+					});
+
+
+					var res = await vscode.commands.executeCommand(LanguageServerCommands.EXECUTE_TO_CSV, selectedScript, curFileNameShortened, curFileName, false);
+					// If cancellation requested, skip this part.
+					if (!cancellationRequested) {
+						var mocaResults = new MocaResults(res);
+
+						// If lang server says we need approval before executing(due to unsafe code config on connection), we need to ask the user if they truly want to run script.
+						// NOTE: if cancellation is requested before we get here, lang server does not run unsafe scripts in configured envs by default -- assuming that approval is required.
+						if (mocaResults.needsApprovalToExecute) {
+							var approvalOptionRes = await vscode.window.showWarningMessage(UNSAFE_CODE_APPROVAL_PROMPT, UNSAFE_CODE_APPROVAL_OPTION_YES, UNSAFE_CODE_APPROVAL_OPTION_NO);
+							// Check again if cancellation is requested.
+							// If so, just exit and do not worry about approval option result.
+							if (!cancellationRequested) {
+								if (approvalOptionRes === UNSAFE_CODE_APPROVAL_OPTION_YES) {
+									// User says yes; run script!
+									var approvedRes = await vscode.commands.executeCommand(LanguageServerCommands.EXECUTE_TO_CSV, selectedScript, curFileNameShortened, curFileName, true);
+									var approvedMocaResults = new MocaResults(approvedRes);
+
+									// Lang server is taking care of loading results.
+
+									if (approvedMocaResults.msg && approvedMocaResults.msg.length > 0) {
+										vscode.window.showErrorMessage(curFileNameShortened + ": " + approvedMocaResults.msg);
+									}
+								}
+							}
+						} else {
+
+							// Lang server is taking care of loading results.
+
+							if (mocaResults.msg && mocaResults.msg.length > 0) {
+								vscode.window.showErrorMessage(curFileNameShortened + ": " + mocaResults.msg);
+							}
+						}
+					}
+				});
+
+
+			}
+
+
 		}
 	}));
 
@@ -865,6 +1016,8 @@ export async function activate(context: vscode.ExtensionContext) {
 				if (clientOptionsConfigObj["showAllIconsInStatusBar"] === true) {
 					executeStatusBarItem.show();
 					executeSelectionStatusBarItem.show();
+					executeToCSVStatusBarItem.show();
+					executeSelectionToCSVStatusBarItem.show();
 					commandLookupStatusBarItem.show();
 					traceStatusBarItem.show();
 					openTraceOutlineStatusBarItem.show();
@@ -873,6 +1026,8 @@ export async function activate(context: vscode.ExtensionContext) {
 				} else {
 					executeStatusBarItem.hide();
 					executeSelectionStatusBarItem.hide();
+					executeToCSVStatusBarItem.hide();
+					executeSelectionToCSVStatusBarItem.hide();
 					commandLookupStatusBarItem.hide();
 					traceStatusBarItem.hide();
 					openTraceOutlineStatusBarItem.hide();
@@ -900,9 +1055,17 @@ export async function activate(context: vscode.ExtensionContext) {
 	executeStatusBarItem.command = LanguageClientCommands.EXECUTE;
 	executeStatusBarItem.tooltip = "Execute (Ctrl+Enter)";
 
-	executeSelectionStatusBarItem.text = "$(selection)";
+	executeSelectionStatusBarItem.text = "$(play)$(selection)";
 	executeSelectionStatusBarItem.command = LanguageClientCommands.EXECUTE_SELECTION;
 	executeSelectionStatusBarItem.tooltip = "Execute Selection (Ctrl+Shift+Enter)";
+
+	executeToCSVStatusBarItem.text = "CSV";
+	executeToCSVStatusBarItem.command = LanguageClientCommands.EXECUTE_TO_CSV;
+	executeToCSVStatusBarItem.tooltip = "Execute To CSV (Ctrl+Alt+Enter)";
+
+	executeSelectionToCSVStatusBarItem.text = "$(selection)CSV";
+	executeSelectionToCSVStatusBarItem.command = LanguageClientCommands.EXECUTE_SELECTION_TO_CSV;
+	executeSelectionToCSVStatusBarItem.tooltip = "Execute Selection To CSV (Ctrl+Shift+Alt+Enter)";
 
 	commandLookupStatusBarItem.text = "$(file-code)";
 	commandLookupStatusBarItem.command = LanguageClientCommands.COMMAND_LOOKUP;
@@ -926,6 +1089,8 @@ export async function activate(context: vscode.ExtensionContext) {
 		if (clientOptionsConfigObj["showAllIconsInStatusBar"] === true) {
 			executeStatusBarItem.show();
 			executeSelectionStatusBarItem.show();
+			executeToCSVStatusBarItem.show();
+			executeSelectionToCSVStatusBarItem.show();
 			commandLookupStatusBarItem.show();
 			traceStatusBarItem.show();
 			openTraceOutlineStatusBarItem.show();
@@ -934,6 +1099,8 @@ export async function activate(context: vscode.ExtensionContext) {
 		} else {
 			executeStatusBarItem.hide();
 			executeSelectionStatusBarItem.hide();
+			executeToCSVStatusBarItem.hide();
+			executeSelectionToCSVStatusBarItem.hide();
 			commandLookupStatusBarItem.hide();
 			traceStatusBarItem.hide();
 			openTraceOutlineStatusBarItem.hide();
@@ -948,6 +1115,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(connectionStatusBarItem);
 	context.subscriptions.push(executeStatusBarItem);
 	context.subscriptions.push(executeSelectionStatusBarItem);
+	context.subscriptions.push(executeToCSVStatusBarItem);
+	context.subscriptions.push(executeSelectionToCSVStatusBarItem);
 	context.subscriptions.push(commandLookupStatusBarItem);
 	context.subscriptions.push(traceStatusBarItem);
 	context.subscriptions.push(openTraceOutlineStatusBarItem);
