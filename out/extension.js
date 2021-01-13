@@ -889,10 +889,10 @@ function activate(context) {
         executeSelectionStatusBarItem.text = "$(play)$(selection)";
         executeSelectionStatusBarItem.command = LanguageClientCommands.EXECUTE_SELECTION;
         executeSelectionStatusBarItem.tooltip = "Execute Selection (Ctrl+Shift+Enter)";
-        executeToCSVStatusBarItem.text = "$(play)CSV";
+        executeToCSVStatusBarItem.text = "CSV";
         executeToCSVStatusBarItem.command = LanguageClientCommands.EXECUTE_TO_CSV;
         executeToCSVStatusBarItem.tooltip = "Execute To CSV (Ctrl+Alt+Enter)";
-        executeSelectionToCSVStatusBarItem.text = "$(play)$(selection)CSV";
+        executeSelectionToCSVStatusBarItem.text = "$(selection)CSV";
         executeSelectionToCSVStatusBarItem.command = LanguageClientCommands.EXECUTE_SELECTION_TO_CSV;
         executeSelectionToCSVStatusBarItem.tooltip = "Execute Selection To CSV (Ctrl+Shift+Alt+Enter)";
         commandLookupStatusBarItem.text = "$(file-code)";
@@ -967,8 +967,7 @@ function startMocaLanguageServer() {
                     protocol2Code: value => vscode.Uri.parse(value)
                 }
             };
-            //let args = ["-jar", path.resolve(globalExtensionContext.extensionPath, "bin", MOCA_LANGUAGE_SERVER)];
-            let args = ["-jar", path.resolve("C:\\dev\\moca-language-server\\build", "libs", MOCA_LANGUAGE_SERVER)];
+            let args = ["-jar", path.resolve(globalExtensionContext.extensionPath, "bin", MOCA_LANGUAGE_SERVER)];
             let executable = {
                 command: javaPath,
                 args: args
