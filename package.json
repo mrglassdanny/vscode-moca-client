@@ -55,6 +55,11 @@
 				"category": "MOCA"
 			},
 			{
+				"command": "moca.executeSelectionToCSV",
+				"title": "Execute Selection MOCA Script To CSV",
+				"category": "MOCA"
+			},
+			{
 				"command": "moca.trace",
 				"title": "MOCA Trace",
 				"category": "MOCA"
@@ -84,6 +89,16 @@
 			{
 				"command": "moca.executeSelection",
 				"key": "ctrl+shift+enter",
+				"when": "editorTextFocus && editorLangId == moca && editorHasSelection"
+			},
+			{
+				"command": "moca.executeToCSV",
+				"key": "ctrl+alt+enter",
+				"when": "editorTextFocus && editorLangId == moca"
+			},
+			{
+				"command": "moca.executeSelectionToCSV",
+				"key": "ctrl+shift+alt+enter",
 				"when": "editorTextFocus && editorLangId == moca && editorHasSelection"
 			}
 		],

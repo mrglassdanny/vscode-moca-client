@@ -44,6 +44,7 @@ var LanguageClientCommands;
     LanguageClientCommands.EXECUTE = "moca.execute";
     LanguageClientCommands.EXECUTE_SELECTION = "moca.executeSelection";
     LanguageClientCommands.EXECUTE_TO_CSV = "moca.executeToCSV";
+    LanguageClientCommands.EXECUTE_SELECTION_TO_CSV = "moca.executeSelectionToCSV";
     LanguageClientCommands.TRACE = "moca.trace";
     LanguageClientCommands.COMMAND_LOOKUP = "moca.commandLookup";
     LanguageClientCommands.AUTO_EXECUTE = "moca.autoExecute";
@@ -69,9 +70,10 @@ var connectionStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBar
 var executeStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 1 + STATUS_BAR_PRIORITY_OFFSET);
 var executeSelectionStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 2 + STATUS_BAR_PRIORITY_OFFSET);
 var executeToCSVStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 3 + STATUS_BAR_PRIORITY_OFFSET);
-var commandLookupStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 4 + STATUS_BAR_PRIORITY_OFFSET);
-var traceStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 5 + STATUS_BAR_PRIORITY_OFFSET);
-var openTraceOutlineStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 6 + STATUS_BAR_PRIORITY_OFFSET);
+var executeSelectionToCSVStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 4 + STATUS_BAR_PRIORITY_OFFSET);
+var commandLookupStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 5 + STATUS_BAR_PRIORITY_OFFSET);
+var traceStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 6 + STATUS_BAR_PRIORITY_OFFSET);
+var openTraceOutlineStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, Number.MAX_VALUE - 7 + STATUS_BAR_PRIORITY_OFFSET);
 // Status bar constants.
 const STATUS_BAR_NOT_CONNECTED_STR = "MOCA: $(circle-slash)";
 const STATUS_BAR_CONNECTED_PREFIX_STR = "MOCA: $(pass) ";
@@ -387,6 +389,61 @@ function activate(context) {
                         }
                     }
                 }));
+            }
+        })));
+        context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.EXECUTE_SELECTION_TO_CSV, () => __awaiter(this, void 0, void 0, function* () {
+            let editor = vscode.window.activeTextEditor;
+            if (editor) {
+                var curFileName = editor.document.fileName;
+                var curFileNameShortened = curFileName.substring(curFileName.lastIndexOf('\\') + 1, curFileName.length);
+                var selection = editor.selection;
+                if (selection) {
+                    var selectedScript = editor.document.getText(selection);
+                    vscode.window.withProgress({
+                        location: vscode.ProgressLocation.Notification,
+                        title: "MOCA",
+                        cancellable: true
+                    }, (progress, token) => __awaiter(this, void 0, void 0, function* () {
+                        progress.report({
+                            increment: Infinity,
+                            message: "Executing Selection To CSV " + curFileNameShortened
+                        });
+                        // Purpose of this is to indicate that cancellation was requested down below.
+                        var cancellationRequested = false;
+                        token.onCancellationRequested(() => {
+                            cancellationRequested = true;
+                        });
+                        var res = yield vscode.commands.executeCommand(LanguageServerCommands.EXECUTE_TO_CSV, selectedScript, curFileNameShortened, curFileName, false);
+                        // If cancellation requested, skip this part.
+                        if (!cancellationRequested) {
+                            var mocaResults = new mocaResults_1.MocaResults(res);
+                            // If lang server says we need approval before executing(due to unsafe code config on connection), we need to ask the user if they truly want to run script.
+                            // NOTE: if cancellation is requested before we get here, lang server does not run unsafe scripts in configured envs by default -- assuming that approval is required.
+                            if (mocaResults.needsApprovalToExecute) {
+                                var approvalOptionRes = yield vscode.window.showWarningMessage(UNSAFE_CODE_APPROVAL_PROMPT, UNSAFE_CODE_APPROVAL_OPTION_YES, UNSAFE_CODE_APPROVAL_OPTION_NO);
+                                // Check again if cancellation is requested.
+                                // If so, just exit and do not worry about approval option result.
+                                if (!cancellationRequested) {
+                                    if (approvalOptionRes === UNSAFE_CODE_APPROVAL_OPTION_YES) {
+                                        // User says yes; run script!
+                                        var approvedRes = yield vscode.commands.executeCommand(LanguageServerCommands.EXECUTE_TO_CSV, selectedScript, curFileNameShortened, curFileName, true);
+                                        var approvedMocaResults = new mocaResults_1.MocaResults(approvedRes);
+                                        // Lang server is taking care of loading results.
+                                        if (approvedMocaResults.msg && approvedMocaResults.msg.length > 0) {
+                                            vscode.window.showErrorMessage(curFileNameShortened + ": " + approvedMocaResults.msg);
+                                        }
+                                    }
+                                }
+                            }
+                            else {
+                                // Lang server is taking care of loading results.
+                                if (mocaResults.msg && mocaResults.msg.length > 0) {
+                                    vscode.window.showErrorMessage(curFileNameShortened + ": " + mocaResults.msg);
+                                }
+                            }
+                        }
+                    }));
+                }
             }
         })));
         context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.TRACE, () => __awaiter(this, void 0, void 0, function* () {
@@ -799,6 +856,7 @@ function activate(context) {
                         executeStatusBarItem.show();
                         executeSelectionStatusBarItem.show();
                         executeToCSVStatusBarItem.show();
+                        executeSelectionToCSVStatusBarItem.show();
                         commandLookupStatusBarItem.show();
                         traceStatusBarItem.show();
                         openTraceOutlineStatusBarItem.show();
@@ -808,6 +866,7 @@ function activate(context) {
                         executeStatusBarItem.hide();
                         executeSelectionStatusBarItem.hide();
                         executeToCSVStatusBarItem.hide();
+                        executeSelectionToCSVStatusBarItem.hide();
                         commandLookupStatusBarItem.hide();
                         traceStatusBarItem.hide();
                         openTraceOutlineStatusBarItem.hide();
@@ -832,7 +891,10 @@ function activate(context) {
         executeSelectionStatusBarItem.tooltip = "Execute Selection (Ctrl+Shift+Enter)";
         executeToCSVStatusBarItem.text = "$(play)CSV";
         executeToCSVStatusBarItem.command = LanguageClientCommands.EXECUTE_TO_CSV;
-        executeToCSVStatusBarItem.tooltip = "Execute To CSV";
+        executeToCSVStatusBarItem.tooltip = "Execute To CSV (Ctrl+Alt+Enter)";
+        executeSelectionToCSVStatusBarItem.text = "$(play)$(selection)CSV";
+        executeSelectionToCSVStatusBarItem.command = LanguageClientCommands.EXECUTE_SELECTION_TO_CSV;
+        executeSelectionToCSVStatusBarItem.tooltip = "Execute Selection To CSV (Ctrl+Shift+Alt+Enter)";
         commandLookupStatusBarItem.text = "$(file-code)";
         commandLookupStatusBarItem.command = LanguageClientCommands.COMMAND_LOOKUP;
         commandLookupStatusBarItem.tooltip = "Command Lookup";
@@ -852,6 +914,7 @@ function activate(context) {
                 executeStatusBarItem.show();
                 executeSelectionStatusBarItem.show();
                 executeToCSVStatusBarItem.show();
+                executeSelectionToCSVStatusBarItem.show();
                 commandLookupStatusBarItem.show();
                 traceStatusBarItem.show();
                 openTraceOutlineStatusBarItem.show();
@@ -861,6 +924,7 @@ function activate(context) {
                 executeStatusBarItem.hide();
                 executeSelectionStatusBarItem.hide();
                 executeToCSVStatusBarItem.hide();
+                executeSelectionToCSVStatusBarItem.hide();
                 commandLookupStatusBarItem.hide();
                 traceStatusBarItem.hide();
                 openTraceOutlineStatusBarItem.hide();
@@ -871,6 +935,7 @@ function activate(context) {
         context.subscriptions.push(executeStatusBarItem);
         context.subscriptions.push(executeSelectionStatusBarItem);
         context.subscriptions.push(executeToCSVStatusBarItem);
+        context.subscriptions.push(executeSelectionToCSVStatusBarItem);
         context.subscriptions.push(commandLookupStatusBarItem);
         context.subscriptions.push(traceStatusBarItem);
         context.subscriptions.push(openTraceOutlineStatusBarItem);
