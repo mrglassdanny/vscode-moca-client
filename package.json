@@ -65,6 +65,11 @@
 				"category": "MOCA"
 			},
 			{
+				"command": "moca.executeWithCSVToCSV",
+				"title": "Execute MOCA Script With CSV To CSV",
+				"category": "MOCA"
+			},
+			{
 				"command": "moca.trace",
 				"title": "MOCA Trace",
 				"category": "MOCA"

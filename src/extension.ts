@@ -41,6 +41,7 @@ export namespace LanguageClientCommands {
 	export const EXECUTE_TO_CSV = "moca.executeToCSV";
 	export const EXECUTE_SELECTION_TO_CSV = "moca.executeSelectionToCSV";
 	export const EXECUTE_WITH_CSV = "moca.executeWithCSV";
+	export const EXECUTE_WITH_CSV_TO_CSV = "moca.executeWithCSVToCSV";
 	export const TRACE = "moca.trace";
 	export const COMMAND_LOOKUP = "moca.commandLookup";
 	export const AUTO_EXECUTE = "moca.autoExecute";
@@ -271,7 +272,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			var curFileNameShortened = curFileName.substring(curFileName.lastIndexOf('\\') + 1, curFileName.length);
 			let script = editor.document.getText();
 
-			await executeMocaScript(context, curFileNameShortened, script, "Executing ");
+			await executeMocaScriptWithProgress(context, curFileNameShortened, script, "Executing ");
 		}
 	}));
 
@@ -288,7 +289,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			if (selection) {
 				var selectedScript = editor.document.getText(selection);
 
-				await executeMocaScript(context, curFileNameShortened, selectedScript, "Executing Selection ");
+				await executeMocaScriptWithProgress(context, curFileNameShortened, selectedScript, "Executing Selection ");
 			}
 		}
 	}));
@@ -303,7 +304,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			var curFileNameShortened = curFileName.substring(curFileName.lastIndexOf('\\') + 1, curFileName.length);
 			let script = editor.document.getText();
 
-			await executeMocaScriptToCSV(context, curFileNameShortened, curFileName, script, "Executing To CSV ");
+			await executeMocaScriptToCSVWithProgress(context, curFileNameShortened, curFileName, script, "Executing To CSV ");
 		}
 	}));
 
@@ -320,7 +321,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			if (selection) {
 				var selectedScript = editor.document.getText(selection);
 
-				await executeMocaScriptToCSV(context, curFileNameShortened, curFileName, selectedScript, "Executing Selection To CSV ");
+				await executeMocaScriptToCSVWithProgress(context, curFileNameShortened, curFileName, selectedScript, "Executing Selection To CSV ");
 			}
 		}
 	}));
@@ -335,33 +336,23 @@ export async function activate(context: vscode.ExtensionContext) {
 		});
 
 		if (csvFileNameRes) {
-			var results: any[] = [];
 
-			var fileName = csvFileNameRes[0].toString();
+			var csvRes: any[] = [];
 
-			var realFileName = vscode.Uri.parse(fileName);
+			// vscode is a bit goofy with it's URIs, so we need to do this ugly transform.
+			var csvFileUri = vscode.Uri.parse(csvFileNameRes[0].toString());
+			var csvFileName = csvFileUri.toString(true).replace("file:///", "");
 
-			await fs.createReadStream(realFileName.toString(true).replace('file:///', ''))
+			await fs.createReadStream(csvFileName)
 				.pipe(csv())
 				.on('data', (data) => {
-					results.push(data)
+					csvRes.push(data)
 				})
 				.on('end', async () => {
 
-					var str = '';
-					for (var i in results) {
-						var obj = JSON.parse(JSON.stringify(results[i]));
-						str += "publish data where ";
-						for (var attributename in obj) {
-							str += (attributename + " = \"" + obj[attributename] + "\" and ");
-						}
+					var csvPublishMocaScript = buildCSVPublishMocaScript(csvRes);
 
-						str = str.slice(0, str.length - " and ".length);
-						str += " & ";
-					}
-
-					str = str.slice(0, str.length - " & ".length);
-
+					// CSV publish script is built. Now let's get editor script, combine accordingly, and execute.
 					let editor = vscode.window.activeTextEditor;
 
 					if (editor) {
@@ -370,13 +361,59 @@ export async function activate(context: vscode.ExtensionContext) {
 						var curFileNameShortened = curFileName.substring(curFileName.lastIndexOf('\\') + 1, curFileName.length);
 						let script = editor.document.getText();
 
-						if (script.length > 0) {
-							str += " | ";
+						if (csvPublishMocaScript.length > 0 && script.length > 0) {
+							csvPublishMocaScript += " | ";
 						}
 
-						await executeMocaScript(context, curFileNameShortened, str + script, "Executing With CSV ");
+						await executeMocaScriptWithProgress(context, curFileNameShortened, csvPublishMocaScript + script, "Executing With CSV ");
 					}
+				});
+		}
 
+
+	}));
+
+	context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.EXECUTE_WITH_CSV_TO_CSV, async () => {
+
+		// Give user list of local files to pick from.
+		var csvFileNameRes = await vscode.window.showOpenDialog({
+			canSelectMany: false, canSelectFiles: true, canSelectFolders: false, title: "Execute With CSV To CSV", filters: {
+				"CSV": ["csv"]
+			}
+		});
+
+		if (csvFileNameRes) {
+
+			var csvRes: any[] = [];
+
+			// vscode is a bit goofy with it's URIs, so we need to do this ugly transform.
+			var csvFileUri = vscode.Uri.parse(csvFileNameRes[0].toString());
+			var csvFileName = csvFileUri.toString(true).replace("file:///", "");
+
+			await fs.createReadStream(csvFileName)
+				.pipe(csv())
+				.on('data', (data) => {
+					csvRes.push(data)
+				})
+				.on('end', async () => {
+
+					var csvPublishMocaScript = buildCSVPublishMocaScript(csvRes);
+
+					// CSV publish script is built. Now let's get editor script, combine accordingly, and execute.
+					let editor = vscode.window.activeTextEditor;
+
+					if (editor) {
+
+						var curFileName = editor.document.fileName;
+						var curFileNameShortened = curFileName.substring(curFileName.lastIndexOf('\\') + 1, curFileName.length);
+						let script = editor.document.getText();
+
+						if (csvPublishMocaScript.length > 0 && script.length > 0) {
+							csvPublishMocaScript += " | ";
+						}
+
+						await executeMocaScriptToCSVWithProgress(context, curFileNameShortened, curFileName, csvPublishMocaScript + script, "Executing With CSV To CSV ");
+					}
 				});
 		}
 
@@ -1081,7 +1118,7 @@ function validate(javaPath: string): boolean {
 	return fs.existsSync(javaPath) && fs.statSync(javaPath).isFile();
 }
 
-async function executeMocaScript(context: vscode.ExtensionContext, curFileNameShortened: string, script: string, progressMessagePrefix: string) {
+async function executeMocaScriptWithProgress(context: vscode.ExtensionContext, curFileNameShortened: string, script: string, progressMessagePrefix: string) {
 	vscode.window.withProgress({
 		location: vscode.ProgressLocation.Notification,
 		title: "MOCA",
@@ -1135,7 +1172,7 @@ async function executeMocaScript(context: vscode.ExtensionContext, curFileNameSh
 	});
 }
 
-async function executeMocaScriptToCSV(context: vscode.ExtensionContext, curFileNameShortened: string, curFileName: string, script: string, progressMessagePrefix: string) {
+async function executeMocaScriptToCSVWithProgress(context: vscode.ExtensionContext, curFileNameShortened: string, curFileName: string, script: string, progressMessagePrefix: string) {
 	vscode.window.withProgress({
 		location: vscode.ProgressLocation.Notification,
 		title: "MOCA",
@@ -1192,4 +1229,29 @@ async function executeMocaScriptToCSV(context: vscode.ExtensionContext, curFileN
 	});
 }
 
+function buildCSVPublishMocaScript(csvRes: any[]) {
 
+	var csvPublishMocaScript = "";
+
+	for (var i in csvRes) {
+
+		var obj = JSON.parse(JSON.stringify(csvRes[i]));
+
+		csvPublishMocaScript += "publish data where ";
+
+		for (var attributename in obj) {
+			csvPublishMocaScript += (attributename + " = \"" + obj[attributename] + "\" and ");
+		}
+
+		// Get rid of last " and " and add " & ".
+		csvPublishMocaScript = csvPublishMocaScript.slice(0, csvPublishMocaScript.length - " and ".length);
+		csvPublishMocaScript += " & ";
+	}
+
+	// Get rid of last " & ".
+	if (csvPublishMocaScript.length > 0) {
+		csvPublishMocaScript = csvPublishMocaScript.slice(0, csvPublishMocaScript.length - " & ".length);
+	}
+
+	return csvPublishMocaScript;
+}
