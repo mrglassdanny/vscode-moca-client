@@ -2,11 +2,13 @@ import * as vscode from 'vscode';
 import { LanguageClient, LanguageClientOptions, Executable } from "vscode-languageclient";
 import * as path from "path";
 import * as fs from "fs";
+import * as csv from "csv-parser";
 import { SemanticHighlightingFeature, GlobalSemanticHighlightingVars } from './semanticHighlighting/semanticHighlighting';
 import { MocaResults } from './results/mocaResults';
 import { ResultViewPanel } from './results/ResultViewPanel';
 import { MocaCommand, MocaTrigger } from './mocaCommandLookup/mocaCommandLookup';
 import { performance } from 'perf_hooks';
+
 
 // Language server constants.
 const MOCA_LANGUAGE_SERVER_VERSION = "1.8.19";
@@ -38,6 +40,7 @@ export namespace LanguageClientCommands {
 	export const EXECUTE_SELECTION = "moca.executeSelection";
 	export const EXECUTE_TO_CSV = "moca.executeToCSV";
 	export const EXECUTE_SELECTION_TO_CSV = "moca.executeSelectionToCSV";
+	export const EXECUTE_WITH_CSV = "moca.executeWithCSV";
 	export const TRACE = "moca.trace";
 	export const COMMAND_LOOKUP = "moca.commandLookup";
 	export const AUTO_EXECUTE = "moca.autoExecute";
@@ -96,6 +99,7 @@ let hidingTraceStatusBarItem: boolean = false;
 
 
 export async function activate(context: vscode.ExtensionContext) {
+
 
 	// Set some vars.
 	globalExtensionContext = context;
@@ -267,57 +271,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			var curFileNameShortened = curFileName.substring(curFileName.lastIndexOf('\\') + 1, curFileName.length);
 			let script = editor.document.getText();
 
-			vscode.window.withProgress({
-				location: vscode.ProgressLocation.Notification,
-				title: "MOCA",
-				cancellable: true
-			}, async (progress, token) => {
-				progress.report({
-					increment: Infinity,
-					message: "Executing " + curFileNameShortened
-				});
-
-				// Purpose of this is to indicate that cancellation was requested down below.
-				var cancellationRequested = false;
-
-				token.onCancellationRequested(() => {
-					cancellationRequested = true;
-				});
-
-
-				var res = await vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, script, curFileNameShortened, false);
-				// If cancellation requested, skip this part.
-				if (!cancellationRequested) {
-					var mocaResults = new MocaResults(res);
-
-					// If lang server says we need approval before executing(due to unsafe code config on connection), we need to ask the user if they truly want to run script.
-					// NOTE: if cancellation is requested before we get here, lang server does not run unsafe scripts in configured envs by default -- assuming that approval is required.
-					if (mocaResults.needsApprovalToExecute) {
-						var approvalOptionRes = await vscode.window.showWarningMessage(UNSAFE_CODE_APPROVAL_PROMPT, UNSAFE_CODE_APPROVAL_OPTION_YES, UNSAFE_CODE_APPROVAL_OPTION_NO);
-						// Check again if cancellation is requested.
-						// If so, just exit and do not worry about approval option result.
-						if (!cancellationRequested) {
-							if (approvalOptionRes === UNSAFE_CODE_APPROVAL_OPTION_YES) {
-								// User says yes; run script!
-								var approvedRes = await vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, script, curFileNameShortened, true);
-								// If cancellation requested, skip this part.
-								if (!cancellationRequested) {
-									var approvedMocaResults = new MocaResults(approvedRes);
-									ResultViewPanel.createOrShow(context.extensionPath, curFileNameShortened, approvedMocaResults);
-									if (approvedMocaResults.msg && approvedMocaResults.msg.length > 0) {
-										vscode.window.showErrorMessage(curFileNameShortened + ": " + approvedMocaResults.msg);
-									}
-								}
-							}
-						}
-					} else {
-						ResultViewPanel.createOrShow(context.extensionPath, curFileNameShortened, mocaResults);
-						if (mocaResults.msg && mocaResults.msg.length > 0) {
-							vscode.window.showErrorMessage(curFileNameShortened + ": " + mocaResults.msg);
-						}
-					}
-				}
-			});
+			await executeMocaScript(context, curFileNameShortened, script, "Executing ");
 		}
 	}));
 
@@ -333,56 +287,8 @@ export async function activate(context: vscode.ExtensionContext) {
 			var selection = editor.selection;
 			if (selection) {
 				var selectedScript = editor.document.getText(selection);
-				vscode.window.withProgress({
-					location: vscode.ProgressLocation.Notification,
-					title: "MOCA",
-					cancellable: true
-				}, async (progress, token) => {
-					progress.report({
-						increment: Infinity,
-						message: "Executing Selection " + curFileNameShortened
-					});
 
-					// Purpose of this is to indicate that cancellation was requested down below.
-					var cancellationRequested = false;
-
-					token.onCancellationRequested(() => {
-						cancellationRequested = true;
-					});
-
-					var res = await vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, selectedScript, curFileNameShortened, false);
-					// If cancellation requested, skip this part.
-					if (!cancellationRequested) {
-						var mocaResults = new MocaResults(res);
-
-						// If lang server says we need approval before executing(due to unsafe code config on connection), we need to ask the user if they truly want to run script.
-						// NOTE: if cancellation is requested before we get here, lang server does not run unsafe scripts in configured envs by default -- assuming that approval is required.
-						if (mocaResults.needsApprovalToExecute) {
-							var approvalOptionRes = await vscode.window.showWarningMessage(UNSAFE_CODE_APPROVAL_PROMPT, UNSAFE_CODE_APPROVAL_OPTION_YES, UNSAFE_CODE_APPROVAL_OPTION_NO);
-							// Check again if cancellation is requested.
-							// If so, just exit and do not worry about approval option result.
-							if (!cancellationRequested) {
-								if (approvalOptionRes === UNSAFE_CODE_APPROVAL_OPTION_YES) {
-									// User says yes; run script!
-									var approvedRes = await vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, selectedScript, curFileNameShortened, true);
-									// If cancellation requested, skip this part.
-									if (!cancellationRequested) {
-										var approvedMocaResults = new MocaResults(approvedRes);
-										ResultViewPanel.createOrShow(context.extensionPath, curFileNameShortened, approvedMocaResults);
-										if (approvedMocaResults.msg && approvedMocaResults.msg.length > 0) {
-											vscode.window.showErrorMessage(curFileNameShortened + ": " + approvedMocaResults.msg);
-										}
-									}
-								}
-							}
-						} else {
-							ResultViewPanel.createOrShow(context.extensionPath, curFileNameShortened, mocaResults);
-							if (mocaResults.msg && mocaResults.msg.length > 0) {
-								vscode.window.showErrorMessage(curFileNameShortened + ": " + mocaResults.msg);
-							}
-						}
-					}
-				});
+				await executeMocaScript(context, curFileNameShortened, selectedScript, "Executing Selection ");
 			}
 		}
 	}));
@@ -397,60 +303,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			var curFileNameShortened = curFileName.substring(curFileName.lastIndexOf('\\') + 1, curFileName.length);
 			let script = editor.document.getText();
 
-			vscode.window.withProgress({
-				location: vscode.ProgressLocation.Notification,
-				title: "MOCA",
-				cancellable: true
-			}, async (progress, token) => {
-				progress.report({
-					increment: Infinity,
-					message: "Executing To CSV " + curFileNameShortened
-				});
-
-				// Purpose of this is to indicate that cancellation was requested down below.
-				var cancellationRequested = false;
-
-				token.onCancellationRequested(() => {
-					cancellationRequested = true;
-				});
-
-
-				var res = await vscode.commands.executeCommand(LanguageServerCommands.EXECUTE_TO_CSV, script, curFileNameShortened, curFileName, false);
-				// If cancellation requested, skip this part.
-				if (!cancellationRequested) {
-					var mocaResults = new MocaResults(res);
-
-					// If lang server says we need approval before executing(due to unsafe code config on connection), we need to ask the user if they truly want to run script.
-					// NOTE: if cancellation is requested before we get here, lang server does not run unsafe scripts in configured envs by default -- assuming that approval is required.
-					if (mocaResults.needsApprovalToExecute) {
-						var approvalOptionRes = await vscode.window.showWarningMessage(UNSAFE_CODE_APPROVAL_PROMPT, UNSAFE_CODE_APPROVAL_OPTION_YES, UNSAFE_CODE_APPROVAL_OPTION_NO);
-						// Check again if cancellation is requested.
-						// If so, just exit and do not worry about approval option result.
-						if (!cancellationRequested) {
-							if (approvalOptionRes === UNSAFE_CODE_APPROVAL_OPTION_YES) {
-								// User says yes; run script!
-								var approvedRes = await vscode.commands.executeCommand(LanguageServerCommands.EXECUTE_TO_CSV, script, curFileNameShortened, curFileName, true);
-								var approvedMocaResults = new MocaResults(approvedRes);
-
-								// Lang server is taking care of loading results.
-
-								if (approvedMocaResults.msg && approvedMocaResults.msg.length > 0) {
-									vscode.window.showErrorMessage(curFileNameShortened + ": " + approvedMocaResults.msg);
-								}
-
-
-							}
-						}
-					} else {
-
-						// Lang server is taking care of loading results.
-
-						if (mocaResults.msg && mocaResults.msg.length > 0) {
-							vscode.window.showErrorMessage(curFileNameShortened + ": " + mocaResults.msg);
-						}
-					}
-				}
-			});
+			await executeMocaScriptToCSV(context, curFileNameShortened, curFileName, script, "Executing To CSV ");
 		}
 	}));
 
@@ -463,69 +316,71 @@ export async function activate(context: vscode.ExtensionContext) {
 			var curFileName = editor.document.fileName;
 			var curFileNameShortened = curFileName.substring(curFileName.lastIndexOf('\\') + 1, curFileName.length);
 
-
 			var selection = editor.selection;
 			if (selection) {
 				var selectedScript = editor.document.getText(selection);
 
-				vscode.window.withProgress({
-					location: vscode.ProgressLocation.Notification,
-					title: "MOCA",
-					cancellable: true
-				}, async (progress, token) => {
-					progress.report({
-						increment: Infinity,
-						message: "Executing Selection To CSV " + curFileNameShortened
-					});
-
-					// Purpose of this is to indicate that cancellation was requested down below.
-					var cancellationRequested = false;
-
-					token.onCancellationRequested(() => {
-						cancellationRequested = true;
-					});
-
-
-					var res = await vscode.commands.executeCommand(LanguageServerCommands.EXECUTE_TO_CSV, selectedScript, curFileNameShortened, curFileName, false);
-					// If cancellation requested, skip this part.
-					if (!cancellationRequested) {
-						var mocaResults = new MocaResults(res);
-
-						// If lang server says we need approval before executing(due to unsafe code config on connection), we need to ask the user if they truly want to run script.
-						// NOTE: if cancellation is requested before we get here, lang server does not run unsafe scripts in configured envs by default -- assuming that approval is required.
-						if (mocaResults.needsApprovalToExecute) {
-							var approvalOptionRes = await vscode.window.showWarningMessage(UNSAFE_CODE_APPROVAL_PROMPT, UNSAFE_CODE_APPROVAL_OPTION_YES, UNSAFE_CODE_APPROVAL_OPTION_NO);
-							// Check again if cancellation is requested.
-							// If so, just exit and do not worry about approval option result.
-							if (!cancellationRequested) {
-								if (approvalOptionRes === UNSAFE_CODE_APPROVAL_OPTION_YES) {
-									// User says yes; run script!
-									var approvedRes = await vscode.commands.executeCommand(LanguageServerCommands.EXECUTE_TO_CSV, selectedScript, curFileNameShortened, curFileName, true);
-									var approvedMocaResults = new MocaResults(approvedRes);
-
-									// Lang server is taking care of loading results.
-
-									if (approvedMocaResults.msg && approvedMocaResults.msg.length > 0) {
-										vscode.window.showErrorMessage(curFileNameShortened + ": " + approvedMocaResults.msg);
-									}
-								}
-							}
-						} else {
-
-							// Lang server is taking care of loading results.
-
-							if (mocaResults.msg && mocaResults.msg.length > 0) {
-								vscode.window.showErrorMessage(curFileNameShortened + ": " + mocaResults.msg);
-							}
-						}
-					}
-				});
-
-
+				await executeMocaScriptToCSV(context, curFileNameShortened, curFileName, selectedScript, "Executing Selection To CSV ");
 			}
-
-
 		}
+	}));
+
+	context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.EXECUTE_WITH_CSV, async () => {
+
+		// Give user list of local files to pick from.
+		var csvFileNameRes = await vscode.window.showOpenDialog({
+			canSelectMany: false, canSelectFiles: true, canSelectFolders: false, title: "Execute With CSV", filters: {
+				"CSV": ["csv"]
+			}
+		});
+
+		if (csvFileNameRes) {
+			var results: any[] = [];
+
+			var fileName = csvFileNameRes[0].toString();
+
+			var realFileName = vscode.Uri.parse(fileName);
+
+			await fs.createReadStream(realFileName.toString(true).replace('file:///', ''))
+				.pipe(csv())
+				.on('data', (data) => {
+					results.push(data)
+				})
+				.on('end', async () => {
+
+					var str = '';
+					for (var i in results) {
+						var obj = JSON.parse(JSON.stringify(results[i]));
+						str += "publish data where ";
+						for (var attributename in obj) {
+							str += (attributename + " = \"" + obj[attributename] + "\" and ");
+						}
+
+						str = str.slice(0, str.length - " and ".length);
+						str += " & ";
+					}
+
+					str = str.slice(0, str.length - " & ".length);
+
+					let editor = vscode.window.activeTextEditor;
+
+					if (editor) {
+
+						var curFileName = editor.document.fileName;
+						var curFileNameShortened = curFileName.substring(curFileName.lastIndexOf('\\') + 1, curFileName.length);
+						let script = editor.document.getText();
+
+						if (script.length > 0) {
+							str += " | ";
+						}
+
+						await executeMocaScript(context, curFileNameShortened, str + script, "Executing With CSV ");
+					}
+
+				});
+		}
+
+
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.TRACE, async () => {
@@ -1226,5 +1081,115 @@ function validate(javaPath: string): boolean {
 	return fs.existsSync(javaPath) && fs.statSync(javaPath).isFile();
 }
 
+async function executeMocaScript(context: vscode.ExtensionContext, curFileNameShortened: string, script: string, progressMessagePrefix: string) {
+	vscode.window.withProgress({
+		location: vscode.ProgressLocation.Notification,
+		title: "MOCA",
+		cancellable: true
+	}, async (progress, token) => {
+		progress.report({
+			increment: Infinity,
+			message: progressMessagePrefix + curFileNameShortened
+		});
+
+		// Purpose of this is to indicate that cancellation was requested down below.
+		var cancellationRequested = false;
+
+		token.onCancellationRequested(() => {
+			cancellationRequested = true;
+		});
+
+
+		var res = await vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, script, curFileNameShortened, false);
+		// If cancellation requested, skip this part.
+		if (!cancellationRequested) {
+			var mocaResults = new MocaResults(res);
+
+			// If lang server says we need approval before executing(due to unsafe code config on connection), we need to ask the user if they truly want to run script.
+			// NOTE: if cancellation is requested before we get here, lang server does not run unsafe scripts in configured envs by default -- assuming that approval is required.
+			if (mocaResults.needsApprovalToExecute) {
+				var approvalOptionRes = await vscode.window.showWarningMessage(UNSAFE_CODE_APPROVAL_PROMPT, UNSAFE_CODE_APPROVAL_OPTION_YES, UNSAFE_CODE_APPROVAL_OPTION_NO);
+				// Check again if cancellation is requested.
+				// If so, just exit and do not worry about approval option result.
+				if (!cancellationRequested) {
+					if (approvalOptionRes === UNSAFE_CODE_APPROVAL_OPTION_YES) {
+						// User says yes; run script!
+						var approvedRes = await vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, script, curFileNameShortened, true);
+						// If cancellation requested, skip this part.
+						if (!cancellationRequested) {
+							var approvedMocaResults = new MocaResults(approvedRes);
+							ResultViewPanel.createOrShow(context.extensionPath, curFileNameShortened, approvedMocaResults);
+							if (approvedMocaResults.msg && approvedMocaResults.msg.length > 0) {
+								vscode.window.showErrorMessage(curFileNameShortened + ": " + approvedMocaResults.msg);
+							}
+						}
+					}
+				}
+			} else {
+				ResultViewPanel.createOrShow(context.extensionPath, curFileNameShortened, mocaResults);
+				if (mocaResults.msg && mocaResults.msg.length > 0) {
+					vscode.window.showErrorMessage(curFileNameShortened + ": " + mocaResults.msg);
+				}
+			}
+		}
+	});
+}
+
+async function executeMocaScriptToCSV(context: vscode.ExtensionContext, curFileNameShortened: string, curFileName: string, script: string, progressMessagePrefix: string) {
+	vscode.window.withProgress({
+		location: vscode.ProgressLocation.Notification,
+		title: "MOCA",
+		cancellable: true
+	}, async (progress, token) => {
+		progress.report({
+			increment: Infinity,
+			message: progressMessagePrefix + curFileNameShortened
+		});
+
+		// Purpose of this is to indicate that cancellation was requested down below.
+		var cancellationRequested = false;
+
+		token.onCancellationRequested(() => {
+			cancellationRequested = true;
+		});
+
+
+		var res = await vscode.commands.executeCommand(LanguageServerCommands.EXECUTE_TO_CSV, script, curFileNameShortened, curFileName, false);
+		// If cancellation requested, skip this part.
+		if (!cancellationRequested) {
+			var mocaResults = new MocaResults(res);
+
+			// If lang server says we need approval before executing(due to unsafe code config on connection), we need to ask the user if they truly want to run script.
+			// NOTE: if cancellation is requested before we get here, lang server does not run unsafe scripts in configured envs by default -- assuming that approval is required.
+			if (mocaResults.needsApprovalToExecute) {
+				var approvalOptionRes = await vscode.window.showWarningMessage(UNSAFE_CODE_APPROVAL_PROMPT, UNSAFE_CODE_APPROVAL_OPTION_YES, UNSAFE_CODE_APPROVAL_OPTION_NO);
+				// Check again if cancellation is requested.
+				// If so, just exit and do not worry about approval option result.
+				if (!cancellationRequested) {
+					if (approvalOptionRes === UNSAFE_CODE_APPROVAL_OPTION_YES) {
+						// User says yes; run script!
+						var approvedRes = await vscode.commands.executeCommand(LanguageServerCommands.EXECUTE_TO_CSV, script, curFileNameShortened, curFileName, true);
+						var approvedMocaResults = new MocaResults(approvedRes);
+
+						// Lang server is taking care of loading results.
+
+						if (approvedMocaResults.msg && approvedMocaResults.msg.length > 0) {
+							vscode.window.showErrorMessage(curFileNameShortened + ": " + approvedMocaResults.msg);
+						}
+
+
+					}
+				}
+			} else {
+
+				// Lang server is taking care of loading results.
+
+				if (mocaResults.msg && mocaResults.msg.length > 0) {
+					vscode.window.showErrorMessage(curFileNameShortened + ": " + mocaResults.msg);
+				}
+			}
+		}
+	});
+}
 
 
