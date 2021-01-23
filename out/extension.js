@@ -844,7 +844,6 @@ function activate(context) {
 exports.activate = activate;
 function deactivate() { }
 exports.deactivate = deactivate;
-// Language server functions.
 function startMocaLanguageServer() {
     javaPath = findJava();
     return vscode.window.withProgress({ location: vscode.ProgressLocation.Window }, progress => {
@@ -867,7 +866,8 @@ function startMocaLanguageServer() {
                     protocol2Code: value => vscode.Uri.parse(value)
                 }
             };
-            let args = ["-jar", path.resolve(globalExtensionContext.extensionPath, "bin", MOCA_LANGUAGE_SERVER)];
+            //let args = ["-jar", path.resolve(globalExtensionContext.extensionPath, "bin", MOCA_LANGUAGE_SERVER)];
+            let args = ["-jar", path.resolve("C:\\dev\\moca-language-server\\build\\libs", MOCA_LANGUAGE_SERVER)];
             let executable = {
                 command: javaPath,
                 args: args
