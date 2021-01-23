@@ -109,15 +109,24 @@ function activate(context) {
         // Directories are there -- let's purge existing files.
         var commandLookupDirRes = yield vscode.workspace.fs.readDirectory(vscode.Uri.file(context.globalStoragePath + "\\command-lookup"));
         for (var i = 0; i < commandLookupDirRes.length; i++) {
-            vscode.workspace.fs.delete(vscode.Uri.file(context.globalStoragePath + "\\command-lookup\\" + commandLookupDirRes[i][0]));
+            // Only delete if last modified date is not same as today.
+            if (fs.statSync(context.globalStoragePath + "\\command-lookup\\" + commandLookupDirRes[i][0]).mtime.getDate() != new Date().getDate()) {
+                vscode.workspace.fs.delete(vscode.Uri.file(context.globalStoragePath + "\\command-lookup\\" + commandLookupDirRes[i][0]));
+            }
         }
         var traceDirRes = yield vscode.workspace.fs.readDirectory(vscode.Uri.file(context.globalStoragePath + "\\trace"));
         for (var i = 0; i < traceDirRes.length; i++) {
-            vscode.workspace.fs.delete(vscode.Uri.file(context.globalStoragePath + "\\trace\\" + traceDirRes[i][0]));
+            // Only delete if last modified date is not same as today.
+            if (fs.statSync(context.globalStoragePath + "\\trace\\" + traceDirRes[i][0]).mtime.getDate() != new Date().getDate()) {
+                vscode.workspace.fs.delete(vscode.Uri.file(context.globalStoragePath + "\\trace\\" + traceDirRes[i][0]));
+            }
         }
         var referencesDirRes = yield vscode.workspace.fs.readDirectory(vscode.Uri.file(context.globalStoragePath + "\\references"));
         for (var i = 0; i < referencesDirRes.length; i++) {
-            vscode.workspace.fs.delete(vscode.Uri.file(context.globalStoragePath + "\\references\\" + referencesDirRes[i][0]));
+            // Only delete if last modified date is not same as today.
+            if (fs.statSync(context.globalStoragePath + "\\references\\" + referencesDirRes[i][0]).mtime.getDate() != new Date().getDate()) {
+                vscode.workspace.fs.delete(vscode.Uri.file(context.globalStoragePath + "\\references\\" + referencesDirRes[i][0]));
+            }
         }
         // Start language server on extension activate.
         yield startMocaLanguageServer();
