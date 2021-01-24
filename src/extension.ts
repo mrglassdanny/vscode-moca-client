@@ -357,7 +357,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			var csvFileUri = vscode.Uri.parse(csvFileNameRes[0].toString());
 			var csvFileName = csvFileUri.toString(true).replace("file:///", "");
 
-			await fs.createReadStream(csvFileName)
+			fs.createReadStream(csvFileName)
 				.pipe(csv())
 				.on('data', (data) => {
 					csvRes.push(data)
@@ -404,7 +404,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			var csvFileUri = vscode.Uri.parse(csvFileNameRes[0].toString());
 			var csvFileName = csvFileUri.toString(true).replace("file:///", "");
 
-			await fs.createReadStream(csvFileName)
+			fs.createReadStream(csvFileName)
 				.pipe(csv())
 				.on('data', (data) => {
 					csvRes.push(data)

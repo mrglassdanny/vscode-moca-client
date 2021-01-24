@@ -292,7 +292,7 @@ function activate(context) {
                 // vscode is a bit goofy with it's URIs, so we need to do this ugly transform.
                 var csvFileUri = vscode.Uri.parse(csvFileNameRes[0].toString());
                 var csvFileName = csvFileUri.toString(true).replace("file:///", "");
-                yield fs.createReadStream(csvFileName)
+                fs.createReadStream(csvFileName)
                     .pipe(csv())
                     .on('data', (data) => {
                     csvRes.push(data);
@@ -325,7 +325,7 @@ function activate(context) {
                 // vscode is a bit goofy with it's URIs, so we need to do this ugly transform.
                 var csvFileUri = vscode.Uri.parse(csvFileNameRes[0].toString());
                 var csvFileName = csvFileUri.toString(true).replace("file:///", "");
-                yield fs.createReadStream(csvFileName)
+                fs.createReadStream(csvFileName)
                     .pipe(csv())
                     .on('data', (data) => {
                     csvRes.push(data);
