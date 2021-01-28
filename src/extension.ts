@@ -144,10 +144,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		if (fs.statSync(context.globalStoragePath + "\\references\\" + referencesDirRes[i][0]).mtime.getDate() != new Date().getDate()) {
 			vscode.workspace.fs.delete(vscode.Uri.file(context.globalStoragePath + "\\references\\" + referencesDirRes[i][0]));
 		}
-
 	}
-
-
 
 
 	// Start language server on extension activate.
@@ -158,7 +155,6 @@ export async function activate(context: vscode.ExtensionContext) {
 	if (activateResponseJsonObj["exception"]) {
 		vscode.window.showErrorMessage("Error occuring during MOCA Language Server activation: " + activateResponseJsonObj["exception"]["message"]);
 	}
-
 
 	// Command registration.
 	context.subscriptions.push(vscode.commands.registerCommand(LanguageClientCommands.CONNECT, async () => {
