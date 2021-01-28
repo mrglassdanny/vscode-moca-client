@@ -1,6 +1,13 @@
 # Changelog
 https://semver.org/
 
+## 1.7.26 (January 27, 2021)
+* Execute MOCA with CSV feature -- https://github.com/mrglassdanny/moca-language-server/issues/57
+* Issue #13 fix -- https://github.com/mrglassdanny/vscode-moca-client/issues/13
+* Issue #15 feature -- https://github.com/mrglassdanny/vscode-moca-client/issues/15
+* Webview datatable column color change
+* Misc cleanup
+
 ## 1.6.26 (January 12, 2021)
 * MOCA language server update -- https://github.com/mrglassdanny/moca-language-server/blob/master/CHANGELOG.md
 * Execute MOCA to CSV feature
