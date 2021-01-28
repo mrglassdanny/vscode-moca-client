@@ -3,7 +3,7 @@
 	"icon": "resources/local-syntax-logo.png",
 	"displayName": "MOCA Client",
 	"description": "MOCA Client and Local Syntax programming support for Visual Studio Code",
-	"version": "1.7.26",
+	"version": "1.7.27",
 	"author": {
 		"name": "Danny Glass",
 		"email": "mrglassdanny@gmail.com",

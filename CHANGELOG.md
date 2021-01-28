@@ -1,6 +1,9 @@
 # Changelog
 https://semver.org/
 
+## 1.7.27 (January 27, 2021)
+* Bug fix
+
 ## 1.7.26 (January 27, 2021)
 * Execute MOCA with CSV feature -- https://github.com/mrglassdanny/moca-language-server/issues/57
 * Issue #13 fix -- https://github.com/mrglassdanny/vscode-moca-client/issues/13
