@@ -70,8 +70,18 @@
 				"category": "MOCA"
 			},
 			{
+				"command": "moca.executionHistory",
+				"title": "Show MOCA Script Execution History For Current Window",
+				"category": "MOCA"
+			},
+			{
 				"command": "moca.trace",
 				"title": "MOCA Trace",
+				"category": "MOCA"
+			},
+			{
+				"command": "moca.openTraceOutline",
+				"title": "Open MOCA Trace Outline",
 				"category": "MOCA"
 			},
 			{
@@ -82,11 +92,6 @@
 			{
 				"command": "moca.autoExecute",
 				"title": "Auto Execute MOCA Script",
-				"category": "MOCA"
-			},
-			{
-				"command": "moca.openTraceOutline",
-				"title": "Open MOCA Trace Outline",
 				"category": "MOCA"
 			}
 		],

@@ -38,14 +38,16 @@ Provides MOCA client and language support for Visual Studio Code via the [MOCA L
 - `MOCA:Execute MOCA Selection To CSV` (`Ctrl+Shift+Alt+Enter`): Executes selection in focused MOCA file and writes results to CSV file in same directory as MOCA script file.
 - `MOCA:Execute MOCA Script With CSV`: Executes script in focused MOCA file with user selected CSV file parsed into `publish data` script as prefix and displays results in web view.
 - `MOCA:Execute MOCA Script With CSV To CSV`: Executes script in focused MOCA file with user selected CSV file parsed into `publish data` script as prefix and writes results to CSV file in same directory as MOCA script file.
+- `MOCA:Show MOCA Script Execution History For Current Window`: Shows MOCA script execution history for current window and allows user to insert into focused editor tab.
 - `MOCA:MOCA Trace`: Starts/stops trace.
+- `MOCA:Open MOCA Trace Outline`: Open MOCA trace outline(remote or local).
 - `MOCA:Lookup MOCA Command`: Dialog appears for searching commands/triggers.
 - `MOCA:Auto Execute MOCA Script`: Auto MOCA script execution.
-- `MOCA:Open MOCA Trace Outline`: Open MOCA trace outline(remote or local).
+
 
 ![Status-Bar-Demo](resources/status-bar.png)
 
-*MOCA Connection | Execute | Execute Selection | Execute To CSV | Execute Selection To CSV | Command Lookup | Start/Stop Trace | Open Trace Outline*
+*MOCA Connection | Execute | Execute Selection | Execute To CSV | Execute Selection To CSV | Show MOCA Script Execution History For Current Window | Command Lookup | Start/Stop Trace | Open Trace Outline*
 
 ## Settings
 
