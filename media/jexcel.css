@@ -63,7 +63,6 @@
     border:0px;
     background-color: transparent;
     width:0;
-
     border-top:1px solid transparent;
     border-left:1px solid transparent;
     border-right:1px solid rgba(0,0,0,0.85);
@@ -77,7 +76,7 @@
     border-left:1px solid rgba(0,0,0,0.85);
     border-right:1px solid transparent;
     border-bottom:1px solid transparent;
-    background-color:rgba(0,0,0,0.75);
+    background-color: var(--vscode-button-background);
     padding:2px;
     cursor:pointer;
     box-sizing: border-box;
@@ -86,7 +85,7 @@
     top: 0;
     z-index:2000;
     font-weight: bold;
-    color:rgb(255, 255, 255);
+    color: var(--vscode-button-foreground);
 }
 
 .with-toolbar .jexcel > thead > tr > td
@@ -132,7 +131,8 @@
 .jexcel > thead > tr > td.selected
 {
     font-weight: bolder;
-    background-color:rgba(0,0,0,0.50);
+    background-color: var(--vscode-button-secondaryBackground);
+    color: var(--vscode-button-secondaryForeground);
 }
 
 .jexcel > thead > tr > td.arrow-up
@@ -154,7 +154,8 @@
 .jexcel > tbody > tr > td:first-child
 {
     position:relative;
-    background-color:rgba(0,0,0,0.20);
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
     text-align:center;
 }
 
@@ -216,7 +217,8 @@
 .jexcel > tbody > tr.selected > td:first-child
 {
     font-weight: bolder;
-    background-color:rgba(0,0,0,0.50);
+    background-color:var(--vscode-button-secondaryBackground);
+    color:var(--vscode-button-secondaryForeground);
 }
 .jexcel > tbody > tr > td > select,
 .jexcel > tbody > tr > td > input,
@@ -282,28 +284,28 @@
 }
 
 .jexcel .highlight {
-    background-color:rgba(0,0,0,0.20);
+    background-color: var(--vscode-editor-selectionBackground);
 }
 
 .jexcel .highlight-top {
-    border-top:1px solid rgb(67, 76, 200);
+    border-top:1px solid var(--vscode-button-background);
 }
 
 .jexcel .highlight-left {
-    border-left:1px solid rgb(67, 76, 200);
+    border-left:1px solid var(--vscode-button-background);
 }
 
 .jexcel .highlight-right {
-    border-right:1px solid rgb(67, 76, 200); /* var(--jexcel-border-color);*/
+    border-right:1px solid var(--vscode-button-background);
 }
 
 .jexcel .highlight-bottom {
-    border-bottom:1px solid rgb(67, 76, 200); /* var(--jexcel-border-color);*/
+    border-bottom:1px solid var(--vscode-button-background);
 }
 
 .jexcel .highlight-selected
 {
-    background-color:rgba(0,0,0,0.2);
+    background-color: var(--vscode-editor-selectionBackground);
 }
 .jexcel .selection
 {
@@ -656,11 +658,11 @@
 }
 
 .jexcel_search {
-    background-color:rgba(0,0,0,0.25);
-    border-top:1px solid rgba(0,0,0,0.85);
-    border-left:1px solid rgba(0,0,0,0.85);
-    border-right:1px solid rgba(0,0,0,0.85);
-    border-bottom:1px solid rgba(0,0,0,0.85);
+    border-top:1px solid var(--vscode-button-secondaryBackground);
+    border-left:1px solid var(--vscode-button-secondaryBackground);
+    border-right:1px solid var(--vscode-button-secondaryBackground);
+    border-bottom:1px solid var(--vscode-button-secondaryBackground);
+    background-color: transparent;
     color: var(--vscode-editor-foreground);
     font-family: var(--vscode-font-family);
     font-weight: var(--vscode-font-weight);
