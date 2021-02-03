@@ -1,6 +1,9 @@
 # Changelog
 https://semver.org/
 
+## 1.7.29 (February 2, 2021)
+* Added demos
+
 ## 1.7.28 (February 2, 2021)
 * Webview datatable color changes
 
