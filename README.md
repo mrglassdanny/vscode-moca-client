@@ -3,7 +3,15 @@
 Provides MOCA client and language support for Visual Studio Code via the [MOCA Language Server].
 
 
+## Demos
+
+[Demos]
+
+
 ## Quick Start
+
+[Quick Start Demo]
+
 1. Install extension
 ![Install](resources/install.gif)
 
@@ -146,7 +154,8 @@ Please refer to [FAQ] to see if questions have already been asked/answered!
 
 
 [MOCA Language Server]: https://github.com/mrglassdanny/moca-language-server
-[FAQ]: https://github.com/mrglassdanny/vscode-moca-client/blob/master/FAQ.md
+[Demos]: https://github.com/mrglassdanny/vscode-moca-client/blob/master/DEMOS.md
+[Quick Start Demo]: https://vimeo.com/507834760/b2b6df34bd
 [minimum Java version]: https://github.com/mrglassdanny/moca-language-server
 [JAVA_HOME]: https://confluence.atlassian.com/doc/setting-the-java_home-variable-in-windows-8895.html
 [JRE_HOME]: https://confluence.atlassian.com/doc/setting-the-java_home-variable-in-windows-8895.html
@@ -154,3 +163,4 @@ Please refer to [FAQ] to see if questions have already been asked/answered!
 [Command Execution]: https://github.com/mrglassdanny/moca-language-server
 [Trace Outliner]: https://github.com/mrglassdanny/moca-language-server
 [contribution guide]: https://github.com/mrglassdanny/vscode-moca-client/blob/master/CONTRIBUTE.md
+[FAQ]: https://github.com/mrglassdanny/vscode-moca-client/blob/master/FAQ.md
