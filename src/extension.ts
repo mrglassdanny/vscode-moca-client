@@ -115,10 +115,10 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.workspace.fs.createDirectory(vscode.Uri.file(context.globalStoragePath));
 
 	// NOTE: uri will be structured differently for windows vs other platforms.
-	var commandLookupDir = null;
-	var traceDir = null;
-	var referencesDir = null;
-	var dirDelim = null;
+	var commandLookupDir: string = null;
+	var traceDir: string = null;
+	var referencesDir: string = null;
+	var dirDelim: string = null;
 	if (process["platform"] === "win32") {
 		commandLookupDir = context.globalStoragePath + "\\command-lookup";
 		traceDir = context.globalStoragePath + "\\trace";
@@ -571,13 +571,8 @@ export async function activate(context: vscode.ExtensionContext) {
 								}
 
 								// Create uri now so we can give it to lang server.
-								// NOTE: uri will be structured differently for windows vs other platforms.
-								var uri = null;
-								if (process["platform"] === "win32") {
-									uri = vscode.Uri.file(context.globalStoragePath + "\\trace\\" + fileName.replace('.log', '') + ".moca.traceoutline");
-								} else {
-									uri = vscode.Uri.file(context.globalStoragePath + "/trace/" + fileName.replace('.log', '') + ".moca.traceoutline");
-								}
+								var uri = vscode.Uri.file(traceDir + dirDelim + fileName.replace('.log', '') + ".moca.traceoutline");
+
 
 								// Now that we have a remote trace file name, we can request outline from lang server.
 								// NOTE: get rid of uri string encoding to match lang server format if windows. Do not skip encoding if other than windows.
@@ -655,13 +650,7 @@ export async function activate(context: vscode.ExtensionContext) {
 					});
 
 					// Create uri now so we can give it to lang server.
-					// NOTE: uri will be structured differently for windows vs other platforms.
-					var uri = null;
-					if (process["platform"] === "win32") {
-						uri = vscode.Uri.file(context.globalStoragePath + "\\trace\\" + traceFileNameSelectedRemote.replace('.log', '') + ".moca.traceoutline");
-					} else {
-						uri = vscode.Uri.file(context.globalStoragePath + "/trace/" + traceFileNameSelectedRemote.replace('.log', '') + ".moca.traceoutline");
-					}
+					var uri = vscode.Uri.file(traceDir + dirDelim + traceFileNameSelectedRemote.replace('.log', '') + ".moca.traceoutline");
 
 					// Now that we have a remote trace file name, we can request outline from lang server.
 					// NOTE: get rid of uri string encoding to match lang server format if windows. Do not skip encoding if other than windows.
@@ -715,13 +704,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 
 					// Create uri now so we can give it to lang server.
-					// NOTE: uri will be structured differently for windows vs other platforms.
-					var uri = null;
-					if (process["platform"] === "win32") {
-						uri = vscode.Uri.file(context.globalStoragePath + "\\trace\\" + traceFileNameSelectedShortenedLocalStr.replace('.log', '') + ".moca.traceoutline");
-					} else {
-						uri = vscode.Uri.file(context.globalStoragePath + "/trace/" + traceFileNameSelectedShortenedLocalStr.replace('.log', '') + ".moca.traceoutline");
-					}
+					var uri = vscode.Uri.file(traceDir + dirDelim + traceFileNameSelectedShortenedLocalStr.replace('.log', '') + ".moca.traceoutline");
 
 					// Now that we have a local trace file name, we can request outline from lang server.
 					// NOTE: get rid of uri string encoding to match lang server format if windows. Do not skip encoding if other than windows.
@@ -811,13 +794,7 @@ export async function activate(context: vscode.ExtensionContext) {
 					for (var j = 0; j < commandsAtLevels.length; j++) {
 						if (commandDataSelected.localeCompare(commandsAtLevels[j].cmplvl + ": " + commandsAtLevels[j].command + " (" + commandsAtLevels[j].type + ")") === 0) {
 
-							// NOTE: uri will be structured differently for windows vs other platforms.
-							var uri = null;
-							if (process["platform"] === "win32") {
-								uri = vscode.Uri.file(context.globalStoragePath + "\\command-lookup\\" + (commandsAtLevels[j].cmplvl + "-" + commandsAtLevels[j].command).replace(/ /g, "_") + ".moca.readonly");
-							} else {
-								uri = vscode.Uri.file(context.globalStoragePath + "/command-lookup/" + (commandsAtLevels[j].cmplvl + "-" + commandsAtLevels[j].command).replace(/ /g, "_") + ".moca.readonly");
-							}
+							var uri = vscode.Uri.file(commandLookupDir + dirDelim + (commandsAtLevels[j].cmplvl + "-" + commandsAtLevels[j].command).replace(/ /g, "_") + ".moca.readonly");
 
 							// Before we attempt to write, we need to make sure code is local syntax.
 							if (commandsAtLevels[j].type.localeCompare("Local Syntax") !== 0) {
@@ -834,13 +811,7 @@ export async function activate(context: vscode.ExtensionContext) {
 					for (var j = 0; j < triggers.length; j++) {
 						if (commandDataSelected.localeCompare("Trigger: " + triggers[j].trgseq + " - " + triggers[j].name) === 0) {
 
-							// NOTE: uri will be structured differently for windows vs other platforms.
-							var uri = null;
-							if (process["platform"] === "win32") {
-								uri = vscode.Uri.file(context.globalStoragePath + "\\command-lookup\\" + (distinctCommandSelected + "-" + triggers[j].name).replace(/ /g, "_") + ".moca.readonly");
-							} else {
-								uri = vscode.Uri.file(context.globalStoragePath + "/command-lookup/" + (distinctCommandSelected + "-" + triggers[j].name).replace(/ /g, "_") + ".moca.readonly");
-							}
+							var uri = vscode.Uri.file(commandLookupDir + dirDelim + (distinctCommandSelected + "-" + triggers[j].name).replace(/ /g, "_") + ".moca.readonly");
 
 							// Triggers are always local syntax.
 							await vscode.workspace.fs.writeFile(uri, Buffer.from(triggers[j].syntax));
