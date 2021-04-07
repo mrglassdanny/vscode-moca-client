@@ -118,14 +118,17 @@ export async function activate(context: vscode.ExtensionContext) {
 	var commandLookupDir = null;
 	var traceDir = null;
 	var referencesDir = null;
+	var dirDelim = null;
 	if (process["platform"] === "win32") {
-		commandLookupDir = context.globalStoragePath + "\\command-lookup\\";
-		traceDir = context.globalStoragePath + "\\trace\\";
-		referencesDir = context.globalStoragePath + "\\references\\";
+		commandLookupDir = context.globalStoragePath + "\\command-lookup";
+		traceDir = context.globalStoragePath + "\\trace";
+		referencesDir = context.globalStoragePath + "\\references";
+		dirDelim = "\\";
 	} else {
-		commandLookupDir = context.globalStoragePath + "/command-lookup/";
-		traceDir = context.globalStoragePath + "/trace/";
-		referencesDir = context.globalStoragePath + "/references/";
+		commandLookupDir = context.globalStoragePath + "/command-lookup";
+		traceDir = context.globalStoragePath + "/trace";
+		referencesDir = context.globalStoragePath + "/references";
+		dirDelim = "/";
 	}
 
 	// Make sure other paths exist.
@@ -137,24 +140,24 @@ export async function activate(context: vscode.ExtensionContext) {
 	var commandLookupDirRes = await vscode.workspace.fs.readDirectory(vscode.Uri.file(commandLookupDir));
 	for (var i = 0; i < commandLookupDirRes.length; i++) {
 		// Only delete if last modified date is not same as today.
-		if (fs.statSync(commandLookupDir + commandLookupDirRes[i][0]).mtime.getDate() != new Date().getDate()) {
-			vscode.workspace.fs.delete(vscode.Uri.file(commandLookupDir + commandLookupDirRes[i][0]));
+		if (fs.statSync(commandLookupDir + dirDelim + commandLookupDirRes[i][0]).mtime.getDate() != new Date().getDate()) {
+			vscode.workspace.fs.delete(vscode.Uri.file(commandLookupDir + dirDelim + commandLookupDirRes[i][0]));
 		}
 	}
 
 	var traceDirRes = await vscode.workspace.fs.readDirectory(vscode.Uri.file(traceDir));
 	for (var i = 0; i < traceDirRes.length; i++) {
 		// Only delete if last modified date is not same as today.
-		if (fs.statSync(traceDir + traceDirRes[i][0]).mtime.getDate() != new Date().getDate()) {
-			vscode.workspace.fs.delete(vscode.Uri.file(traceDir + traceDirRes[i][0]));
+		if (fs.statSync(traceDir + dirDelim + traceDirRes[i][0]).mtime.getDate() != new Date().getDate()) {
+			vscode.workspace.fs.delete(vscode.Uri.file(traceDir + dirDelim + traceDirRes[i][0]));
 		}
 	}
 
 	var referencesDirRes = await vscode.workspace.fs.readDirectory(vscode.Uri.file(referencesDir));
 	for (var i = 0; i < referencesDirRes.length; i++) {
 		// Only delete if last modified date is not same as today.
-		if (fs.statSync(referencesDir + referencesDirRes[i][0]).mtime.getDate() != new Date().getDate()) {
-			vscode.workspace.fs.delete(vscode.Uri.file(referencesDir + referencesDirRes[i][0]));
+		if (fs.statSync(referencesDir + dirDelim + referencesDirRes[i][0]).mtime.getDate() != new Date().getDate()) {
+			vscode.workspace.fs.delete(vscode.Uri.file(referencesDir + dirDelim + referencesDirRes[i][0]));
 		}
 	}
 
