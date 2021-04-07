@@ -1183,7 +1183,8 @@ function getShortenedFileName(fileName: string): string {
 	if (process["platform"] === "win32") {
 		return fileName.substring(fileName.lastIndexOf('\\') + 1, fileName.length);
 	} else {
-		return fileName.substring(fileName.lastIndexOf('/') + 1, fileName.length);
+		var shortenedFileName = fileName.substring(fileName.lastIndexOf('/') + 1, fileName.length);
+		return shortenedFileName.substring(shortenedFileName.lastIndexOf('\\'), shortenedFileName.length);
 	}
 }
 
