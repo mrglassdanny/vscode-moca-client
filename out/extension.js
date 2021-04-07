@@ -973,8 +973,7 @@ function getShortenedFileName(fileName) {
         return fileName.substring(fileName.lastIndexOf('\\') + 1, fileName.length);
     }
     else {
-        var shortenedFileName = fileName.substring(fileName.lastIndexOf('/') + 1, fileName.length);
-        return shortenedFileName.substring(shortenedFileName.lastIndexOf('\\'), shortenedFileName.length);
+        return fileName.substring(fileName.lastIndexOf('/') + 1, fileName.length);
     }
 }
 function executeMocaScriptWithProgress(context, curFileNameShortened, script, progressMessagePrefix) {
