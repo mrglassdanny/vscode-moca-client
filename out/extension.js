@@ -447,7 +447,14 @@ function activate(context) {
                                         minimumExecutionTime = 1.0;
                                     }
                                     // Create uri now so we can give it to lang server.
-                                    var uri = vscode.Uri.file(context.globalStoragePath + "\\trace\\" + fileName.replace('.log', '') + ".moca.traceoutline");
+                                    // TEST:
+                                    var uri = null;
+                                    if (process["platform"] === "win32") {
+                                        uri = vscode.Uri.file(context.globalStoragePath + "\\trace\\" + fileName.replace('.log', '') + ".moca.traceoutline");
+                                    }
+                                    else {
+                                        uri = vscode.Uri.file(context.globalStoragePath + "/trace/" + fileName.replace('.log', '') + ".moca.traceoutline");
+                                    }
                                     // Now that we have a remote trace file name, we can request outline from lang server.
                                     // NOTE: get rid of uri string encoding to match lang server format if windows. Do not skip encoding if other than windows.
                                     var traceResponseRemoteRes = null;
