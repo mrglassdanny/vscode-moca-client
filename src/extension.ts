@@ -285,7 +285,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		if (editor) {
 
 			var curFileName = editor.document.fileName;
-			var curFileNameShortened = curFileName.substring(curFileName.lastIndexOf('\\') + 1, curFileName.length);
+			var curFileNameShortened = getShortenedFileName(curFileName);
 			let script = editor.document.getText();
 
 			await executeMocaScriptWithProgress(context, curFileNameShortened, script, "Executing ");
@@ -299,7 +299,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		if (editor) {
 
 			var curFileName = editor.document.fileName;
-			var curFileNameShortened = curFileName.substring(curFileName.lastIndexOf('\\') + 1, curFileName.length);
+			var curFileNameShortened = getShortenedFileName(curFileName);
 
 			var selection = editor.selection;
 			if (selection) {
@@ -317,7 +317,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		if (editor) {
 
 			var curFileName = editor.document.fileName;
-			var curFileNameShortened = curFileName.substring(curFileName.lastIndexOf('\\') + 1, curFileName.length);
+			var curFileNameShortened = getShortenedFileName(curFileName);
 			let script = editor.document.getText();
 
 			await executeMocaScriptToCSVWithProgress(context, curFileNameShortened, curFileName, script, "Executing To CSV ");
@@ -331,7 +331,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		if (editor) {
 
 			var curFileName = editor.document.fileName;
-			var curFileNameShortened = curFileName.substring(curFileName.lastIndexOf('\\') + 1, curFileName.length);
+			var curFileNameShortened = getShortenedFileName(curFileName);
 
 			var selection = editor.selection;
 			if (selection) {
@@ -374,7 +374,7 @@ export async function activate(context: vscode.ExtensionContext) {
 					if (editor) {
 
 						var curFileName = editor.document.fileName;
-						var curFileNameShortened = curFileName.substring(curFileName.lastIndexOf('\\') + 1, curFileName.length);
+						var curFileNameShortened = getShortenedFileName(curFileName);
 						let script = editor.document.getText();
 
 						if (csvPublishMocaScript.length > 0 && script.length > 0) {
@@ -421,7 +421,7 @@ export async function activate(context: vscode.ExtensionContext) {
 					if (editor) {
 
 						var curFileName = editor.document.fileName;
-						var curFileNameShortened = curFileName.substring(curFileName.lastIndexOf('\\') + 1, curFileName.length);
+						var curFileNameShortened = getShortenedFileName(curFileName);
 						let script = editor.document.getText();
 
 						if (csvPublishMocaScript.length > 0 && script.length > 0) {
@@ -559,8 +559,15 @@ export async function activate(context: vscode.ExtensionContext) {
 								var uri = vscode.Uri.file(context.globalStoragePath + "\\trace\\" + fileName.replace('.log', '') + ".moca.traceoutline");
 
 								// Now that we have a remote trace file name, we can request outline from lang server.
-								// NOTE: get rid of uri string encoding to match lang server format.
-								var traceResponseRemoteRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, fileName + ".log", uri.toString(true), true, useLogicalIndentStrategy, minimumExecutionTime);
+								// NOTE: get rid of uri string encoding to match lang server format if windows. Do not skip encoding if other than windows.
+								var traceResponseRemoteRes = null;
+								if (process["platform"] === "win32") {
+									traceResponseRemoteRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, fileName + ".log", uri.toString(true), true, useLogicalIndentStrategy, minimumExecutionTime);
+								} else {
+									traceResponseRemoteRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, fileName + ".log", uri.toString(false), true, useLogicalIndentStrategy, minimumExecutionTime);
+								}
+
+
 								if (traceResponseRemoteRes) {
 									var traceResponseRemoteObj = JSON.parse(JSON.stringify(traceResponseRemoteRes));
 
@@ -630,8 +637,14 @@ export async function activate(context: vscode.ExtensionContext) {
 					var uri = vscode.Uri.file(context.globalStoragePath + "\\trace\\" + traceFileNameSelectedRemote.replace('.log', '') + ".moca.traceoutline");
 
 					// Now that we have a remote trace file name, we can request outline from lang server.
-					// NOTE: get rid of uri string encoding to match lang server format.
-					traceResponseRemoteRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedRemote, uri.toString(true), true, useLogicalIndentStrategy, minimumExecutionTime);
+					// NOTE: get rid of uri string encoding to match lang server format if windows. Do not skip encoding if other than windows.
+					if (process["platform"] === "win32") {
+						traceResponseRemoteRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedRemote, uri.toString(true), true, useLogicalIndentStrategy, minimumExecutionTime);
+					} else {
+						traceResponseRemoteRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedRemote, uri.toString(false), true, useLogicalIndentStrategy, minimumExecutionTime);
+					}
+
+
 					if (traceResponseRemoteRes) {
 						traceResponseRemoteObj = JSON.parse(JSON.stringify(traceResponseRemoteRes));
 
@@ -678,8 +691,13 @@ export async function activate(context: vscode.ExtensionContext) {
 					var uri = vscode.Uri.file(context.globalStoragePath + "\\trace\\" + traceFileNameSelectedShortenedLocalStr.replace('.log', '') + ".moca.traceoutline");
 
 					// Now that we have a local trace file name, we can request outline from lang server.
-					// NOTE: get rid of uri string encoding to match lang server format.
-					var traceResponseLocalRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedLocalStr, uri.toString(true), false, useLogicalIndentStrategy, minimumExecutionTime);
+					// NOTE: get rid of uri string encoding to match lang server format if windows. Do not skip encoding if other than windows.
+					var traceResponseLocalRes = null;
+					if (process["platform"] === "win32") {
+						traceResponseLocalRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedLocalStr, uri.toString(true), false, useLogicalIndentStrategy, minimumExecutionTime);
+					} else {
+						traceResponseLocalRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE, traceFileNameSelectedLocalStr, uri.toString(false), false, useLogicalIndentStrategy, minimumExecutionTime);
+					}
 
 					if (traceResponseLocalRes) {
 						var traceResponseLocalObj = JSON.parse(JSON.stringify(traceResponseLocalRes));
@@ -841,7 +859,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			if (editor) {
 
 				var curFileName = editor.document.fileName;
-				var curFileNameShortened = curFileName.substring(curFileName.lastIndexOf('\\') + 1, curFileName.length);
+				var curFileNameShortened = getShortenedFileName(curFileName);
 				let script = editor.document.getText();
 
 				vscode.window.withProgress({
@@ -1158,6 +1176,15 @@ export default function findJava(): string {
 
 function validate(javaPath: string): boolean {
 	return fs.existsSync(javaPath) && fs.statSync(javaPath).isFile();
+}
+
+function getShortenedFileName(fileName: string): string {
+	// Behavior will be different for windows vs other platforms.
+	if (process["platform"] === "win32") {
+		return fileName.substring(fileName.lastIndexOf('\\') + 1, fileName.length);
+	} else {
+		return fileName.substring(fileName.lastIndexOf('/') + 1, fileName.length);
+	}
 }
 
 async function executeMocaScriptWithProgress(context: vscode.ExtensionContext, curFileNameShortened: string, script: string, progressMessagePrefix: string) {
