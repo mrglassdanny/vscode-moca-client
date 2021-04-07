@@ -124,8 +124,15 @@ export async function activate(context: vscode.ExtensionContext) {
 	for (var i = 0; i < commandLookupDirRes.length; i++) {
 
 		// Only delete if last modified date is not same as today.
-		if (fs.statSync(context.globalStoragePath + "\\command-lookup\\" + commandLookupDirRes[i][0]).mtime.getDate() != new Date().getDate()) {
-			vscode.workspace.fs.delete(vscode.Uri.file(context.globalStoragePath + "\\command-lookup\\" + commandLookupDirRes[i][0]));
+		// NOTE: uri will be structured differently for windows vs other platforms.
+		if (process["platform"] === "win32") {
+			if (fs.statSync(context.globalStoragePath + "\\command-lookup\\" + commandLookupDirRes[i][0]).mtime.getDate() == new Date().getDate()) {
+				vscode.workspace.fs.delete(vscode.Uri.file(context.globalStoragePath + "\\command-lookup\\" + commandLookupDirRes[i][0]));
+			}
+		} else {
+			if (fs.statSync(context.globalStoragePath + "/command-lookup/" + commandLookupDirRes[i][0]).mtime.getDate() == new Date().getDate()) {
+				vscode.workspace.fs.delete(vscode.Uri.file(context.globalStoragePath + "/command-lookup/" + commandLookupDirRes[i][0]));
+			}
 		}
 
 	}
@@ -133,16 +140,30 @@ export async function activate(context: vscode.ExtensionContext) {
 	for (var i = 0; i < traceDirRes.length; i++) {
 
 		// Only delete if last modified date is not same as today.
-		if (fs.statSync(context.globalStoragePath + "\\trace\\" + traceDirRes[i][0]).mtime.getDate() != new Date().getDate()) {
-			vscode.workspace.fs.delete(vscode.Uri.file(context.globalStoragePath + "\\trace\\" + traceDirRes[i][0]));
+		// NOTE: uri will be structured differently for windows vs other platforms.
+		if (process["platform"] === "win32") {
+			if (fs.statSync(context.globalStoragePath + "\\trace\\" + traceDirRes[i][0]).mtime.getDate() != new Date().getDate()) {
+				vscode.workspace.fs.delete(vscode.Uri.file(context.globalStoragePath + "\\trace\\" + traceDirRes[i][0]));
+			}
+		} else {
+			if (fs.statSync(context.globalStoragePath + "/trace/" + traceDirRes[i][0]).mtime.getDate() != new Date().getDate()) {
+				vscode.workspace.fs.delete(vscode.Uri.file(context.globalStoragePath + "/trace/" + traceDirRes[i][0]));
+			}
 		}
 	}
 	var referencesDirRes = await vscode.workspace.fs.readDirectory(vscode.Uri.file(context.globalStoragePath + "\\references"));
 	for (var i = 0; i < referencesDirRes.length; i++) {
 
 		// Only delete if last modified date is not same as today.
-		if (fs.statSync(context.globalStoragePath + "\\references\\" + referencesDirRes[i][0]).mtime.getDate() != new Date().getDate()) {
-			vscode.workspace.fs.delete(vscode.Uri.file(context.globalStoragePath + "\\references\\" + referencesDirRes[i][0]));
+		// NOTE: uri will be structured differently for windows vs other platforms.
+		if (process["platform"] === "win32") {
+			if (fs.statSync(context.globalStoragePath + "\\references\\" + referencesDirRes[i][0]).mtime.getDate() != new Date().getDate()) {
+				vscode.workspace.fs.delete(vscode.Uri.file(context.globalStoragePath + "\\references\\" + referencesDirRes[i][0]));
+			}
+		} else {
+			if (fs.statSync(context.globalStoragePath + "/references/" + referencesDirRes[i][0]).mtime.getDate() != new Date().getDate()) {
+				vscode.workspace.fs.delete(vscode.Uri.file(context.globalStoragePath + "/references/" + referencesDirRes[i][0]));
+			}
 		}
 	}
 
@@ -556,7 +577,7 @@ export async function activate(context: vscode.ExtensionContext) {
 								}
 
 								// Create uri now so we can give it to lang server.
-								// TEST:
+								// NOTE: uri will be structured differently for windows vs other platforms.
 								var uri = null;
 								if (process["platform"] === "win32") {
 									uri = vscode.Uri.file(context.globalStoragePath + "\\trace\\" + fileName.replace('.log', '') + ".moca.traceoutline");
@@ -640,7 +661,13 @@ export async function activate(context: vscode.ExtensionContext) {
 					});
 
 					// Create uri now so we can give it to lang server.
-					var uri = vscode.Uri.file(context.globalStoragePath + "\\trace\\" + traceFileNameSelectedRemote.replace('.log', '') + ".moca.traceoutline");
+					// NOTE: uri will be structured differently for windows vs other platforms.
+					var uri = null;
+					if (process["platform"] === "win32") {
+						uri = vscode.Uri.file(context.globalStoragePath + "\\trace\\" + traceFileNameSelectedRemote.replace('.log', '') + ".moca.traceoutline");
+					} else {
+						uri = vscode.Uri.file(context.globalStoragePath + "/trace/" + traceFileNameSelectedRemote.replace('.log', '') + ".moca.traceoutline");
+					}
 
 					// Now that we have a remote trace file name, we can request outline from lang server.
 					// NOTE: get rid of uri string encoding to match lang server format if windows. Do not skip encoding if other than windows.
@@ -694,7 +721,13 @@ export async function activate(context: vscode.ExtensionContext) {
 
 
 					// Create uri now so we can give it to lang server.
-					var uri = vscode.Uri.file(context.globalStoragePath + "\\trace\\" + traceFileNameSelectedShortenedLocalStr.replace('.log', '') + ".moca.traceoutline");
+					// NOTE: uri will be structured differently for windows vs other platforms.
+					var uri = null;
+					if (process["platform"] === "win32") {
+						uri = vscode.Uri.file(context.globalStoragePath + "\\trace\\" + traceFileNameSelectedShortenedLocalStr.replace('.log', '') + ".moca.traceoutline");
+					} else {
+						uri = vscode.Uri.file(context.globalStoragePath + "/trace/" + traceFileNameSelectedShortenedLocalStr.replace('.log', '') + ".moca.traceoutline");
+					}
 
 					// Now that we have a local trace file name, we can request outline from lang server.
 					// NOTE: get rid of uri string encoding to match lang server format if windows. Do not skip encoding if other than windows.
@@ -783,7 +816,15 @@ export async function activate(context: vscode.ExtensionContext) {
 					// Checking commands.
 					for (var j = 0; j < commandsAtLevels.length; j++) {
 						if (commandDataSelected.localeCompare(commandsAtLevels[j].cmplvl + ": " + commandsAtLevels[j].command + " (" + commandsAtLevels[j].type + ")") === 0) {
-							var uri = vscode.Uri.file(context.globalStoragePath + "\\command-lookup\\" + (commandsAtLevels[j].cmplvl + "-" + commandsAtLevels[j].command).replace(/ /g, "_") + ".moca.readonly");
+
+							// NOTE: uri will be structured differently for windows vs other platforms.
+							var uri = null;
+							if (process["platform"] === "win32") {
+								uri = vscode.Uri.file(context.globalStoragePath + "\\command-lookup\\" + (commandsAtLevels[j].cmplvl + "-" + commandsAtLevels[j].command).replace(/ /g, "_") + ".moca.readonly");
+							} else {
+								uri = vscode.Uri.file(context.globalStoragePath + "/command-lookup/" + (commandsAtLevels[j].cmplvl + "-" + commandsAtLevels[j].command).replace(/ /g, "_") + ".moca.readonly");
+							}
+
 							// Before we attempt to write, we need to make sure code is local syntax.
 							if (commandsAtLevels[j].type.localeCompare("Local Syntax") !== 0) {
 								vscode.window.showErrorMessage("Command Lookup: Cannot view non Local Syntax commands!");
@@ -798,7 +839,15 @@ export async function activate(context: vscode.ExtensionContext) {
 					// Checking triggers.
 					for (var j = 0; j < triggers.length; j++) {
 						if (commandDataSelected.localeCompare("Trigger: " + triggers[j].trgseq + " - " + triggers[j].name) === 0) {
-							var uri = vscode.Uri.file(context.globalStoragePath + "\\command-lookup\\" + (distinctCommandSelected + "-" + triggers[j].name).replace(/ /g, "_") + ".moca.readonly");
+
+							// NOTE: uri will be structured differently for windows vs other platforms.
+							var uri = null;
+							if (process["platform"] === "win32") {
+								uri = vscode.Uri.file(context.globalStoragePath + "\\command-lookup\\" + (distinctCommandSelected + "-" + triggers[j].name).replace(/ /g, "_") + ".moca.readonly");
+							} else {
+								uri = vscode.Uri.file(context.globalStoragePath + "/command-lookup/" + (distinctCommandSelected + "-" + triggers[j].name).replace(/ /g, "_") + ".moca.readonly");
+							}
+
 							// Triggers are always local syntax.
 							await vscode.workspace.fs.writeFile(uri, Buffer.from(triggers[j].syntax));
 							var doc = await vscode.workspace.openTextDocument(uri);
