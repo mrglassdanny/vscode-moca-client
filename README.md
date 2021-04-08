@@ -14,7 +14,7 @@ Provides MOCA client and language support for Visual Studio Code via the [MOCA L
 [Quick Start Demo]
 
 1. [Install extension]
-    - HINT: search for "MOCA"
+    - search for "MOCA"
 
 2. Make sure [minimum Java version] is installed and either:
     - set [JRE_HOME] environment variable
