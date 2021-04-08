@@ -13,7 +13,7 @@ Provides MOCA client and language support for Visual Studio Code via the [MOCA L
 [Quick Start Demo]
 
 1. Install extension
-![Install](resources/install.gif)
+[vscode Extension Marketplace]
 
 2. Make sure [minimum Java version] is installed and either:
     - set [JRE_HOME] environment variable
@@ -34,7 +34,6 @@ Provides MOCA client and language support for Visual Studio Code via the [MOCA L
 - [Intellisense]
 - [Command Execution]
 - [Trace Outliner]
-![Trace-Outliner-Demo](resources/trace-outliner-demo.gif)
 
 
 ## Commands
@@ -156,6 +155,7 @@ Please refer to [FAQ] to see if questions have already been asked/answered!
 [MOCA Language Server]: https://github.com/mrglassdanny/moca-language-server
 [Demos]: https://github.com/mrglassdanny/vscode-moca-client/blob/master/DEMOS.md
 [Quick Start Demo]: https://vimeo.com/507834760/b2b6df34bd
+[vscode Extension Marketplace]: https://code.visualstudio.com/docs/editor/extension-gallery
 [minimum Java version]: https://github.com/mrglassdanny/moca-language-server
 [JAVA_HOME]: https://confluence.atlassian.com/doc/setting-the-java_home-variable-in-windows-8895.html
 [JRE_HOME]: https://confluence.atlassian.com/doc/setting-the-java_home-variable-in-windows-8895.html

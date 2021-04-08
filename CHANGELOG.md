@@ -1,6 +1,10 @@
 # Changelog
 https://semver.org/
 
+## 1.7.30 (April 7, 2021)
+* MOCA language server update -- https://github.com/mrglassdanny/moca-language-server/blob/master/CHANGELOG.md
+* macOS fix -- https://github.com/mrglassdanny/vscode-moca-client/issues/14
+
 ## 1.7.29 (February 2, 2021)
 * Added demos
 
