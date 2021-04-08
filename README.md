@@ -2,6 +2,7 @@
 
 Provides MOCA client and language support for Visual Studio Code via the [MOCA Language Server].
 
+![Demo](resources/demo.gif)
 
 ## Demos
 
@@ -12,8 +13,8 @@ Provides MOCA client and language support for Visual Studio Code via the [MOCA L
 
 [Quick Start Demo]
 
-1. Install extension
-[vscode Extension Marketplace]
+1. [Install extension]
+    - HINT: search for "MOCA"
 
 2. Make sure [minimum Java version] is installed and either:
     - set [JRE_HOME] environment variable
@@ -28,8 +29,6 @@ Provides MOCA client and language support for Visual Studio Code via the [MOCA L
 
 ## Features
 
-![Demo](resources/demo.gif)
-
 - Syntax highlighting
 - [Intellisense]
 - [Command Execution]
@@ -37,6 +36,7 @@ Provides MOCA client and language support for Visual Studio Code via the [MOCA L
 
 
 ## Commands
+
 - `MOCA:Connect to MOCA Server`: Connect to 1 of the MOCA servers specified in `moca.connections` configuration.
 - `MOCA:Load MOCA Cache`: Loads MOCA cache(commands/triggers/tables/views/etc).
 - `MOCA:Execute MOCA Script` (`Ctrl+Enter`): Executes script in focused MOCA file and displays results in web view.
@@ -144,6 +144,7 @@ Please refer to the [contribution guide] for specifics.
 
 
 ## FAQ
+
 Please refer to [FAQ] to see if questions have already been asked/answered!
 
 
@@ -155,7 +156,7 @@ Please refer to [FAQ] to see if questions have already been asked/answered!
 [MOCA Language Server]: https://github.com/mrglassdanny/moca-language-server
 [Demos]: https://github.com/mrglassdanny/vscode-moca-client/blob/master/DEMOS.md
 [Quick Start Demo]: https://vimeo.com/507834760/b2b6df34bd
-[vscode Extension Marketplace]: https://code.visualstudio.com/docs/editor/extension-gallery
+[Install extension]: https://code.visualstudio.com/docs/editor/extension-gallery
 [minimum Java version]: https://github.com/mrglassdanny/moca-language-server
 [JAVA_HOME]: https://confluence.atlassian.com/doc/setting-the-java_home-variable-in-windows-8895.html
 [JRE_HOME]: https://confluence.atlassian.com/doc/setting-the-java_home-variable-in-windows-8895.html
