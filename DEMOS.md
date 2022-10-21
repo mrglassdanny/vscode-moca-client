@@ -5,7 +5,7 @@
 
 ## Getting Started
 
-[Getting Started Demo]
+[Getting Started]
 
 
 ## Code Editor
@@ -13,9 +13,9 @@
 Coming Soon!
 
 
-## Execution & Results
+## Execution and Results
 
-[Execution & Results]
+[Execution and Results]
 
 
 ## Trace Outliner
@@ -30,13 +30,13 @@ Coming Soon!
 
 ## HTTPS Certification Installation
 
-[HTTPS Certification Installation Demo]
+[HTTPS Certification Installation]
 
 
 
 
 
 [MOCA Programming]: https://vimeo.com/761563998
-[Getting Started Demo]: https://vimeo.com/507834760/b2b6df34bd
-[Execution & Results]: https://vimeo.com/762796098/395d8f3533
-[HTTPS Certification Installation Demo]: https://vimeo.com/500196466
+[Getting Started]: https://vimeo.com/507834760
+[Execution and Results]: https://vimeo.com/762796098
+[HTTPS Certification Installation]: https://vimeo.com/500196466
