@@ -25,7 +25,7 @@ Coming Soon!
 
 ## Auto Execution
 
-Coming Soon!
+[Auto Execution]
 
 
 ## HTTPS Certification Installation
@@ -39,4 +39,5 @@ Coming Soon!
 [MOCA Programming]: https://vimeo.com/761563998
 [Getting Started]: https://vimeo.com/507834760
 [Execution and Results]: https://vimeo.com/762796098
+[Auto Execution]: https://vimeo.com/763537613
 [HTTPS Certification Installation]: https://vimeo.com/500196466
