@@ -3,6 +3,7 @@ https://semver.org/
 
 ## 1.7.32 (October 25, 2022)
 * MOCA language server update -- https://github.com/mrglassdanny/moca-language-server/blob/master/CHANGELOG.md
+* Webview focus tweak
 
 ## 1.7.31 (May 4, 2022)
 * MOCA language server update -- https://github.com/mrglassdanny/moca-language-server/blob/master/CHANGELOG.md
