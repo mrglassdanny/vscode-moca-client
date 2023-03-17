@@ -21,7 +21,7 @@ export class ResultViewPanel {
 
         if (ResultViewPanel.resultViewPanels.has(fileName)) {
             var resultViewPanel = this.resultViewPanels.get(fileName);
-            resultViewPanel._panel.reveal(column, true);
+            resultViewPanel._panel.reveal(column, false);
             resultViewPanel.res = res;
         } else {
             // We don't have a panel, initialize one.
@@ -40,7 +40,7 @@ export class ResultViewPanel {
 
             var resultViewPanel = new ResultViewPanel(panel, extensionPath, fileName, res);
             ResultViewPanel.resultViewPanels.set(fileName, resultViewPanel);
-            resultViewPanel._panel.reveal(column, true);
+            resultViewPanel._panel.reveal(column, false);
         }
     }
 

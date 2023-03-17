@@ -1,6 +1,9 @@
 # Changelog
 https://semver.org/
 
+## 1.7.33 (March 17, 2023)
+* Issue #20 fix
+
 ## 1.7.32 (October 25, 2022)
 * MOCA language server update -- https://github.com/mrglassdanny/moca-language-server/blob/master/CHANGELOG.md
 * Webview focus tweak
