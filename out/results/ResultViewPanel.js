@@ -37,7 +37,7 @@ class ResultViewPanel {
         const column = vscode.ViewColumn.Beside;
         if (ResultViewPanel.resultViewPanels.has(fileName)) {
             var resultViewPanel = this.resultViewPanels.get(fileName);
-            resultViewPanel._panel.reveal(column, true);
+            resultViewPanel._panel.reveal(column, false);
             resultViewPanel.res = res;
         }
         else {
@@ -50,7 +50,7 @@ class ResultViewPanel {
             });
             var resultViewPanel = new ResultViewPanel(panel, extensionPath, fileName, res);
             ResultViewPanel.resultViewPanels.set(fileName, resultViewPanel);
-            resultViewPanel._panel.reveal(column, true);
+            resultViewPanel._panel.reveal(column, false);
         }
     }
     doRefactor() {
