@@ -38,6 +38,12 @@ class MocaResults {
         else {
             this.needsApprovalToExecute = false;
         }
+        if (data['superUser']) {
+            this.superUser = true;
+        }
+        else {
+            this.superUser = false;
+        }
     }
 }
 exports.MocaResults = MocaResults;
