@@ -5,6 +5,26 @@ const path = require("path");
 const vscode = require("vscode");
 const extension_1 = require("../extension");
 class ResultViewPanel {
+    static createOrShow(extensionPath, fileName, res) {
+        const column = vscode.ViewColumn.Beside;
+        if (ResultViewPanel.resultViewPanels.has(fileName)) {
+            var resultViewPanel = this.resultViewPanels.get(fileName);
+            resultViewPanel._panel.reveal(column, false);
+            resultViewPanel.res = res;
+        }
+        else {
+            // We don't have a panel, initialize one.
+            const panel = vscode.window.createWebviewPanel(ResultViewPanel.viewType, 'Results: ' + fileName, column, {
+                //Enable javascript in the webview
+                enableScripts: true,
+                // And restrict the webview to only loading content from our extension's `media` directory.
+                localResourceRoots: [vscode.Uri.file(path.join(extensionPath, 'media'))]
+            });
+            var resultViewPanel = new ResultViewPanel(panel, extensionPath, fileName, res);
+            ResultViewPanel.resultViewPanels.set(fileName, resultViewPanel);
+            resultViewPanel._panel.reveal(column, false);
+        }
+    }
     constructor(panel, extensionPath, fileName, res) {
         this._disposables = [];
         this.curColWidths = [];
@@ -32,26 +52,6 @@ class ResultViewPanel {
                     return;
             }
         }, null, this._disposables);
-    }
-    static createOrShow(extensionPath, fileName, res) {
-        const column = vscode.ViewColumn.Beside;
-        if (ResultViewPanel.resultViewPanels.has(fileName)) {
-            var resultViewPanel = this.resultViewPanels.get(fileName);
-            resultViewPanel._panel.reveal(column, false);
-            resultViewPanel.res = res;
-        }
-        else {
-            // We don't have a panel, initialize one.
-            const panel = vscode.window.createWebviewPanel(ResultViewPanel.viewType, 'Results: ' + fileName, column, {
-                //Enable javascript in the webview
-                enableScripts: true,
-                // And restrict the webview to only loading content from our extension's `media` directory.
-                localResourceRoots: [vscode.Uri.file(path.join(extensionPath, 'media'))]
-            });
-            var resultViewPanel = new ResultViewPanel(panel, extensionPath, fileName, res);
-            ResultViewPanel.resultViewPanels.set(fileName, resultViewPanel);
-            resultViewPanel._panel.reveal(column, false);
-        }
     }
     doRefactor() {
         // Send a message to the webview webview.

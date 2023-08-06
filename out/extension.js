@@ -53,7 +53,7 @@ var LanguageClientCommands;
     LanguageClientCommands.OPEN_TRACE_OUTLINE = "moca.openTraceOutline";
     LanguageClientCommands.COMMAND_LOOKUP = "moca.commandLookup";
     LanguageClientCommands.AUTO_EXECUTE = "moca.autoExecute";
-})(LanguageClientCommands = exports.LanguageClientCommands || (exports.LanguageClientCommands = {}));
+})(LanguageClientCommands || (exports.LanguageClientCommands = LanguageClientCommands = {}));
 // Language server commands.
 var LanguageServerCommands;
 (function (LanguageServerCommands) {
@@ -66,7 +66,7 @@ var LanguageServerCommands;
     LanguageServerCommands.OPEN_TRACE_OUTLINE = "mocalanguageserver.openTraceOutline";
     LanguageServerCommands.COMMAND_LOOKUP = "mocalanguageserver.commandLookup";
     LanguageServerCommands.SET_LANGUAGE_SERVER_OPTIONS = "mocalanguageserver.setLanguageServerOptions";
-})(LanguageServerCommands = exports.LanguageServerCommands || (exports.LanguageServerCommands = {}));
+})(LanguageServerCommands || (exports.LanguageServerCommands = LanguageServerCommands = {}));
 // Status bar items.
 // Arbitrary number to offset status bar priorities in order to try to keep items together better.
 const STATUS_BAR_PRIORITY_OFFSET = 562;
@@ -88,6 +88,7 @@ const STATUS_BAR_STOP_TRACE_STR = "$(debug-disconnect) Stop Trace";
 const UNSAFE_CODE_APPROVAL_PROMPT = "You are attempting to run unsafe code. Do you want to continue?";
 const UNSAFE_CODE_APPROVAL_OPTION_YES = "Yes";
 const UNSAFE_CODE_APPROVAL_OPTION_NO = "No";
+const UNSAFE_CODE_NOT_SUPER_USER_MESSAGE = "Only super users are allowed to run unsafe code.";
 // Constants for opening trace outline immediately after trace stop.
 const OPEN_TRACE_OUTLINE_PROMPT = "Would you like to open trace outline?";
 const OPEN_TRACE_OUTLINE_OPTION_YES = "Yes";
@@ -1015,22 +1016,27 @@ function executeMocaScriptWithProgress(context, curFileNameShortened, script, pr
             // If cancellation requested, skip this part.
             if (!cancellationRequested) {
                 var mocaResults = new mocaResults_1.MocaResults(res);
-                // If lang server says we need approval before executing(due to unsafe code config on connection), we need to ask the user if they truly want to run script.
+                // If lang server says we need approval before executing (due to unsafe code config on connection), we need to ask the user if they truly want to run script.
                 // NOTE: if cancellation is requested before we get here, lang server does not run unsafe scripts in configured envs by default -- assuming that approval is required.
                 if (mocaResults.needsApprovalToExecute) {
-                    var approvalOptionRes = yield vscode.window.showWarningMessage(UNSAFE_CODE_APPROVAL_PROMPT, UNSAFE_CODE_APPROVAL_OPTION_YES, UNSAFE_CODE_APPROVAL_OPTION_NO);
-                    // Check again if cancellation is requested.
-                    // If so, just exit and do not worry about approval option result.
-                    if (!cancellationRequested) {
-                        if (approvalOptionRes === UNSAFE_CODE_APPROVAL_OPTION_YES) {
-                            // User says yes; run script!
-                            var approvedRes = yield vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, script, curFileNameShortened, true);
-                            // If cancellation requested, skip this part.
-                            if (!cancellationRequested) {
-                                var approvedMocaResults = new mocaResults_1.MocaResults(approvedRes);
-                                ResultViewPanel_1.ResultViewPanel.createOrShow(context.extensionPath, curFileNameShortened, approvedMocaResults);
-                                if (approvedMocaResults.msg && approvedMocaResults.msg.length > 0) {
-                                    vscode.window.showErrorMessage(curFileNameShortened + ": " + approvedMocaResults.msg);
+                    if (!mocaResults.superUser) {
+                        vscode.window.showErrorMessage(UNSAFE_CODE_NOT_SUPER_USER_MESSAGE);
+                    }
+                    else {
+                        var approvalOptionRes = yield vscode.window.showWarningMessage(UNSAFE_CODE_APPROVAL_PROMPT, UNSAFE_CODE_APPROVAL_OPTION_YES, UNSAFE_CODE_APPROVAL_OPTION_NO);
+                        // Check again if cancellation is requested.
+                        // If so, just exit and do not worry about approval option result.
+                        if (!cancellationRequested) {
+                            if (approvalOptionRes === UNSAFE_CODE_APPROVAL_OPTION_YES) {
+                                // User says yes -- run script!
+                                var approvedRes = yield vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, script, curFileNameShortened, true);
+                                // If cancellation requested, skip this part.
+                                if (!cancellationRequested) {
+                                    var approvedMocaResults = new mocaResults_1.MocaResults(approvedRes);
+                                    ResultViewPanel_1.ResultViewPanel.createOrShow(context.extensionPath, curFileNameShortened, approvedMocaResults);
+                                    if (approvedMocaResults.msg && approvedMocaResults.msg.length > 0) {
+                                        vscode.window.showErrorMessage(curFileNameShortened + ": " + approvedMocaResults.msg);
+                                    }
                                 }
                             }
                         }

@@ -19,7 +19,7 @@ const extension_1 = require("../extension");
 // Global access variables.
 var GlobalSemanticHighlightingVars;
 (function (GlobalSemanticHighlightingVars) {
-})(GlobalSemanticHighlightingVars = exports.GlobalSemanticHighlightingVars || (exports.GlobalSemanticHighlightingVars = {}));
+})(GlobalSemanticHighlightingVars || (exports.GlobalSemanticHighlightingVars = GlobalSemanticHighlightingVars = {}));
 // Language server push notification providing the semantic highlighting
 // information for a text document.
 const NotificationType = new vscodelc.NotificationType('textDocument/semanticHighlighting');
