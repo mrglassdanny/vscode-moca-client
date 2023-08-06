@@ -85,7 +85,7 @@ const STATUS_BAR_STOP_TRACE_STR = "$(debug-disconnect) Stop Trace";
 const UNSAFE_CODE_APPROVAL_PROMPT = "You are attempting to run unsafe code. Do you want to continue?";
 const UNSAFE_CODE_APPROVAL_OPTION_YES = "Yes";
 const UNSAFE_CODE_APPROVAL_OPTION_NO = "No";
-const UNSAFE_CODE_NOT_SUPER_USER_PROMPT = "Only super users are allowed to run unsafe code.";
+const UNSAFE_CODE_NOT_SUPER_USER_MESSAGE = "Only super users are allowed to run unsafe code.";
 
 // Constants for opening trace outline immediately after trace stop.
 const OPEN_TRACE_OUTLINE_PROMPT = "Would you like to open trace outline?";
@@ -1240,7 +1240,7 @@ async function executeMocaScriptWithProgress(context: vscode.ExtensionContext, c
 			if (mocaResults.needsApprovalToExecute) {
 
 				if (!mocaResults.superUser) {
-					vscode.window.showErrorMessage(UNSAFE_CODE_NOT_SUPER_USER_PROMPT);
+					vscode.window.showErrorMessage(UNSAFE_CODE_NOT_SUPER_USER_MESSAGE);
 				} else {
 					var approvalOptionRes = await vscode.window.showWarningMessage(UNSAFE_CODE_APPROVAL_PROMPT, UNSAFE_CODE_APPROVAL_OPTION_YES, UNSAFE_CODE_APPROVAL_OPTION_NO);
 					// Check again if cancellation is requested.
