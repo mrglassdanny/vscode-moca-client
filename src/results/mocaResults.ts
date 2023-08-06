@@ -10,6 +10,7 @@ export class MocaResults {
     rows: Object[][];
     msg: string;
     needsApprovalToExecute: boolean;
+    superUser: boolean;
 
     constructor(data: any) {
         if (data['results']) {
@@ -46,8 +47,10 @@ export class MocaResults {
             this.needsApprovalToExecute = false;
         }
 
-
+        if (data['superUser']) {
+            this.superUser = true;
+        } else {
+            this.superUser = false;
+        }
     }
-
-
 }
