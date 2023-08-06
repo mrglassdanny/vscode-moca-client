@@ -53,6 +53,4 @@ export class MocaResults {
             this.superUser = false;
         }
     }
-
-
 }
