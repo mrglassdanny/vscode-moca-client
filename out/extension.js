@@ -53,7 +53,7 @@ var LanguageClientCommands;
     LanguageClientCommands.OPEN_TRACE_OUTLINE = "moca.openTraceOutline";
     LanguageClientCommands.COMMAND_LOOKUP = "moca.commandLookup";
     LanguageClientCommands.AUTO_EXECUTE = "moca.autoExecute";
-})(LanguageClientCommands || (exports.LanguageClientCommands = LanguageClientCommands = {}));
+})(LanguageClientCommands = exports.LanguageClientCommands || (exports.LanguageClientCommands = {}));
 // Language server commands.
 var LanguageServerCommands;
 (function (LanguageServerCommands) {
@@ -66,7 +66,7 @@ var LanguageServerCommands;
     LanguageServerCommands.OPEN_TRACE_OUTLINE = "mocalanguageserver.openTraceOutline";
     LanguageServerCommands.COMMAND_LOOKUP = "mocalanguageserver.commandLookup";
     LanguageServerCommands.SET_LANGUAGE_SERVER_OPTIONS = "mocalanguageserver.setLanguageServerOptions";
-})(LanguageServerCommands || (exports.LanguageServerCommands = LanguageServerCommands = {}));
+})(LanguageServerCommands = exports.LanguageServerCommands || (exports.LanguageServerCommands = {}));
 // Status bar items.
 // Arbitrary number to offset status bar priorities in order to try to keep items together better.
 const STATUS_BAR_PRIORITY_OFFSET = 562;
