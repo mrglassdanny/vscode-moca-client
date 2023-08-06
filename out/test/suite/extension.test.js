@@ -7,7 +7,7 @@ const mocha_1 = require("mocha");
 const vscode = require("vscode");
 // import * as myExtension from '../extension';
 suite('Extension Test Suite', () => {
-    (0, mocha_1.before)(() => {
+    mocha_1.before(() => {
         vscode.window.showInformationMessage('Start all tests.');
     });
     test('Sample test', () => {
