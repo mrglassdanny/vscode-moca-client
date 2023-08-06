@@ -11,7 +11,7 @@ import { performance } from 'perf_hooks';
 
 
 // Language server constants.
-const MOCA_LANGUAGE_SERVER_VERSION = "1.10.21";
+const MOCA_LANGUAGE_SERVER_VERSION = "1.11.21";
 const MOCA_LANGUAGE_SERVER = "moca-language-server-" + MOCA_LANGUAGE_SERVER_VERSION + "-all.jar";
 const MOCA_LANGUAGE_SERVER_INITIALIZING_MESSAGE = "MOCA: Initializing language server";
 const MOCA_LANGUAGE_SERVER_ERR_STARTUP = "The MOCA extension failed to start";
