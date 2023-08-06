@@ -85,6 +85,7 @@ const STATUS_BAR_STOP_TRACE_STR = "$(debug-disconnect) Stop Trace";
 const UNSAFE_CODE_APPROVAL_PROMPT = "You are attempting to run unsafe code. Do you want to continue?";
 const UNSAFE_CODE_APPROVAL_OPTION_YES = "Yes";
 const UNSAFE_CODE_APPROVAL_OPTION_NO = "No";
+const UNSAFE_CODE_NOT_SUPER_USER_PROMPT = "Only super users are allowed to run unsafe code.";
 
 // Constants for opening trace outline immediately after trace stop.
 const OPEN_TRACE_OUTLINE_PROMPT = "Would you like to open trace outline?";
@@ -1234,24 +1235,29 @@ async function executeMocaScriptWithProgress(context: vscode.ExtensionContext, c
 		if (!cancellationRequested) {
 			var mocaResults = new MocaResults(res);
 
-			// If lang server says we need approval before executing(due to unsafe code config on connection), we need to ask the user if they truly want to run script.
+			// If lang server says we need approval before executing (due to unsafe code config on connection), we need to ask the user if they truly want to run script.
 			// NOTE: if cancellation is requested before we get here, lang server does not run unsafe scripts in configured envs by default -- assuming that approval is required.
 			if (mocaResults.needsApprovalToExecute) {
-				var approvalOptionRes = await vscode.window.showWarningMessage(UNSAFE_CODE_APPROVAL_PROMPT, UNSAFE_CODE_APPROVAL_OPTION_YES, UNSAFE_CODE_APPROVAL_OPTION_NO);
-				// Check again if cancellation is requested.
-				// If so, just exit and do not worry about approval option result.
-				if (!cancellationRequested) {
-					if (approvalOptionRes === UNSAFE_CODE_APPROVAL_OPTION_YES) {
 
-						// User says yes; run script!
-						var approvedRes = await vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, script, curFileNameShortened, true);
+				if (!mocaResults.superUser) {
+					vscode.window.showErrorMessage(UNSAFE_CODE_NOT_SUPER_USER_PROMPT);
+				} else {
+					var approvalOptionRes = await vscode.window.showWarningMessage(UNSAFE_CODE_APPROVAL_PROMPT, UNSAFE_CODE_APPROVAL_OPTION_YES, UNSAFE_CODE_APPROVAL_OPTION_NO);
+					// Check again if cancellation is requested.
+					// If so, just exit and do not worry about approval option result.
+					if (!cancellationRequested) {
+						if (approvalOptionRes === UNSAFE_CODE_APPROVAL_OPTION_YES) {
 
-						// If cancellation requested, skip this part.
-						if (!cancellationRequested) {
-							var approvedMocaResults = new MocaResults(approvedRes);
-							ResultViewPanel.createOrShow(context.extensionPath, curFileNameShortened, approvedMocaResults);
-							if (approvedMocaResults.msg && approvedMocaResults.msg.length > 0) {
-								vscode.window.showErrorMessage(curFileNameShortened + ": " + approvedMocaResults.msg);
+							// User says yes -- run script!
+							var approvedRes = await vscode.commands.executeCommand(LanguageServerCommands.EXECUTE, script, curFileNameShortened, true);
+
+							// If cancellation requested, skip this part.
+							if (!cancellationRequested) {
+								var approvedMocaResults = new MocaResults(approvedRes);
+								ResultViewPanel.createOrShow(context.extensionPath, curFileNameShortened, approvedMocaResults);
+								if (approvedMocaResults.msg && approvedMocaResults.msg.length > 0) {
+									vscode.window.showErrorMessage(curFileNameShortened + ": " + approvedMocaResults.msg);
+								}
 							}
 						}
 					}
