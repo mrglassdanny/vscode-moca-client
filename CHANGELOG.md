@@ -1,9 +1,12 @@
 # Changelog
 https://semver.org/
 
+## 1.8.36 (November 22, 2023)
+* MOCA language server update -- https://github.com/mrglassdanny/moca-language-server/blob/master/CHANGELOG.md
+
 ## 1.8.35 (August 9, 2023)
 * MOCA language server update -- https://github.com/mrglassdanny/moca-language-server/blob/master/CHANGELOG.md
-  
+
 ## 1.8.34 (August 5, 2023)
 * Bug fix
 
