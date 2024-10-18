@@ -34,15 +34,14 @@ class ResultViewPanel {
         }, null, this._disposables);
     }
     static createOrShow(extensionPath, fileName, res) {
-        const column = vscode.ViewColumn.Beside;
         if (ResultViewPanel.resultViewPanels.has(fileName)) {
             var resultViewPanel = this.resultViewPanels.get(fileName);
-            resultViewPanel._panel.reveal(column, false);
+            resultViewPanel._panel.reveal();
             resultViewPanel.res = res;
         }
         else {
             // We don't have a panel, initialize one.
-            const panel = vscode.window.createWebviewPanel(ResultViewPanel.viewType, 'Results: ' + fileName, column, {
+            const panel = vscode.window.createWebviewPanel(ResultViewPanel.viewType, 'Results: ' + fileName, vscode.ViewColumn.Beside, {
                 //Enable javascript in the webview
                 enableScripts: true,
                 // And restrict the webview to only loading content from our extension's `media` directory.
@@ -50,7 +49,7 @@ class ResultViewPanel {
             });
             var resultViewPanel = new ResultViewPanel(panel, extensionPath, fileName, res);
             ResultViewPanel.resultViewPanels.set(fileName, resultViewPanel);
-            resultViewPanel._panel.reveal(column, false);
+            resultViewPanel._panel.reveal();
         }
     }
     doRefactor() {

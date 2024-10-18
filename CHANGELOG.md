@@ -1,6 +1,10 @@
 # Changelog
 https://semver.org/
 
+## 1.8.39 (October 18, 2024)
+* MOCA language server update -- https://github.com/mrglassdanny/moca-language-server/blob/master/CHANGELOG.md
+* Fix datatable placement issue
+
 ## 1.8.38 (November 28, 2023)
 * MOCA language server update -- https://github.com/mrglassdanny/moca-language-server/blob/master/CHANGELOG.md
 

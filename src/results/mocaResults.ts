@@ -30,7 +30,6 @@ export class MocaResults {
             this.rows = [];
         }
 
-
         if (data['exception']) {
             if (data['exception']['message']) {
                 this.msg = data['exception']['message'] as string;
