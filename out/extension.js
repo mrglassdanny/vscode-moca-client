@@ -20,7 +20,7 @@ const mocaResults_1 = require("./results/mocaResults");
 const ResultViewPanel_1 = require("./results/ResultViewPanel");
 const perf_hooks_1 = require("perf_hooks");
 // Language server constants.
-const MOCA_LANGUAGE_SERVER_VERSION = "1.11.25";
+const MOCA_LANGUAGE_SERVER_VERSION = "1.12.25";
 const MOCA_LANGUAGE_SERVER = "moca-language-server-" + MOCA_LANGUAGE_SERVER_VERSION + "-all.jar";
 const MOCA_LANGUAGE_SERVER_INITIALIZING_MESSAGE = "MOCA: Initializing language server";
 const MOCA_LANGUAGE_SERVER_ERR_STARTUP = "The MOCA extension failed to start";
@@ -509,8 +509,18 @@ function activate(context) {
             var useLogicalIndentStrategy = traceOutlinerConfigJsonObj.useLogicalIndentStrategy;
             var minimumExecutionTime = traceOutlinerConfigJsonObj.minimumExecutionTime;
             if (traceTypeRes === "Remote") {
-                // Sending empty args so that lang server knows to send us back a list of remote trace files.
-                var traceResponseRemoteRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE);
+                let traceResponseRemoteRes;
+                yield vscode.window.withProgress({
+                    location: vscode.ProgressLocation.Notification,
+                    title: "MOCA"
+                }, (progress, token) => __awaiter(this, void 0, void 0, function* () {
+                    progress.report({
+                        increment: Infinity,
+                        message: "Retrieving Remote Trace Files"
+                    });
+                    // Sending empty args so that lang server knows to send us back a list of remote trace files.
+                    traceResponseRemoteRes = yield vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE);
+                }));
                 // We should have a string array of trace file names now.
                 var traceResponseRemoteObj = JSON.parse(JSON.stringify(traceResponseRemoteRes));
                 if (traceResponseRemoteObj.traceFileNames) {

@@ -11,7 +11,7 @@ import { performance } from 'perf_hooks';
 
 
 // Language server constants.
-const MOCA_LANGUAGE_SERVER_VERSION = "1.11.25";
+const MOCA_LANGUAGE_SERVER_VERSION = "1.12.25";
 const MOCA_LANGUAGE_SERVER = "moca-language-server-" + MOCA_LANGUAGE_SERVER_VERSION + "-all.jar";
 const MOCA_LANGUAGE_SERVER_INITIALIZING_MESSAGE = "MOCA: Initializing language server";
 const MOCA_LANGUAGE_SERVER_ERR_STARTUP = "The MOCA extension failed to start";
@@ -626,8 +626,22 @@ export async function activate(context: vscode.ExtensionContext) {
 
 		if (traceTypeRes === "Remote") {
 
-			// Sending empty args so that lang server knows to send us back a list of remote trace files.
-			var traceResponseRemoteRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE);
+			let traceResponseRemoteRes;
+
+			await vscode.window.withProgress({
+				location: vscode.ProgressLocation.Notification,
+				title: "MOCA"
+			}, async (progress, token) => {
+				progress.report({
+					increment: Infinity,
+					message: "Retrieving Remote Trace Files"
+				});
+
+				// Sending empty args so that lang server knows to send us back a list of remote trace files.
+				traceResponseRemoteRes = await vscode.commands.executeCommand(LanguageServerCommands.OPEN_TRACE_OUTLINE);
+			});
+
+
 
 			// We should have a string array of trace file names now.
 			var traceResponseRemoteObj = JSON.parse(JSON.stringify(traceResponseRemoteRes));
